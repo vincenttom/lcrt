@@ -1,0 +1,21 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=lcrt
+Name[en_US]=Linux Remote Login Tool
+Name[zh_CN]=Linux远程登录工具
+Name[de_DE]=Linux Remote Login-Tool
+Comment[en_US]=Auto connect to remote ssh or telnet server without enter username or password(since you had saved them once).
+Comment[en_CN]=自动登录到远程ssh或者telnet服务器上而不需要输入用户名或者密码(如果你已经保存了这些信息)。
+Comment[de_DE]=Automatisches Verbinden mit Remote-SSH oder Telnet-Server ohne Eingabe Benutzername oder Passwort (da Sie hatte sie einmal gespeichert).
+TryExec=lcrt
+Exec=lcrt
+Icon=lcrt-logo.xpm
+Type=Application
+X-GNOME-Bugzilla-Bugzilla=GNOME
+X-GNOME-Bugzilla-Product=lcrt
+X-GNOME-Bugzilla-Component=BugBuddyBugs
+X-GNOME-Bugzilla-Version=0.0.1
+Categories=GNOME;GTK;Utility;
+StartupNotify=true
+OnlyShowIn=GNOME;
+X-Ubuntu-Gettext-Domain=lcrt

@@ -1,0 +1,532 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+  <!ENTITY legal SYSTEM "legal.xml">
+  <!ENTITY app "LCRT">  
+  <!ENTITY appversion "0.0.8">
+  <!ENTITY manrevision "0.8">
+  <!ENTITY date "Mar 2011">
+]>
+<!-- (Do not remove this comment block.)
+  Maintained by the GNOME Documentation Project
+  Template version: 2.0 beta
+  Template last modified Jan 2, 2002 
+    
+  -->
+<article id="index" lang="en"> 
+  <articleinfo> 
+     <title>&app; Manual</title> 
+     <abstract role="description">
+       <para>
+	 User manual for the LCRT application.
+       </para>
+     </abstract>
+     <copyright> 
+        <year>2011</year> 
+        <holder>Niu Tao</holder> 
+     </copyright> 
+     <publisher> 
+        <publishername>LCRT Documentation Project</publishername> 
+     </publisher> &legal; 
+     <authorgroup> 
+        <author> 
+          <firstname>LCRT</firstname> 
+          <surname>Documentation Team</surname> 
+          <affiliation> 
+              <orgname>code.google.com/p/lcrt</orgname> 
+          </affiliation> 
+        </author> 
+     </authorgroup> 
+     <publisher role="maintainer">
+       <publishername>LCRT Documentation Project</publishername>
+     </publisher>
+     <revhistory> 
+	    <revision> 
+          <revnumber>LCRT Terminal Manual V0.8</revnumber> 
+          <date>Mar 2011</date> 
+          <revdescription> 
+             <para role="author">LCRT Documentation Team</para>
+             <para role="publisher">LCRT Documentation Project</para>
+          </revdescription> 
+        </revision>
+     </revhistory> 
+     <releaseinfo> This manual describes version &appversion; of &app;.
+        </releaseinfo> 
+     <legalnotice> 
+        <title>Feedback</title> 
+        <para> To report a bug or make a suggestion regarding the &app; application or this manual, follow the directions in the <ulink url="ghelp:user-guide?feedback" type="help">GNOME Feedback Page</ulink>. </para>
+     </legalnotice> 
+  </articleinfo> 
+  <indexterm> 
+     <primary>&app;</primary> 
+  </indexterm> 
+  <indexterm> 
+     <primary>lcrt application</primary> 
+  </indexterm> 
+  <sect1 id="lcrt-introduction"> 
+     <title>Introduction</title> 
+     <para>
+        <application>&app;</application> is a terminal application that you can use to perform the following tasks: 
+     </para>
+     <variablelist> 
+        <varlistentry> 
+          <term>Connect to remote server through ssh,telnet and etc:</term> 
+          <listitem> 
+             <para>
+                 If you are a system administrator of unix/linux server, you can use <application>&app;</application>, it can save your session information, such as hostname, username and password(if you choose save password).So in next time you connect to the server, you can't need to enter username and password. I think this can be useful if you need login remote server hundred time every day.
+             </para>
+          </listitem> 
+        </varlistentry> 
+        <varlistentry> 
+          <term>An useful terminal of session management</term> 
+          <listitem> 
+             <para>
+                If you are a software engineer in embedded field, you may debug your software in embedded device, and you should open several connection to look different result, so you can use <application>&app;</application> to clone as many connected session as you can. <application>&app;</application>  have some useful keyboard shortcut to clone, close, move, and switch a session.<application>gnome-terminal</application> is an popular terminal, so I use the same keyboard shortcut to management session, such as CTRL+SHIFT+T to clone a session, ALT+1, ALT+2 to switch a session.
+             </para>
+          </listitem> 
+        </varlistentry> 
+     </variablelist> 
+  </sect1> 
+  <sect1 id="lcrt-get-started"> 
+     <title>Getting Started</title> 
+     <para>
+        The following sections describe how to start <application>&app;</application>. 
+     </para>
+     <sect2 id="lcrt-to-start"> 
+        <title>Starting &app;</title> 
+        <para>
+          You can start <application>&app;</application> in the following ways: 
+        </para>
+        <variablelist> 
+          <varlistentry> 
+             <term><guimenu>Applications</guimenu> menu</term> 
+             <listitem>
+                <para>
+                  Choose <menuchoice><guimenu>Accessories</guimenu><guimenuitem>Lcrt</guimenuitem></menuchoice>.</para>
+             </listitem>
+          </varlistentry> 
+          <varlistentry> 
+             <term>Command line</term> 
+             <listitem> 
+                <para>
+                  Execute the following command: <command>lcrt</command>
+                </para>
+                <para>
+                  To view the command line options, execute the following command: <command>lcrt --help</command>
+                </para>
+             </listitem> 
+          </varlistentry> 
+        </variablelist> 
+     </sect2> 
+     <sect2 id="lcrt-first-start"> 
+        <title>When You First Start &app;</title> 
+        <para>
+            When you start <application>&app;</application> for the first time, lcrt will create some default configuration in the directory ~/.lcrt, such as language, the settings of session. When you change the size of window, or it's postion, this change will be saved before close <application>&app;</application>.
+        </para>
+     </sect2> 
+
+     <sect2 id="lcrt-quick-connect"> 
+        <title>Quick Connection</title> 
+        <para>
+            When you start <application>&app;</application> for the first time, we will open a 'quick connect' window, so you can choose a protocol, enter hostname and username to getting start a connection. The 'quick connect' window is here:
+       </para>
+           <imageobject>
+               <imagedata fileref="figures/lcrt-quick-connect.png" format="PNG"/> 
+           </imageobject> 
+     </sect2>
+  </sect1> 
+
+  <sect1 id="lcrt-usage"> 
+     <title>Usage</title> 
+     <sect2 id="lcrt-windows"> 
+        <title>Open a Connection</title> 
+        <variablelist> 
+          <varlistentry> 
+             <term>To open a new connection in window:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>File</guimenu><guimenuitem>Connect...</guimenuitem></menuchoice>.  
+                </para>
+                    You can also use shortcut <keycombo><keycap>Alt</keycap><keycap>C</keycap></keycombo>(default shortcut).
+                <para>
+                  Then you will get a new dialog to choose a saved session:
+                </para>
+                <imageobject>
+                    <imagedata fileref="figures/lcrt-connect.png" format="PNG"/> 
+                </imageobject> 
+                <para>
+                    In the top of dialog, there has some useful button,these can allow you create a new session, rename,delete or find a session in treeview.In treeview, there are all sessions you created, select one and double click, you can open a new session in new window.
+                </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>To create a new session:</term> 
+             <listitem> 
+                <para>
+                  Choose <menuchoice><guimenu>File</guimenu><guimenuitem>Quick connect...</guimenuitem></menuchoice>.  </para>
+                    You can also use shortcut <keycombo><keycap>Alt</keycap><keycap>Q</keycap></keycombo>(default shortcut).
+                <para>
+                  You will get a 'quick connect' dialog,see <xref linkend="lcrt-quick-connect"/>
+                </para>  
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>To open a new session in tab:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>File</guimenu><guisubmenu>Connect in Tab</guisubmenu>.</menuchoice>
+                    You can also use shortcut <keycombo><keycap>Alt</keycap><keycap>B</keycap></keycombo>(default shortcut).
+                </para>
+                <para>
+                    you will get a dialog same as <guisubmenu>Conenct</guisubmenu>.but when you double click a seesion,it will be opened in a tab of current window.
+                </para>
+             </listitem> 
+          </varlistentry> 
+        </variablelist> 
+     </sect2> 
+     <sect2 id="lcrt-manage-connection"> 
+        <title>Managing Connection</title> 
+        <variablelist> 
+          <varlistentry> 
+             <term>To reconnect a session:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>File</guimenu><guisubmenu>Reconnect</guisubmenu>.</menuchoice>
+                    You can also use shortcut <keycap>F5</keycap>(default shortcut). or <keycap>Enter</keycap>(when current session had been disconnected.)
+                </para>
+                <para>
+                    For some reason, your connection may be disconnect from remote server,so click <guisubmenu>Reconnect</guisubmenu> menuitem, you can reconnect to server.
+                </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>To reconnect all session:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>File</guimenu><guisubmenu>Reconnect All</guisubmenu>.</menuchoice>
+                </para>
+                <para>
+                    If you have open many session on tab, but network is offline unexpected, after a while, your network is online, you should reconnect all your session, so click <guisubmenu>Reconnect All</guisubmenu> menuitem, you can reload all your session.
+                </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>To disconnect a session:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>File</guimenu><guisubmenu>Disconnect</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    If you finish your work, you want close the session, you can click <guimenu>Disconnect</guimenu> menuitem to disconnect the session first, then close session tab. 
+                </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>To disconnect all session:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>File</guimenu><guisubmenu>Disconnect All</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    Before close <application>&app;</application>, you should disconnect all your connected sessions, here you can use <guimenu>Disconnect All</guimenu> menuitem.
+                </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>To clone a session:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>File</guimenu><guisubmenu>Clone</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    You may need open serveral connection to look diffrent things in one server, you can use <guimenu>Clone</guimenu> menuitem to clone current connection.
+                </para>
+             </listitem> 
+         </varlistentry> 
+          <varlistentry> 
+             <term>To lock a session:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>File</guimenu><guisubmenu>Lock</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    When you open a connection to do some work, but you get an imcoming call and must leave a moment, you can lock your session to avoid some operate your remote server, click <guimenu>Lock</guimenu> menuitem, and enter password, you can lock current seesion.
+                </para>
+             </listitem> 
+          </varlistentry> 
+        </variablelist> 
+     </sect2> 
+     <sect2 id="lcrt-tabs"> 
+         <title>Managing tabs</title>
+         <para>
+             <application>&app;</application> support open many session on current window,every session is on a tab in notebook, so we provide some useful keyboard shortcut to move and switch session quickly.
+         </para>
+        <variablelist> 
+          <varlistentry> 
+             <term>To switch to next tab:</term> 
+             <listitem> 
+                 <para>
+                     Press the <keycombo><keycap>Ctrl</keycap><keycap>Page Down</keycap></keycombo>
+                 </para>
+             </listitem> 
+          </varlistentry>
+          <varlistentry> 
+             <term>To switch to previous tab:</term> 
+             <listitem> 
+                 <para>
+                     Press the <keycombo><keycap>Ctrl</keycap><keycap>Page Up</keycap></keycombo>
+                 </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>To move tab to next:</term> 
+             <listitem> 
+                 <para>
+                     Press the <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Page Down</keycap></keycombo>
+                 </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>To move tab to previous:</term> 
+             <listitem> 
+                 <para>
+                     Press the <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Page Up</keycap></keycombo>
+                 </para>
+             </listitem> 
+          </varlistentry> 
+        </variablelist> 
+        <para>
+              Yes, these keyboard shortcut are same with <application>gnome-terminal</application>, I think many people can use gnome-terminal frequently,the shortcut to manage tabs is easy to use, so I use them in <application>&app;</application>.
+        </para>
+        <para>
+            If you are not like any of them, you can change them in  <menuchoice><guimenu>Options</guimenu><guisubmenu>Global Options...</guisubmenu><guisubmenu>Keybindings</guisubmenu></menuchoice>.
+        </para>
+     </sect2> 
+     <sect2 id="lcrt-manage-window"> 
+        <title>Managing the window</title> 
+        <variablelist> 
+          <varlistentry> 
+              <term>To hide or show toolbar:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>View</guimenu><guisubmenu>Toolbar</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    default is show on window.
+                </para>
+             </listitem> 
+          </varlistentry>
+          <varlistentry> 
+              <term>To hide or show statusbar:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>View</guimenu><guisubmenu>Statusbar</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    default is show on window.
+                </para>
+             </listitem> 
+         </varlistentry> 
+          <varlistentry> 
+              <term>To set window always on top:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>View</guimenu><guisubmenu>Always on Top</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    default is not choose.
+                </para>
+             </listitem> 
+         </varlistentry> 
+
+          <varlistentry> 
+              <term>To run <application>&app;</application> in full screen:</term> 
+             <listitem> 
+                <para>
+                    Choose <menuchoice><guimenu>View</guimenu><guisubmenu>Full Screen</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    Or you can press shortcut <keycap>F11</keycap>.
+                </para>
+             </listitem> 
+         </varlistentry> 
+        </variablelist> 
+     </sect2> 
+     <sect2 id="lcrt-work-with-session">
+        <title>Working with session</title>
+        <variablelist> 
+          <varlistentry> 
+             <term>To select and copy text:</term> 
+             <listitem> 
+                <para>
+                  You can select text in any of the following ways: 
+                </para>
+                <itemizedlist> 
+                  <listitem> 
+                     <para>
+                        To select a character at a time, click on the first character that you want to select and drag the mouse to the last character that you want to select.  </para>
+                  </listitem> 
+                  <listitem> 
+                     <para>
+                        To select a word at a time, double-click on the first word that you want to select and drag the mouse to the last word that you want to select. Symbols are selected individually.</para>
+                  </listitem> 
+                  <listitem> 
+                     <para>
+                        To select a line at a time, triple-click on the first line that you want to select and drag the mouse to the last line that you want to select.  </para>
+                  </listitem> 
+                </itemizedlist> 
+                <para>
+                  These actions select all text between the first and last items. For all text selections, <application>&app;</application> copies the selected text into the clipboard when you release the mouse button. To explicitly copy the selected text, choose <menuchoice><guimenu>Edit</guimenu><guimenuitem>Copy</guimenuitem></menuchoice>.</para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>To paste text into a terminal of session:</term> 
+             <listitem> 
+                <para>
+                  If you previously copied text to the clipboard, you can paste the text into a terminal by performing one of the following actions: </para>
+                <itemizedlist> 
+                  <listitem> 
+                     <para>
+                        To paste text that you copied by selection only, middle-click at the command prompt. If you do not have a middle mouse button, refer to the X Server documentation for information about how to emulate the middle mouse button.  </para>
+                  </listitem> 
+                  <listitem> 
+                     <para>
+                        To paste text that you explicitly copied, choose <menuchoice><guimenu>Edit</guimenu><guimenuitem>Paste</guimenuitem></menuchoice>. </para>
+                  </listitem> 
+                </itemizedlist> 
+             </listitem> 
+         </varlistentry> 
+          <varlistentry> 
+             <term>To copy and paste text:</term> 
+             <listitem> 
+                <para>
+                    Select the woards you want copy, and click <menuchoice><guimenu>Edit</guimenu><guimenuitem>Copy and Paste</guimenuitem></menuchoice>,Or click right button and select <guimenuitem>Copy and Paste</guimenuitem>.
+               </para>
+             </listitem> 
+          </varlistentry> 
+      </variablelist> 
+	 </sect2>	
+  </sect1> 
+
+  <sect1 id="lcrt-settings"> 
+     <title>Preferences</title> 
+     <para>
+         Because of personality, do we have a variety of world. So configure your <application>&app;</application>, make it different.
+     </para> 
+     <sect2 id="lcrt-session-settings"> 
+        <title>Change session Settings</title> 
+        <variablelist> 
+          <varlistentry> 
+            <term>To view or change the current session settings:</term>
+             <listitem> 
+                 <para>
+                    Choose <menuchoice><guimenu>Options</guimenu><guisubmenu>Session Options...</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    Then you will get follow dialog:
+                </para>
+                <imageobject>
+                    <imagedata fileref="figures/lcrt-session-options.png" format="PNG"/> 
+                </imageobject>
+                <para>
+                    There,you can change the display of current session,such as font, font color, background color and others.
+                </para>
+             </listitem> 
+          </varlistentry> 
+        </variablelist> 
+     </sect2>
+
+     <sect2 id="lcrt-global-settings"> 
+         <title>Global Settings</title>
+         <para>
+             There are four kands of global options, <guimenu>General</guimenu>,<guimenu>Keybindings</guimenu>,<guimenu>Terminal</guimenu>,and <guimenu>Application</guimenu>
+         </para>
+         <para>
+             To show the dialog of global settings, choose <menuchoice><guimenu>Options</guimenu><guisubmenu>Golbal Options...</guisubmenu></menuchoice>
+         </para>
+         <para>
+            You will get the follow dialog:
+         </para>
+         <imageobject>
+             <imagedata fileref="figures/lcrt-global-options.png" format="PNG"/> 
+         </imageobject>
+            Click the label in left side of notebook to select diffrent settings.
+         <sect3 id="lcrt-general-settings">
+             <title>General</title>
+                <variablelist> 
+                <varlistentry> 
+                    <term>Click the label <guilabel>General</guilabel> in <guimenu>Global options</guimenu> dialog, here you can change:</term>
+                <listitem>
+                <orderedlist> 
+                <listitem> 
+                    <para>Change language support.</para>
+                </listitem>
+                <listitem>
+                    <para>Change which connect dialog will be show on start up.</para>
+                </listitem>
+                <listitem>
+                    <para>Change show toolbar or statusbar on start up.</para>
+                </listitem>
+            </orderedlist>
+            </listitem>
+            </varlistentry> 
+            </variablelist> 
+        </sect3>
+         <sect3 id="lcrt-keybindings-settings">
+             <title>Keybindings</title>
+                <variablelist> 
+                <varlistentry> 
+                    <term>Click the label <guilabel>Keybindings</guilabel> in <guimenu>Global options</guimenu> dialog, here you can change keyboard shortcuts.</term>
+            </varlistentry> 
+            </variablelist> 
+        </sect3>
+         <sect3 id="lcrt-terminal-settings">
+             <title>Terminal</title>
+                <variablelist> 
+                <varlistentry> 
+                    <term>Click the label <guilabel>Terminal</guilabel> in <guimenu>Global options</guimenu> dialog, here you can change:</term>
+                <listitem>
+                <orderedlist> 
+                <listitem> 
+                    <para>Change terminal font,font color and font size.</para>
+                </listitem>
+                <listitem>
+                    <para>Change background color.</para>
+                </listitem>
+                <listitem>
+                    <para>Change scrollback lines.</para>
+                </listitem>
+                <listitem>
+                    <para>Change background image.</para>
+                    <para>NOTE: only the value of <guilabel>transparent</guilabel> is set to zero, the background image can be displayed.</para>
+                </listitem>
+                <listitem>
+                    <para>Change transparent.</para>
+                </listitem>
+                <listitem>
+                    <para>Change terminal bell.</para>
+                </listitem>
+                <listitem>
+                    <para>Reset terminal setting to default. Click <guilabel>Reset</guilabel> button to reset all setting to default.</para>
+                </listitem>
+            </orderedlist>
+            <note><para>All settings will effect immediately.</para></note>
+            </listitem>
+            </varlistentry> 
+            </variablelist> 
+        </sect3>
+         <sect3 id="lcrt-application-settings">
+             <title>Application</title>
+                <variablelist> 
+                <varlistentry> 
+                    <term>Click the label <guilabel>Application</guilabel> in <guimenu>Global options</guimenu> dialog, here you can change:</term>
+                    <listitem>
+                        <note><para>Ops, these setting isn't work, but may be used in future.</para></note>
+                </listitem>
+            </varlistentry> 
+            </variablelist> 
+        </sect3>
+
+     </sect2> 
+  </sect1> 
+</article> 

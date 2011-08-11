@@ -1,0 +1,530 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+  <!ENTITY legal SYSTEM "legal.xml">
+  <!ENTITY app "LCRT">  
+  <!ENTITY appversion "0.0.9">
+  <!ENTITY manrevision "0.9">
+  <!ENTITY date "Mar 2011">
+]>
+<!-- (Do not remove this comment block.)
+  Maintained by the GNOME Documentation Project
+  Template version: 2.0 beta
+  Template last modified Jan 2, 2002 
+    
+  -->
+<article id="index" lang="zh_CN"> 
+  <articleinfo> 
+     <title>&app; 手册&manrevision;</title> 
+     <abstract role="description">
+       <para>
+	 User manual for the LCRT application.
+       </para>
+     </abstract>
+     <copyright> 
+        <year>2011</year> 
+        <holder>牛涛</holder> 
+     </copyright> 
+     <publisher> 
+        <publishername>LCRT Documentation Project</publishername> 
+     </publisher> &legal; 
+     <authorgroup> 
+        <author> 
+          <firstname>LCRT</firstname> 
+          <surname>Documentation Team</surname> 
+          <affiliation> 
+              <orgname>code.google.com/p/lcrt</orgname> 
+          </affiliation> 
+        </author> 
+     </authorgroup> 
+     <publisher role="maintainer">
+       <publishername>LCRT Documentation Project</publishername>
+     </publisher>
+     <revhistory> 
+	    <revision> 
+          <revnumber>LCRT 用户手册 V0.9</revnumber> 
+          <date>Mar 2011</date> 
+          <revdescription> 
+             <para role="author">LCRT Documentation Team</para>
+             <para role="publisher">LCRT Documentation Project</para>
+          </revdescription> 
+        </revision>
+     </revhistory> 
+     <releaseinfo> This manual describes version &appversion; of &app;.
+        </releaseinfo> 
+     <legalnotice> 
+        <title>Feedback</title> 
+        <para> 要报告关于 &app; 应用程序或本手册的错误或提出建议，请遵循 <ulink url="ghelp:gnome-feedback" type="help">GNOME 反馈页</ulink>中的指导。</para>
+     </legalnotice> 
+  </articleinfo> 
+  <indexterm> 
+     <primary>&app;</primary> 
+  </indexterm> 
+  <indexterm> 
+     <primary>lcrt 应用程序</primary> 
+  </indexterm> 
+  <sect1 id="lcrt-introduction"> 
+     <title>简介</title> 
+     <para>
+        <application>&app;</application> 是一个终端仿真应用程序，您可以使用它来执行以下操作：
+     </para>
+     <variablelist> 
+        <varlistentry> 
+          <term>通过ssh,telnet等自动连接到远程服务器上:</term> 
+          <listitem> 
+              <para>
+                  如果你是一个unix或者linux系统管理员，你可以使用<application>&app;</application>来远程管理你的系统。它能保存你的会话信息，例如服务器地址，用户名和密码(你可以选择是否保存密码)。这样，在你下一次连接该服务器的时候，你就不需要输入用户名和密码。因此对于一个每天需要频繁登录到远程服务器上进行系统管理的人来说，<application>&app;</application>是一个非常有用的工具。
+             </para>
+          </listitem> 
+        </varlistentry> 
+        <varlistentry> 
+          <term>一个非常实用的会话管理工具:</term> 
+          <listitem> 
+              <para>
+               如果你是一个嵌入式软件工程师，在软件开发的过程中，经常需要登录到嵌入式设备上，运行并调试程序，很多时候需要打开多个窗口以便观察程序的不同的运行状态，因此你可以使用<application>&app;</application>来克隆多个连接。<application>&app;</application>有许多实用的快捷键来克隆，关闭，移动和切换标签页. 众所周知，<application>gnome-terminal</application>是一个非常流行的终端软件，因此我预设了一些和它一样的快捷键来管理会话标签，例如CTRL+SHIFT+T克隆会话，ALT+1切换到第一个会话，ALT+2切换到第二个会话等。
+             </para>
+          </listitem> 
+        </varlistentry> 
+     </variablelist> 
+  </sect1> 
+  <sect1 id="lcrt-get-started"> 
+     <title>入门</title> 
+     <para>
+        以下几段将描述如何使用 <application>&app;</application>. 
+     </para>
+     <sect2 id="lcrt-to-start"> 
+        <title>启动 &app;</title> 
+        <para>
+          你可以通过一下几种方式打开 <application>&app;</application> : 
+        </para>
+        <variablelist> 
+          <varlistentry> 
+             <term><guimenu>应用程序</guimenu>菜单</term> 
+             <listitem>
+                <para>
+                  选择 <menuchoice><guimenu>附件</guimenu><guimenuitem>Lcrt</guimenuitem></menuchoice>.</para>
+             </listitem>
+          </varlistentry> 
+          <varlistentry> 
+             <term>命令行</term> 
+             <listitem> 
+                <para>
+                  输入命令： <command>lcrt</command>
+                </para>
+                <para>
+                  查看命令行详细帮助信息，输入命令: <command>lcrt --help</command>
+                </para>
+             </listitem> 
+          </varlistentry> 
+        </variablelist> 
+     </sect2> 
+     <sect2 id="lcrt-first-start"> 
+        <title>第一次使用 &app;</title> 
+        <para>
+			当你第一次使用<application>&app;</application>的时候，它会在用户目录~/.lcrt创建一些默认配置，例如默认的语言，会话配置。当你改变窗口的大小或者移动窗口的位置时，这些信息会在关闭软件前自动保存。
+        </para>
+     </sect2> 
+
+     <sect2 id="lcrt-quick-connect"> 
+        <title>快速连接</title> 
+        <para>
+			当你第一次使用<application>&app;</application>的时候，软件会自动打开一个“快速连接”窗口，在此选择协议，输入主机名和用户名，就可以打开一个新的连接，下图是“快速连接”窗口：
+       </para>
+           <imageobject>
+               <imagedata fileref="figures/lcrt-quick-connect.png" format="PNG"/> 
+           </imageobject> 
+     </sect2>
+  </sect1> 
+
+  <sect1 id="lcrt-usage"> 
+     <title>用法</title> 
+     <sect2 id="lcrt-windows"> 
+        <title>打开一个连接</title> 
+        <variablelist> 
+          <varlistentry> 
+             <term>在新窗口中打开一个连接:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>文件</guimenu><guimenuitem>连接...</guimenuitem></menuchoice>.  
+                </para>
+                    也可以使用快捷键 <keycombo><keycap>Alt</keycap><keycap>C</keycap></keycombo>(默认快捷键).
+                <para>
+                  之后会弹出一个选择会话对话框：
+                </para>
+                <imageobject>
+                    <imagedata fileref="figures/lcrt-connect.png" format="PNG"/> 
+                </imageobject> 
+                <para>
+					在对话框的顶部，有一些非常有用的按钮，可以用来创建一个新会话，删除或者查找在列表框内的会话。在列表框内，里面是所有已经创建的会话信息，选择并双击一个，就可以在新窗口中打开一个新会话。
+                </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>创建一个新会话:</term> 
+             <listitem> 
+                <para>
+                  选择 <menuchoice><guimenu>文件</guimenu><guimenuitem>快速连接...</guimenuitem></menuchoice>.  </para>
+                    也可以使用快捷键<keycombo><keycap>Alt</keycap><keycap>Q</keycap></keycombo>(默认快捷键).
+                <para>
+                  此时会开打一个“快速连接”对话框，详见：<xref linkend="lcrt-quick-connect"/>
+                </para>  
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>在标签页中新建一个会话:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>文件</guimenu><guisubmenu>在标签中连接</guisubmenu>.</menuchoice>
+                    也可以使用快捷键<keycombo><keycap>Alt</keycap><keycap>B</keycap></keycombo>(默认快捷键).
+                </para>
+                <para>
+					此时会打开一个和<guisubmenu>连接</guisubmenu>一样的对话框。但是当你双击一个会话时，会在当前窗口内新建一个会话。
+                </para>
+             </listitem> 
+          </varlistentry> 
+        </variablelist> 
+     </sect2> 
+     <sect2 id="lcrt-manage-connection"> 
+        <title>管理会话</title> 
+        <variablelist> 
+          <varlistentry> 
+             <term>重新连接会话:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>文件</guimenu><guisubmenu>重新连接</guisubmenu>.</menuchoice>
+                    也可以使用快捷键<keycap>F5</keycap>(默认快捷键). 或者 <keycap>Enter</keycap>(只有当前会话状态为“断开连接”时才可以使用该快捷键.)
+                </para>
+                <para>
+					可能由于某些原因，当前已经建立的连接会从远程服务器上端口，此时可以点击<guisubmenu>重新连接</guisubmenu> 菜单项，就可以重新连接到服务器上。
+                </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>全部重新连接:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>文件</guimenu><guisubmenu>全部重连</guisubmenu>.</menuchoice>
+                </para>
+                <para>
+					假如你在标签中新建了许多连接，但网络突然断开了连接，过了一会儿又好了，那么当前的所有连接都会断掉，此时你可以点击<guisubmenu>全部重连</guisubmenu>菜单就可以重新连接所有会话。
+                </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>断开连接:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>文件</guimenu><guisubmenu>断开连接</guisubmenu></menuchoice>
+                </para>
+                <para>
+					当你结束你的工作，你想关闭当前连接时，可以点击<guimenu>断开连接</guimenu> 菜单来断开连接，然后关闭会话标签。
+                </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>全部断开:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>文件</guimenu><guisubmenu>全部断开</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    在退出<application>&app;</application>之前, 你需要断开所有已经连接的会话，因此点击 <guimenu>全部断开</guimenu> 菜单就可以了.
+                </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>克隆会话:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>文件</guimenu><guisubmenu>克隆</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    有时候你可能需要打开好几个连接到一个服务器上的连接来观察不同的东西，此时就可以使用<guimenu>克隆</guimenu> 菜单来从当前会话克隆多个连接.
+                </para>
+             </listitem> 
+         </varlistentry> 
+          <varlistentry> 
+             <term>锁定会话:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>File</guimenu><guisubmenu>Lock</guisubmenu></menuchoice>
+                </para>
+                <para>
+					当你打开一个连接来做一些事情的时候，此时却来了一个电话，你需要离开一会，这时你可以使用锁定会话功能来避免其他人操作你的远程服务器，点击<guimenu>锁定</guimenu> 菜单, 输入一个新的密码，就可以锁定当前会话。
+                </para>
+             </listitem> 
+          </varlistentry> 
+        </variablelist> 
+     </sect2> 
+     <sect2 id="lcrt-tabs"> 
+         <title>管理标签</title>
+         <para>
+             <application>&app;</application> 支持在当前窗口打开多个连接，每一个会话都在一个标签内。因此软件提供了许多有用的快捷键来方便的移动或者切换标签等。
+         </para>
+        <variablelist> 
+          <varlistentry> 
+             <term>切换到下一个标签:</term> 
+             <listitem> 
+                 <para>
+                     按下 <keycombo><keycap>Ctrl</keycap><keycap>Page Down</keycap></keycombo>
+                 </para>
+             </listitem> 
+          </varlistentry>
+          <varlistentry> 
+             <term>切换到前一个标签:</term> 
+             <listitem> 
+                 <para>
+                     按下 <keycombo><keycap>Ctrl</keycap><keycap>Page Up</keycap></keycombo>
+                 </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>将当前标签向后移动:</term> 
+             <listitem> 
+                 <para>
+                     按下 <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Page Down</keycap></keycombo>
+                 </para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>将当前标签向前移动:</term> 
+             <listitem> 
+                 <para>
+                     按下 <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Page Up</keycap></keycombo>
+                 </para>
+             </listitem> 
+          </varlistentry> 
+        </variablelist> 
+        <para>
+		      这些快捷键和<application>gnome-terminal</application>的一样, 考虑到有许多人经常使用gnome-terminal，它的一些管理标签的快捷键非常方便，因此我将它们移植到<application>&app;</application>中.
+        </para>
+        <para>
+			如果你不习惯使用这些快捷键，可以通过菜单<menuchoice><guimenu>选项</guimenu><guisubmenu>全局选项...</guisubmenu><guisubmenu>快捷键</guisubmenu></menuchoice>来修改它们.
+        </para>
+     </sect2> 
+     <sect2 id="lcrt-manage-window"> 
+        <title>管理窗口</title> 
+        <variablelist> 
+          <varlistentry> 
+              <term>隐藏或者显示工具栏:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>查看</guimenu><guisubmenu>工具栏</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    工具栏默认状态为显示.
+                </para>
+             </listitem> 
+          </varlistentry>
+          <varlistentry> 
+              <term>隐藏或者显示状态栏:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>查看</guimenu><guisubmenu>状态栏</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    状态栏默认状态为显示.
+                </para>
+             </listitem> 
+         </varlistentry> 
+          <varlistentry> 
+              <term>设置窗口保持在最顶端:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>查看</guimenu><guisubmenu>保持在顶端</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    该选项默认为为选中.
+                </para>
+             </listitem> 
+         </varlistentry> 
+
+          <varlistentry> 
+              <term>全屏显示:</term> 
+             <listitem> 
+                <para>
+                    选择 <menuchoice><guimenu>查看</guimenu><guisubmenu>全屏</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    也可以使用快捷键<keycap>F11</keycap>.
+                </para>
+             </listitem> 
+         </varlistentry> 
+        </variablelist> 
+     </sect2> 
+     <sect2 id="lcrt-work-with-session">
+        <title>使用会话</title>
+        <variablelist> 
+          <varlistentry> 
+             <term>选择并粘贴:</term> 
+             <listitem> 
+                <para>
+                  你可以通过以下几种方式选择文本: 
+                </para>
+                <itemizedlist> 
+                  <listitem> 
+                    <para>要一次选择一个字符，请单击要选择的第一个字符，然后将鼠标拖到要选择的最后一个字符。
+                     </para>
+                  </listitem>
+                  <listitem>
+                     <para>要一次选择一个词，请双击要选择的第一个词，然后将鼠标拖到要选择的最后一个词。
+                     </para>
+                  </listitem>
+                  <listitem>
+                     <para>要一次选择一行，请三击要选择的第一行，然后将鼠标拖到要选择的最后一行。
+					 </para>
+                  </listitem> 
+                </itemizedlist> 
+                <para>
+                 这些操作的结果是选择第一项和最后一项之间的所有文本。对于所有的文本选择情况，当您放开鼠标按钮后，<application>&app;</application> 都会将所有的文本复制到剪贴板上。</para>
+             </listitem> 
+          </varlistentry> 
+          <varlistentry> 
+             <term>将文本粘贴到会话终端中：</term> 
+             <listitem> 
+                <para>
+                  请执行以下操作之一: </para>
+                <itemizedlist> 
+                  <listitem> 
+                     <para>在命令提示符上单击鼠标中键。如果没有鼠标中键，请参阅 X 服务器文档，以获得关于如何模仿鼠标中键的信息 </para>         
+                  </listitem> 
+                  <listitem> 
+                     <para>选择<menuchoice><guimenu>"编辑"</guimenu><guimenuitem>"粘贴"</guimenuitem></menuchoice>，将文本粘贴到终端中。只有当您通过选择<menuchoice><guimenu>"编辑"</guimenu><guimenuitem>"复制"</guimenuitem></menuchoice>将选定文本复制到剪贴板之后，此功能才起作用。</para>
+                  </listitem> 
+                </itemizedlist> 
+             </listitem> 
+         </varlistentry> 
+          <varlistentry> 
+             <term>复制并粘贴文本:</term> 
+             <listitem> 
+                <para>
+					首先选择想要复制的文字，点击<menuchoice><guimenu>编辑</guimenu><guimenuitem>复制并粘贴</guimenuitem></menuchoice>,或者按右键，选择<guimenuitem>复制并粘贴</guimenuitem>.
+               </para>
+             </listitem> 
+          </varlistentry> 
+      </variablelist> 
+	 </sect2>	
+  </sect1> 
+
+  <sect1 id="lcrt-settings"> 
+     <title>首选项</title> 
+     <para>
+		因为个性，所以我们有一个五彩缤纷的世界。因此通过配置选项，你可以按照自己的习惯配置<application>&app;</application>
+     </para> 
+     <sect2 id="lcrt-session-settings"> 
+        <title>修改会话设置</title> 
+        <variablelist> 
+          <varlistentry> 
+            <term>查看或者修改当前会话的设置:</term>
+             <listitem> 
+                 <para>
+                    选择 <menuchoice><guimenu>选项</guimenu><guisubmenu>会话选项...</guisubmenu></menuchoice>
+                </para>
+                <para>
+                    之后会弹出如下对话框:
+                </para>
+                <imageobject>
+                    <imagedata fileref="figures/lcrt-session-options.png" format="PNG"/> 
+                </imageobject>
+                <para>
+                    在对话框内，你可以修改当前会话的现实，例如字体，字体颜色，背景色和其他一些设置
+                </para>
+             </listitem> 
+          </varlistentry> 
+        </variablelist> 
+     </sect2>
+
+     <sect2 id="lcrt-global-settings"> 
+         <title>全局设置</title>
+         <para>
+             全局设置分为四种不同类型的设置，<guimenu>常规</guimenu>,<guimenu>快捷键</guimenu>,<guimenu>终端</guimenu>和 <guimenu>应用程序</guimenu>
+         </para>
+         <para>
+             要显示全局设置对话框，选择 <menuchoice><guimenu>选项</guimenu><guisubmenu>全局选项...</guisubmenu></menuchoice>
+         </para>
+         <para>
+            之后将显示如下对话框:
+         </para>
+         <imageobject>
+             <imagedata fileref="figures/lcrt-global-options.png" format="PNG"/> 
+         </imageobject>
+            点击对话框左边的标签来选择不同的设置.
+         <sect3 id="lcrt-general-settings">
+             <title>General</title>
+                <variablelist> 
+                <varlistentry> 
+                    <term>在<guimenu>全局设置</guimenu>对话框内点击标签 <guilabel>常规</guilabel>,在这里可以修改:</term>
+                <listitem>
+                <orderedlist> 
+                <listitem> 
+                    <para>语言支持.</para>
+                </listitem>
+                <listitem>
+                    <para>选择在启动的时候显示哪个对话框</para>
+                </listitem>
+                <listitem>
+                    <para>选择在启动的时候显示工具栏或者状态栏</para>
+                </listitem>
+            </orderedlist>
+            </listitem>
+            </varlistentry> 
+            </variablelist> 
+        </sect3>
+         <sect3 id="lcrt-keybindings-settings">
+             <title>快捷键</title>
+                <variablelist> 
+                <varlistentry> 
+                    <term>在<guimenu>全局设置</guimenu>对话框内点击标签 <guilabel>快捷键</guilabel>,在这里可以修改快捷键设置.</term>
+            </varlistentry> 
+            </variablelist> 
+        </sect3>
+         <sect3 id="lcrt-terminal-settings">
+             <title>终端</title>
+                <variablelist> 
+                <varlistentry> 
+                    <term>在<guimenu>全局设置</guimenu>对话框内点击标签 <guilabel>终端</guilabel>,在这里可以修改:</term>
+                <listitem>
+                <orderedlist> 
+                <listitem> 
+                    <para>修改会话终端的字体，字体颜色，字体大小设置.</para>
+                </listitem>
+                <listitem>
+                    <para>修改背景颜色.</para>
+                </listitem>
+                <listitem>
+                    <para>修改滚动的行数.</para>
+                </listitem>
+                <listitem>
+                    <para>修改背景图片.</para>
+                    <para>注意: 只有当<guilabel>透明度</guilabel> 设置为0时，背景图片才会显示.</para>
+                </listitem>
+                <listitem>
+                    <para>修改透明度.</para>
+                </listitem>
+                <listitem>
+                    <para>设置终端是否响铃.</para>
+                </listitem>
+                <listitem>
+                    <para>点击<guilabel>恢复默认</guilabel> 复位所有设置.</para>
+                </listitem>
+            </orderedlist>
+            <note><para>所有设置会立刻.</para></note>
+            </listitem>
+            </varlistentry> 
+            </variablelist> 
+        </sect3>
+         <sect3 id="lcrt-application-settings">
+             <title>应用软件</title>
+                <variablelist> 
+                <varlistentry> 
+                    <term>在<guimenu>全局设置</guimenu>对话框内点击标签 <guilabel>应用软件</guilabel>,在这里可以修改:</term>
+                    <listitem>
+                        <note><para>当前这些设置不会生效，但是在将来可能用到，呵呵！</para></note>
+                </listitem>
+            </varlistentry> 
+            </variablelist> 
+        </sect3>
+
+     </sect2> 
+  </sect1> 
+</article> 

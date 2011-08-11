@@ -1,0 +1,29 @@
+.TH "LCRT" "1" "Apr 18, 2011" "lcrt @VERSION@" ""
+.SH "NAME"
+Lcrt \(em a linux remote login tool
+.SH "SYNOPSIS"
+.PP
+\fBlcrt\fR [\fB-q connect_name\fP]  [\fP-c connect_name\fP]
+.SH "DESCRIPTION"
+.PP
+lcrt is a linux remote login tool. Just like ssh or telnet, but it has a GUI and can manage many connections. User can use it to save connection informations such as hostname,username and password(if choose save),and auto login when next time. lcrt also can clone a connected session, so user can open many connections quickly.
+.SH "FEATURES"
+.PP
+- auto save connection information so that can auto login remote server next time.
+.PP
+- easy to clone a connected session.
+.SH "OPTIONS"
+.IP "\fB-q\fP"
+Quick connect in commandline(don't start GUI).
+.IP "\fB-c\fP"
+Connect in Tab.
+.SH "EXAMPLE"
+.PP
+lcrt -q "localhost"
+.PP
+lcrt -c "127.0.0.1"
+.SH "AUTHOR"
+.PP
+This manual page was written by the Lcrt developer team. Permission is
+granted to copy, distribute and/or modify this document under
+the terms of the GNU General Public License, Version 2.

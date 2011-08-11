@@ -1,0 +1,103 @@
+Description
+==================
+
+lcrt is a Linux remote login tool. Just like ssh or telnet, but it has
+a GUI and can manage many connections. User can use it to save connection
+information such as hostname, username and, optionally, password, and 
+auto login next time. lcrt also can clone a connected session, so
+user can open many connections quickly.
+
+Features
+===================
+
+- auto save connection information so that can auto login remote server 
+  next time.
+- easy to clone a connected session.
+
+General Information
+===================
+
+lcrt is released under the GNU General Public License (GPL) version 2, see
+the file 'COPYING' for more information.
+
+The official web site is:
+
+    http://code.google.com/p/lcrt
+
+You can download the latest lcrt tarball and deb packet from:
+
+    http://code.google.com/p/lcrt/downloads/list
+
+Also you can get the latest source code from:
+
+    http://code.google.com/p/lcrt/source/browse/
+
+use command:
+
+    svn checkout http://lcrt.googlecode.com/svn/trunk/ lcrt-read-only
+
+to get it, but make sure you had install subversion first.
+
+Installation
+============
+
+lcrt is a desktop application based on gnome, so make sure the environment
+of your desktop is gnome. To run the application, you need GTK and vte-terminal
+library, and some others.
+
+If you download source code from http://code.google.com/p/lcrt ,you can install
+programe with follow command:
+
+    ./configure
+    make
+    make install
+
+Here you should known you have super permit to install the programe.
+
+If your oprating system is Ubuntu, you can get deb packet from:
+
+    http://code.google.com/p/lcrt/downloads/list
+
+Then use command:
+
+    sudo dpkg -i lcrt-x.x.x_i386.deb
+
+to install it.
+
+Depend library
+==================
+
+lcrt is writen with GTK, and use another widget named vte-terminal, so to
+compile it, you should have follow libraries:
+
+    libgtk2.0-dev
+    libvte-dev
+    libsqlite3-dev
+
+In Ubuntu system, you can install them with command:
+
+    sudo apt-get install libgtk2.0-dev libvte-dev libsqlite3-dev
+
+In Fedora system, you can install then with command:
+
+    yum install gtk-devel vte-devel sqlite3-devel
+
+Depend programe
+==================
+
+Now you have installed depend libraries of lcrt, but to compile it, you should
+install some toolchain:
+
+    make
+    pkg-config
+    gcc
+
+Bug report
+==================
+
+If you find some bugs, you can send email to me, I will fix it as soom as 
+possible,my email address is:
+
+    NiuTao <niutao0602@gmail.com>
+
+In then end, I hope this programe can help you in your work!

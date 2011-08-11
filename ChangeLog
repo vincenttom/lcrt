@@ -1,0 +1,239 @@
+
+2011-04-18 20:37:22
+===================================================================
+Index: Makefile.in
+===================================================================
+--- Makefile.in	(revision 70)
++++ Makefile.in	(working copy)
+@@ -603,7 +603,7 @@
+ 	rm -rf $(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE) 
+ 
+ # Build ChangeLog from SVN  history
+-ChangeLog:
++changelog:
+ 	@if test -f $(top_srcdir)/.svn/entries; then \
+ 		echo "" >.$$.ChangeLog; \
+ 		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
+@@ -613,8 +613,6 @@
+ 		rm -f .$$.ChangeLog; \
+ 	fi
+ 
+-dist: ChangeLog
+-
+ .PHONY: ChangeLog	
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+Index: Makefile.am
+===================================================================
+--- Makefile.am	(revision 70)
++++ Makefile.am	(working copy)
+@@ -7,7 +7,7 @@
+ 	rm -rf $(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE) 
+ 	
+ # Build ChangeLog from SVN  history
+-ChangeLog:
++changelog:
+ 	@if test -f $(top_srcdir)/.svn/entries; then \
+ 		echo "" >.$$.ChangeLog; \
+ 		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
+@@ -17,6 +17,4 @@
+ 		rm -f .$$.ChangeLog; \
+ 	fi
+ 	
+-dist: ChangeLog
+-	
+ .PHONY: ChangeLog	
+
+2011-04-16 12:08:23
+===================================================================
+Index: Makefile.in
+===================================================================
+--- Makefile.in	(revision 67)
++++ Makefile.in	(working copy)
+@@ -682,7 +682,12 @@
+ # Build ChangeLog from SVN  history
+ ChangeLog:
+ 	@if test -f $(top_srcdir)/.svn/entries; then \
+-		svn diff | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
++		echo "" >.$$.ChangeLog; \
++		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
++		echo "===================================================================" >> .$$.ChangeLog; \
++		svn diff >>.$$.ChangeLog; \
++		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
++		rm -f .$$.ChangeLog; \
+ 	fi
+ 
+ dist: ChangeLog
+Index: ChangeLog
+===================================================================
+--- ChangeLog	(revision 67)
++++ ChangeLog	(working copy)
+@@ -1,4 +1,24 @@
+ 
++2011-04-16 12:06:51
++===================================================================
++Index: Makefile.in
++===================================================================
++--- Makefile.in	(revision 67)
+++++ Makefile.in	(working copy)
++@@ -682,7 +682,11 @@
++ # Build ChangeLog from SVN  history
++ ChangeLog:
++ 	@if test -f $(top_srcdir)/.svn/entries; then \
++-		svn diff | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
+++		echo "" >.$$.ChangeLog; \
+++		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
+++		echo "===================================================================" >> .$$.ChangeLog; \
+++		svn diff >>.$$.ChangeLog; \
+++		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
++ 	fi
++ 
++ dist: ChangeLog
++
+ 2011-04-16 12:04:50
+ ===================================================================
+ Index: pixmaps/Makefile.am
+Index: Makefile.am
+===================================================================
+--- Makefile.am	(revision 67)
++++ Makefile.am	(working copy)
+@@ -14,6 +14,7 @@
+ 		echo "===================================================================" >> .$$.ChangeLog; \
+ 		svn diff >>.$$.ChangeLog; \
+ 		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
++		rm -f .$$.ChangeLog; \
+ 	fi
+ 	
+ dist: ChangeLog
+
+2011-04-16 12:06:51
+===================================================================
+Index: Makefile.in
+===================================================================
+--- Makefile.in	(revision 67)
++++ Makefile.in	(working copy)
+@@ -682,7 +682,11 @@
+ # Build ChangeLog from SVN  history
+ ChangeLog:
+ 	@if test -f $(top_srcdir)/.svn/entries; then \
+-		svn diff | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
++		echo "" >.$$.ChangeLog; \
++		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
++		echo "===================================================================" >> .$$.ChangeLog; \
++		svn diff >>.$$.ChangeLog; \
++		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
+ 	fi
+ 
+ dist: ChangeLog
+
+2011-04-16 12:04:50
+===================================================================
+Index: pixmaps/Makefile.am
+===================================================================
+--- pixmaps/Makefile.am	(revision 66)
++++ pixmaps/Makefile.am	(working copy)
+@@ -23,8 +23,8 @@
+ pkgdatadir = ${datadir}/${PACKAGE}/pixmaps
+ 
+ install-data-local:
+-	test -z ${datadir}/pixmaps || $(MKDIR_P) ${datadir}/pixmaps
+-	$(INSTALL_DATA) lcrt-logo.png ${datadir}/pixmaps
++	test -z $(DESTDIR)/${datadir}/pixmaps || $(MKDIR_P) $(DESTDIR)/${datadir}/pixmaps
++	$(INSTALL_DATA) lcrt-logo.png $(DESTDIR)/${datadir}/pixmaps
+ 
+ uninstall-local:
+-	rm -f ${datadir}/pixmaps/lcrt-logo.png
++	rm -f $(DESTDIR)/${datadir}/pixmaps/lcrt-logo.png
+Index: gnome/Makefile.am
+===================================================================
+--- gnome/Makefile.am	(revision 66)
++++ gnome/Makefile.am	(working copy)
+@@ -1,8 +1,8 @@
+ EXTRA_DIST = lcrt.desktop lcrt
+ 
+ define install-menuitem
+-	test -z ${datadir}/$(1) || $(MKDIR_P) ${datadir}/$(1)
+-	$(INSTALL_DATA) $(2) ${datadir}/$(1)
++	test -z $(DESTDIR)/${datadir}/$(1) || $(MKDIR_P) $(DESTDIR)/${datadir}/$(1)
++	$(INSTALL_DATA) $(2) $(DESTDIR)/${datadir}/$(1)
+ endef
+ 
+ install-data-local:
+@@ -10,5 +10,5 @@
+ 	$(call install-menuitem,menu,lcrt)
+ 
+ uninstall-local:
+-	rm -f ${datadir}/applications/lcrt.desktop
+-	rm -f $(datadir)/menu/lcrt
++	rm -f $(DESTDIR)/${datadir}/applications/lcrt.desktop
++	rm -f $(DESTDIR)/$(datadir)/menu/lcrt
+Index: language/Makefile.am
+===================================================================
+--- language/Makefile.am	(revision 66)
++++ language/Makefile.am	(working copy)
+@@ -42,14 +42,14 @@
+ lcrt_DATABASES = $(addprefix $(LANGUAGE_CONFIG_PATH), $(lcrt_LANGUAGES))
+ 
+ install-data-local:
+-	echo "$(MKDIR_P) ${datadir}/${PACKAGE}/etc/language"
+-	$(MKDIR_P) ${datadir}/${PACKAGE}/etc/language
+-	echo "$(INSTALL_DATA) $(lcrt_DATABASES) '${datadir}/${PACKAGE}/etc/language'"
+-	$(INSTALL_DATA) $(lcrt_DATABASES) ${datadir}/${PACKAGE}/etc/language
++	echo "$(MKDIR_P) $(DESTDIR)/${datadir}/${PACKAGE}/etc/language"
++	$(MKDIR_P) $(DESTDIR)/${datadir}/${PACKAGE}/etc/language
++	echo "$(INSTALL_DATA) $(lcrt_DATABASES) '$(DESTDIR)/${datadir}/${PACKAGE}/etc/language'"
++	$(INSTALL_DATA) $(lcrt_DATABASES) $(DESTDIR)/${datadir}/${PACKAGE}/etc/language
+ 
+ uninstall-local:
+-	echo " (cd '${datadir}/${PACKAGE}/etc/language' && rm -f $(lcrt_LANGUAGES))"
+-	(cd ${datadir}/${PACKAGE}/etc/language && rm -f $(lcrt_LANGUAGES))
++	echo " (cd '$(DESTDIR)/${datadir}/${PACKAGE}/etc/language' && rm -f $(lcrt_LANGUAGES))"
++	(cd $(DESTDIR)/${datadir}/${PACKAGE}/etc/language && rm -f $(lcrt_LANGUAGES))
+ 
+ clean-local:
+ 	@if test -d $(LANGUAGE_CONFIG_PATH) ;then \
+Index: help/Makefile.am
+===================================================================
+--- help/Makefile.am	(revision 66)
++++ help/Makefile.am	(working copy)
+@@ -29,11 +29,11 @@
+ 	$(call doc-data-hook,$(distdir))
+ 
+ install-data-local:
+-	$(call doc-data-hook,$(datadir)/gnome/help/$(PACKAGE))
++	$(call doc-data-hook,$(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE))
+ 
+ uninstall-local:
+ 	@for d in $(DOC_LANGUAGES); do \
+-		echo " (cd '$(datadir)/gnome/help/$(PACKAGE)/$$d' && rm -f $(DOC_ENTITIES) $(DOC_FIGURES))"; \
+-		(cd "$(datadir)/gnome/help/$(PACKAGE)/$$d" && rm -f $(DOC_ENTITIES) $(DOC_FIGURES)); \
++		echo " (cd '$(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE)/$$d' && rm -f $(DOC_ENTITIES) $(DOC_FIGURES))"; \
++		(cd "$(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE)/$$d" && rm -f $(DOC_ENTITIES) $(DOC_FIGURES)); \
+ 	done
+ 
+Index: Makefile.am
+===================================================================
+--- Makefile.am	(revision 66)
++++ Makefile.am	(working copy)
+@@ -3,13 +3,17 @@
+ EXTRA_DIST = AUTHORS NEWS ChangeLog COPYING README
+ 
+ uninstall-local:
+-	rm -rf $(datadir)/$(PACKAGE)
+-	rm -rf $(datadir)/gnome/help/$(PACKAGE) 
++	rm -rf $(DESTDIR)/$(datadir)/$(PACKAGE)
++	rm -rf $(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE) 
+ 	
+ # Build ChangeLog from SVN  history
+ ChangeLog:
+ 	@if test -f $(top_srcdir)/.svn/entries; then \
+-		svn diff | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
++		echo "" >.$$.ChangeLog; \
++		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
++		echo "===================================================================" >> .$$.ChangeLog; \
++		svn diff >>.$$.ChangeLog; \
++		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
+ 	fi
+ 	
+ dist: ChangeLog
+

@@ -1,0 +1,28 @@
+1.0.1
+=====
+ * Thanks for Manfred Müller<manfred.mueller@lin2go.com> to add language support of German.
+ * Thanks for Asias He <asias.hejun@gmail.com> to help me to Change build system to AUTOTOOL.
+ * Add configure 'F10' key in dialog "options".
+ * Fix the bug can't popup login dialog when create a new session(the host not in known_hosts of ssh).
+
+1.0.0
+=====
+ * Complete all main function.
+
+0.0.9
+=====
+ * Complete document of help.
+ * Support settings keyboard shortcut.
+
+0.0.6 
+=====
+ * Add lock session.
+ * Add terminal icon on toolbar.
+ * Add Rename session.
+ * Fix the bug can't popup the dialog of password when connect to a new host.
+
+0.0.4
+=====
+ * Fix segmention default when close an unconnect tab.
+ * Add popup menuitem when lick right button.
+
