@@ -1,9 +1,7 @@
 #ifndef __LCRT_SERIAL_H__
 #define __LCRT_SERIAL_H__
 
-#include "iqconnect.h"
-#include "iterminal.h"
-#include "user.h"
+#include "protocol.h"
 
 #define LCRT_SERIAL_PORT_NUMBER 7
 #define LCRT_SERIAL_PORT \
@@ -66,8 +64,6 @@ enum {
 
 #define SERIAL_COMBOBOX_WIDTH 220
 
-void lcrt_qconnect_create_serial_subbox(struct lcrt_qconnect *lqconnect);
-void *lcrt_terminal_serial_contents_changed(struct lcrt_terminal *lterminal);
-struct lcrtc_user *lcrt_qconnect_serial_on_button_connect_clicked(struct lcrt_qconnect *lqconnect);
+extern struct lcrt_protocol_callback lcrt_protocol_serial_callbacks;
 
 #endif

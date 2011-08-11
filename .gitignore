@@ -1,2 +1,30 @@
+# Makefile can be created by configure
 Makefile
+
 *.o
+.deps
+
+# this is a host running tool to create language database
+language/make_language
+
+# etc directory can be created by make_language to store language 
+# database we support.
+etc/
+
+# src/lang.c is created by make_language
+src/lang.c
+
+# created by configure
+config.h
+config.log
+config.status
+
+# manpage
+help/man/lcrt.1
+
+# executable
+src/lcrt
+
+stamp-h1
+
+autom4te.cache

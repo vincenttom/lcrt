@@ -8,13 +8,7 @@ uninstall-local:
 	
 # Build ChangeLog from SVN  history
 changelog:
-	@if test -f $(top_srcdir)/.svn/entries; then \
-		echo "" >.$$.ChangeLog; \
-		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
-		echo "===================================================================" >> .$$.ChangeLog; \
-		svn diff >>.$$.ChangeLog; \
-		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
-		rm -f .$$.ChangeLog; \
+	@if test -f $(top_srcdir)/.git/HEAD; then \
+		git log --stat > $@; \
 	fi
-	
 .PHONY: ChangeLog	

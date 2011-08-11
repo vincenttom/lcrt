@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 m4_define([gt_version_major],[1])
-m4_define([gt_version_minor],[0])
-m4_define([gt_version_micro],[5])
+m4_define([gt_version_minor],[1])
+m4_define([gt_version_micro],[0])
 m4_define([gt_version_extra],[])
 m4_define([gt_version],[gt_version_major().gt_version_minor().gt_version_micro()])
 
@@ -21,7 +21,7 @@ AC_PREFIX_DEFAULT(/usr)
 #GNOME_INIT
 check_deps()
 {
-	$LCRT_LIB_DEPS_PKG_ERRORS
+	echo "$LCRT_LIB_DEPS_PKG_ERRORS"
 	echo "If the packages is not found,you can install them with follow command:"
 	echo "In Unbutu/Debian system:"
 	echo "    sudo apt-get install libgtk2.0-dev libvte-dev libsqlite3-dev"
@@ -67,7 +67,7 @@ AC_CHECK_FUNCS([clock_gettime fdatasync ftruncate getcwd gettimeofday localtime_
 #debug options support
 AC_ARG_ENABLE([debug],
     [AS_HELP_STRING([--enable-debug],[debug program(default is no)])],
-    [CFLAGS="${CFLAGS} -D__LCRT_DEBUG__"])
+    [CFLAGS="${CFLAGS} -D__LCRT_DEBUG__ -Wall"])
 
 AC_CONFIG_FILES([
     Makefile 

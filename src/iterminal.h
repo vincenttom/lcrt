@@ -58,7 +58,9 @@ struct lcrt_terminal {
     int again;
     int username_changed;
     /* When we receive data from remote, we call this function to handle it */
-    void *(*contents_changed)(struct lcrt_terminal *lterminal);
+    void (*contents_changed)(struct lcrt_terminal *lterminal);
+    /* When we create a terminal, we should fork a child to connect with remote */
+    int (*connect_remote)(struct lcrt_terminal *lterminal);
 
 };
 

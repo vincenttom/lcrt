@@ -49,6 +49,7 @@ lcrt_SOURCES = lcrt.c \
 	mkconfig.c mkconfig.h \
 	message.c message.h \
 	support.c support.h \
+	protocol.c protocol.h \
 	user.c user.h \
 	serial.c serial.h \
 	ssh.c ssh.h \

@@ -209,7 +209,6 @@ int lcrt_create_qconnect(
     g_signal_connect ((gpointer) button_connect, "clicked",
                     G_CALLBACK (lcrt_qconnect_on_button_connect_clicked),
                     lqconnect);
-    gtk_widget_set_sensitive(button_connect, FALSE);
 
     gtk_widget_add_accelerator(button_connect, "clicked", accel_group,
                                GDK_Return, (GdkModifierType) 0,

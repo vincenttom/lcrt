@@ -51,6 +51,7 @@ enum {
     LCRT_Q_SPARITY,
     LCRT_Q_SSTOP_BITS,
     LCRT_Q_SFLOW_CONTROL,
+    LCRT_Q_SHELL,
     LCRT_Q_NUMBER
 };
 #define LCRT_Q_NAME \
@@ -83,6 +84,7 @@ enum {
     "q_sparity", \
     "q_sstop_bits", \
     "q_sflow_control", \
+    "q_shell"
 
 #define LCRT_Q_VALUE \
     "Quick connect", \
@@ -113,7 +115,8 @@ enum {
     "  Data bits:", \
     "  Parity:", \
     "  Stop bits:", \
-    "Flow control"
+    "Flow control", \
+    "  Shell:"
 
 #define LCRT_Q_SHORTCUT \
     {0, 0}
@@ -154,8 +157,9 @@ struct lcrt_qconnect {
             GtkWidget *gssapi;
             GtkWidget *rsa;
             GtkWidget *tis;
-            GtkListStore *authentication;
-            boolean auth[4];
+            GtkListStore *authliststore;
+            GtkWidget *authtreeview;
+			GtkWidget *properties;
         } ssh;
 #define pssh q_proto.ssh
         struct {
@@ -188,10 +192,14 @@ struct lcrt_qconnect {
             GtkWidget *firewall;
             GtkWidget *port;
         } raw;
-#define praw q_proto.raw        
-    } q_proto;
+#define praw q_proto.raw
 
-    GtkWidget *q_bt_properties;
+        struct {
+            GtkWidget *shell;
+        } shell;
+#define pshell q_proto.shell
+
+    } q_proto;
     GtkWidget *q_et_default_command;
     GtkWidget *q_cb_show_qconnect;
     GtkWidget *q_cb_save_session;
@@ -202,7 +210,7 @@ struct lcrt_qconnect {
     struct lcrtc_qconnect config;
     const char *(*get_db)(struct lcrt_qconnect *lqconnect);
     const char *(*get_tb)(struct lcrt_qconnect *lqconnect);
-    struct lcrtc_user *(*on_button_connect_clicked)(struct lcrt_qconnect *lqconnect);
+    struct lcrtc_user *(*create_session)(struct lcrt_qconnect *lqconnect);
     void (*create_subbox)(struct lcrt_qconnect *lqconnect);
 };
 

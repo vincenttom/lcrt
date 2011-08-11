@@ -39,6 +39,7 @@
 #include "rlogin.h"
 #include "serial.h"
 #include "shell.h"
+#include "protocol.h"
 
 int lcrt_create_terminal(struct lcrt_notebook *parent)
 {
@@ -52,10 +53,8 @@ int lcrt_create_terminal(struct lcrt_notebook *parent)
 
     //GtkAccelGroup *accel_group = parent->parent->w_accel;
     struct lcrt_settings *lsettings = parent->parent->w_settings;
-    typedef void  *(*contents_changed_callbacks)(struct lcrt_terminal *lterminal);
-    contents_changed_callbacks callbacks[LCRT_PROTOCOL_NUMBER] = {
-        LCRT_PROTOCOL_CONTENTS_CHANGED_CALLBACKS
-    };
+    struct lcrt_protocol_callback *callback;
+
     struct lcrt_terminal *lterminal;
     char *err;
 
@@ -73,9 +72,11 @@ int lcrt_create_terminal(struct lcrt_notebook *parent)
     list_add(&lterminal->brother, &parent->child);
 
     terminal = vte_terminal_new();
-    lterminal->terminal = terminal;
+    lterminal->terminal = VTE_TERMINAL(terminal);
     debug_print("create VTETerminal = %p\n", lterminal->terminal);
-    lterminal->contents_changed = callbacks[lterminal->user->protocol];
+    callback = lcrt_protocol_get_callback(lterminal->user->protocol);
+    lterminal->contents_changed = callback->contents_changed;
+    lterminal->connect_remote = callback->connect_remote;
 
     scrolledwindow = gtk_scrolled_window_new(NULL, vte_terminal_get_adjustment(VTE_TERMINAL(terminal)));
     lterminal->scrolledwindow = scrolledwindow;
@@ -134,7 +135,9 @@ int lcrt_create_terminal(struct lcrt_notebook *parent)
     gtk_widget_show(terminal);
     GTK_WIDGET_SET_FLAGS(terminal, GTK_CAN_FOCUS);
     gtk_container_add(GTK_CONTAINER(scrolledwindow), terminal);
-    lcrt_terminal_fork(lterminal);
+    //lcrt_terminal_fork(lterminal);
+    if (lterminal->connect_remote)
+        lterminal->connect_remote(lterminal);
     debug_print("terminal = %p, font = %s\n", lterminal->terminal, lsettings->lt_t_font);
     vte_terminal_set_font_from_string(lterminal->terminal, lsettings->lt_t_font);
     debug_where();

@@ -230,6 +230,7 @@ static struct lcrt_language_config iqconnect = {
          {"q_sparity",                          "  Parity:"},
          {"q_sstop_bits",                       "  Stop bits:"},
          {"q_sflow_control",                    "Flow control"},
+         {"q_shell",                            "  Shell:"},
     }
 };
 

@@ -5,6 +5,7 @@
 #include <errno.h>
 enum {
     LCRTE_OK = 0,
+    LCRTE_INVAL,
     LCRTE_NOT_FOUND = 1000,
     LCRTE_NO_TABLE,
     LCRTE_NO_CONFIG,

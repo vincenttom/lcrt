@@ -36,9 +36,9 @@ void lcrt_qconnect_on_button_connect_clicked(GtkButton *button, gpointer user_da
     struct lcrtc_user *user;
 
     debug_where();
-    if (lqconnect->on_button_connect_clicked) {
+    if (lqconnect->create_session) {
         debug_where();
-        user = lqconnect->on_button_connect_clicked(lqconnect);
+        user = lqconnect->create_session(lqconnect);
     }
 
     lcrt_qconnect_on_button_cancel_clicked(NULL, lqconnect);
@@ -74,59 +74,22 @@ void lcrt_qconnect_on_protocol_changed(GtkComboBox *widget, gpointer user_data)
     struct lcrt_qconnect *lqconnect = (struct lcrt_qconnect *)user_data;
     const char *str_port[LCRT_PROTOCOL_NUMBER] = {LCRT_PROTOCOL_PORT};
     const char *proto = gtk_combo_box_get_active_text(GTK_COMBO_BOX(widget));
-    typedef struct lcrtc_user *(*on_button_connect_clicked_callback_t)(struct lcrt_qconnect *lqconnect);
-    typedef void (*create_subbox_callback_t)(struct lcrt_qconnect *lqconnect);
-
-    on_button_connect_clicked_callback_t on_button_connect_clicked_callbacks[LCRT_PROTOCOL_NUMBER] = {
-        LCRT_PROTOCOL_ON_BUTTON_CONNECT_CLICKED_CALLBACKS
-    };
-
-    create_subbox_callback_t create_subbox_callbacks[LCRT_PROTOCOL_NUMBER] = {
-        LCRT_PROTOCOL_CREATE_SUBBOX_CALLBACKS
-    };
+	const char *str_proto[LCRT_PROTOCOL_NUMBER] = {LCRT_PROTOCOL_NAME};
+    struct lcrt_protocol_callback *callback;
 
     lqconnect->nproto = lcrt_user_get_protocol(proto);
 
-    debug_print("protocol: %s\n", lqconnect->nproto);
+	debug_where();
+    debug_print("protocol: %s\n", str_proto[lqconnect->nproto]);
     if (lqconnect->q_vbox_spec) {
         gtk_widget_destroy(lqconnect->q_vbox_spec);
         lqconnect->q_vbox_spec = NULL;
     }
-    lqconnect->on_button_connect_clicked = on_button_connect_clicked_callbacks[lqconnect->nproto];
-    lqconnect->create_subbox = create_subbox_callbacks[lqconnect->nproto];
+
+    callback = lcrt_protocol_get_callback(lqconnect->nproto);
+    lqconnect->create_session = callback->create_session;
+    lqconnect->create_subbox = callback->create_subbox;
     
     if (lqconnect->create_subbox)
         lqconnect->create_subbox(lqconnect);
-
-#if 0
-    gtk_widget_set_sensitive(lqconnect->q_et_hostname, TRUE);
-    gtk_widget_set_sensitive(lqconnect->q_et_username, TRUE);
-    gtk_widget_set_sensitive(lqconnect->q_cb_firewall, TRUE);
-    gtk_widget_set_sensitive(lqconnect->q_et_port, TRUE);
-    lcrt_qconnect_on_entry_hostname_changed(lqconnect->q_et_hostname, lqconnect);
-
-    if (protocol == LCRT_PROTOCOL_SSH1) {
-        gtk_widget_set_sensitive(lqconnect->q_ssh_frame, TRUE);
-        lcrt_qconnect_destroy_ssh1(lqconnect);
-        lcrt_qconnect_destroy_ssh2(lqconnect);
-        lcrt_qconnect_create_ssh1(lqconnect);
-    } else if (protocol == LCRT_PROTOCOL_SSH2) {
-        gtk_widget_set_sensitive(lqconnect->q_ssh_frame, TRUE);
-        lcrt_qconnect_destroy_ssh1(lqconnect);
-        lcrt_qconnect_destroy_ssh2(lqconnect);
-        lcrt_qconnect_create_ssh2(lqconnect);
-    } else if (protocol == LCRT_PROTOCOL_SHELL) {
-        gtk_widget_set_sensitive(lqconnect->q_et_hostname, FALSE);
-        gtk_widget_set_sensitive(lqconnect->q_et_username, FALSE);
-        gtk_widget_set_sensitive(lqconnect->q_cb_firewall, FALSE);
-        gtk_widget_set_sensitive(lqconnect->q_et_port, FALSE);
-        gtk_widget_set_sensitive(lqconnect->q_bt_connect, TRUE);
-        gtk_widget_set_sensitive(lqconnect->q_ssh_frame, FALSE);
-    } else {
-        gtk_widget_set_sensitive(lqconnect->q_ssh_frame, FALSE);
-    }
-    gtk_entry_set_text(GTK_ENTRY(lqconnect->q_et_port), str_port[protocol]);
-    if (protocol == LCRT_PROTOCOL_TELNET || protocol == LCRT_PROTOCOL_TELNET_SSL)
-        gtk_entry_set_editable(GTK_ENTRY(lqconnect->q_et_port), FALSE);
-#endif
 }

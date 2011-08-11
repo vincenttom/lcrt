@@ -229,6 +229,7 @@ static struct lcrt_language_config iqconnect = {
          {"q_sparity",                          "  奇偶校验位:"},
          {"q_sstop_bits",                       "  停止位:"},
          {"q_sflow_control",                    "流控制"},
+         {"q_shell",                            "  终端:"},
     }
 };
 

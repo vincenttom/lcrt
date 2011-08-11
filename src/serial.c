@@ -12,12 +12,27 @@
  */
 #define __LCRT_DEBUG__
 #include <stdio.h>
+#include <gtk/gtk.h>
+#include <vte/vte.h>
+#include "iwindow.h"
+#include "iterminal.h"
 #include "iqconnect.h"
 #include "user.h"
 #include "serial.h"
 #include "debug.h"
 
-void lcrt_qconnect_create_serial_subbox(struct lcrt_qconnect *lqconnect)
+static void lcrt_serial_contents_changed(struct lcrt_terminal *lterminal)
+{
+    VteTerminal *vteterminal = lterminal->terminal;
+    struct lcrt_window *lwindow = lterminal->parent->parent;
+    struct lcrtc_user *user = lterminal->user;
+}
+
+static int lcrt_serial_connect_remote(struct lcrt_terminal *lterminal)
+{
+}
+
+static void lcrt_serial_create_subbox(struct lcrt_qconnect *lqconnect)
 {
     GtkWidget *vbox;
     GtkWidget *vbox_spec;
@@ -217,17 +232,21 @@ void lcrt_qconnect_create_serial_subbox(struct lcrt_qconnect *lqconnect)
         gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_data_bits), 3); //8
         gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_parity), 0); //None
         gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_stop_bits), 0); //1
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_rts_cts), TRUE);
     }
+    gtk_widget_set_sensitive(lqconnect->q_bt_connect, TRUE);
 
 }
 
-void *lcrt_terminal_serial_contents_changed(struct lcrt_terminal *lterminal)
-{
-    VteTerminal *vteterminal = lterminal->terminal;
-    struct lcrt_window *lwindow = lterminal->parent->parent;
-    struct lcrtc_user *user = lterminal->user;
-}
-
-struct lcrtc_user *lcrt_qconnect_serial_on_button_connect_clicked(struct lcrt_qconnect *lqconnect)
+static struct lcrtc_user *lcrt_serial_create_session(struct lcrt_qconnect *lqconnect)
 {
 }
+
+struct lcrt_protocol_callback lcrt_protocol_serial_callbacks = {
+    .protocol         = LCRT_PROTOCOL_SERIAL,
+    .contents_changed = lcrt_serial_contents_changed,
+    .connect_remote   = lcrt_serial_connect_remote,
+    .create_subbox    = lcrt_serial_create_subbox,
+    .create_session   = lcrt_serial_create_session,
+};
+

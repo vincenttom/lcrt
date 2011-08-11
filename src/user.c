@@ -18,6 +18,7 @@
 #include <string.h>
 #include <assert.h>
 #include "foperate.h"
+#include "iwindow.h"
 #include "user.h"
 #include "debug.h"
 
@@ -405,4 +406,27 @@ int lcrt_exec_check(lcrt_protocol_t prot)
         break;
     }
     return rv;
+}
+/*
+ * find a new label like keyword.
+ * note: label is a pointer to store new label.
+ */
+int lcrt_user_find_unused_label(struct lcrt_window *lwindow, 
+    const char *keyword /* in */, char *label /* out */)
+{
+    int i;
+
+    if (!lwindow || !keyword || !label)
+        return LCRTE_INVAL;
+
+    strcpy(label, keyword);
+
+    if (lcrt_user_find_by_name(&lwindow->u_config, keyword) != NULL) {
+        for (i = 1; i <= LCRT_MAX_LABEL; i++) {
+            sprintf(label, "%s (%d)", keyword, i++);
+            if (lcrt_user_find_by_name(&lwindow->u_config, label) == NULL)
+                return LCRTE_OK;
+        };
+    }
+    return LCRTE_OK;
 }
