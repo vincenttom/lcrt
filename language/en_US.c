@@ -224,13 +224,21 @@ static struct lcrt_language_config iqconnect = {
          {"q_bt_ok",                            "OK"},
          {"q_bt_cancel",                        "Cancel"},
          {"q_err_msg",                          "There is no memory to create window"},
-         {"q_sport",                            "  Part:"},
+         {"q_sport",                            "  Port:"},
          {"q_sbaud_rate",                       "  Baud rate:"},
          {"q_sdata_bits",                       "  Data bits:"},
          {"q_sparity",                          "  Parity:"},
          {"q_sstop_bits",                       "  Stop bits:"},
          {"q_sflow_control",                    "Flow control"},
          {"q_shell",                            "  Shell:"},
+         {"q_ptitle",                           "Password Properties"},
+         {"q_pprompt",                          "Change password"},
+         {"q_pstore_password",                  "  Store password:"},
+         {"q_pconfirm_password",                "  Confirm password:"},
+         {"q_pcancel",                          "Cancel"},
+         {"q_pok",                              "OK"},
+         {"q_ppw_unmatch",                      "Password can not match!"},
+
     }
 };
 
@@ -337,7 +345,8 @@ static struct lcrt_language_config iterminal = {
         {"tm_connection_refused",               "Connection refused!"},
         {"tm_connection_failed",                "Username or password error,exit!"},
         {"tm_connection_prog_not_found",        "Can not find the programe \"%s\",please install it!"},
-        {"tm_connection_not_support",           "Current version not support!"}
+        {"tm_connection_not_support",           "Current version not support!"},
+        {"tm_serial_error",                     "Can't open \"%s\",%s."},
     }
 };
 struct lcrt_language en_US = {

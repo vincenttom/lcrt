@@ -10,8 +10,15 @@
  *
  * Description:  
  */
-#define __LCRT_DEBUG__
+//#define __LCRT_DEBUG__
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <libgen.h>
 #include <gtk/gtk.h>
 #include <vte/vte.h>
 #include "iwindow.h"
@@ -20,19 +27,307 @@
 #include "user.h"
 #include "serial.h"
 #include "debug.h"
+struct lcrt_serial_map {
+    int index;
+    char *name;
+    int data;
+};
+struct lcrt_serial_if {
+    GtkWidget *port;
+    GtkWidget *baud_rate;
+    GtkWidget *data_bits;
+    GtkWidget *parity;
+    GtkWidget *stop_bits;
+    /* for flow control */
+    GtkWidget *software;
+    GtkWidget *hardware;
+};
+struct lcrt_serial_tm {
+    int fd; /**< the opened file descriptor of serial device */
+    unsigned int input; /**< A unique id for the input event source */
+    unsigned int commit; /**< terminal commit signal id */
+};
 
-static void lcrt_serial_contents_changed(struct lcrt_terminal *lterminal)
+
+static void lcrt_serial_receive(struct lcrt_terminal *lterminal)
 {
     VteTerminal *vteterminal = lterminal->terminal;
     struct lcrt_window *lwindow = lterminal->parent->parent;
     struct lcrtc_user *user = lterminal->user;
+    debug_where();
+    lcrt_terminal_set_connected_status(lterminal);
 }
-
-static int lcrt_serial_connect_remote(struct lcrt_terminal *lterminal)
+/**
+ * @brief Open and configure the serial port.
+ * @param port the device of serial port.
+ * @param baud_rate baud rate. see bits/termios.h
+ * @param databit data bit. see bits/termios.h
+ * @param parity the pattern of parity.\n
+ *        0 None\n
+ *        1 Odd\n
+ *        2 Even\n
+ *        3 Mark\n
+ *        4 Space\n
+ * @param stopbit the number of stop bit.\n
+ *        0 1bit\n
+ *        1 1.5bit\n
+ *        2 2bit\n
+ * @param software software flow control.\n
+ *        0 not use software flow control\n
+ *        1 use software flow control\n
+ * @param hardware hardware flow control.\n
+ *        0 not use hardware flow control\n
+ *        1 use hardware flow control\n
+ * @return >0 serial file descriptor \n
+ *         <0 error code.
+ */
+int lcrt_serial_config(const char *port, int baud_rate, int databit,
+    int parity, int stopbit, int software, int hardware)
 {
+    static struct termios ltermios;
+    int fd;
+    if ((fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY)) == -1) {
+        return -errno;
+    }
+    tcgetattr(fd, &ltermios);
+    ltermios.c_cflag |= (baud_rate & CBAUD);
+    ltermios.c_cflag |= (databit & CSIZE);
+
+    switch (stopbit) {
+    case 0:
+        ltermios.c_cflag &= ~CSTOPB; 
+        break;
+    case 1:
+        ltermios.c_cflag |= CSTOPB; 
+        break;
+    case 2:
+        ltermios.c_cflag &= ~CSTOPB; 
+        break;
+    default:
+        return -EINVAL;
+    }
+   
+    switch (parity) {
+    case 0:
+        ltermios.c_cflag &= ~PARENB; /* Clear parity enable */
+        ltermios.c_iflag &= ~INPCK; /* Enable parity checking */ 
+        break;
+    case 1:
+        ltermios.c_cflag |= (PARODD | PARENB); /* */
+        break;
+    case 2:
+        ltermios.c_cflag |= PARENB; /* Enable parity */
+        break;
+    case 3:
+        ltermios.c_cflag &= ~CMSPAR;
+        break;
+    case 4:
+        ltermios.c_cflag |= CMSPAR;
+        break;
+    default:
+        return -EINVAL;
+    }
+    ltermios.c_cflag |= CREAD;
+    ltermios.c_iflag = IGNPAR | IGNBRK;
+    
+    if (software)
+        ltermios.c_iflag |= (IXON | IXOFF | IXANY); //Enable Software Flow Control
+    if (hardware)
+        ltermios.c_cflag |= CRTSCTS;  //Enable hardware flow control
+    if (!software && !hardware)
+        ltermios.c_cflag |= CLOCAL;
+    
+    ltermios.c_oflag = 0;
+    ltermios.c_lflag = 0;
+    ltermios.c_cc[VTIME] = 0;
+    ltermios.c_cc[VMIN] = 1;
+    
+    tcsetattr(fd, TCSANOW, &ltermios);
+    tcflush(fd, TCOFLUSH);  
+    tcflush(fd, TCIFLUSH);
+    
+    return fd;
 }
 
-static void lcrt_serial_create_subbox(struct lcrt_qconnect *lqconnect)
+void put_text(gchar *string, guint size, struct lcrt_terminal *lterminal)
+{
+	int pos;
+	GString *buffer_tmp;
+	gchar *in_buffer;
+
+	buffer_tmp =  g_string_new(string);
+	in_buffer=buffer_tmp->str;
+	in_buffer += size;
+	
+	for (pos = size; pos > 0; pos--) {
+		in_buffer--;
+		if(*in_buffer=='\r' && *(in_buffer+1) != '\n'){
+			g_string_insert_c(buffer_tmp, pos, '\n');
+			size += 1;
+		}
+		if(*in_buffer=='\n' && *(in_buffer-1) != '\r'){
+			g_string_insert_c(buffer_tmp, pos-1, '\r');
+			size += 1;
+		}
+	}
+	vte_terminal_feed(lterminal->terminal, buffer_tmp->str, size);
+}
+/**
+ * @brief the callback to read data from serial port and put the data to terminal.
+ * @param user_data we use it to point to struct lcrt_terminal.
+ * @param fd file descriptor of serial port.
+ * @condition
+ */
+static void lcrt_serial_read(gpointer user_data, gint fd, GdkInputCondition condition)
+{
+    struct lcrt_terminal *lterminal = (struct lcrt_terminal *)user_data;
+    int len = 0;
+    unsigned char frame[1024] = {0};    
+    char num[32] = {0};
+    debug_where();
+    len = read(fd, frame, 1024);
+    if (len < 0) {
+        perror("read error:\n");
+        return ;
+    }
+    debug_print("read_uart frame:%s len: %d\n", frame, len);
+    //put_text(frame, len, lterminal);
+    vte_terminal_feed(lterminal->terminal, frame, len);
+}
+/**
+ * @brief the callback to write data to serial port.
+ * @param widget
+ * @param text the data to be write
+ * @param length data length
+ * @param point to struct lcrt_terminal.
+ */
+static void lcrt_serial_write(VteTerminal *widget, gchar *text, guint length, gpointer user_data)
+{
+    struct lcrt_terminal *lterminal = (struct lcrt_terminal *)user_data;
+    struct lcrt_serial_tm *tserial = (struct lcrt_serial_tm *)lterminal->private_data;
+    int fd = tserial->fd;
+	char *buffer, *start_buffer;
+	int i, size_written, buf_length;
+	int bytes_written = 0;
+    debug_where();
+    if (tserial->fd)
+        write(fd, text, length);
+#if 0
+	if (length == 0)
+		return;
+
+	buffer = text;
+
+	if (length == 1) {
+		if(*text == '\n' ) { //|| *string == '\r'){
+			bytes_written = write(fd, "\r\n", 2);
+		} else	{
+			bytes_written = write(fd, text, length);
+		}
+	} else {
+		start_buffer = buffer;
+		buf_length = 1;
+		for (i = 0; i < length; i++) {
+			if (*buffer == '\n' && *(buffer - 1) != '\r') {
+				size_written = write(fd, start_buffer, buf_length - 1);
+
+				if(size_written == -1)
+					return ;
+
+				size_written = write(fd, "\r\n", 2);
+				if(size_written == -1)
+					return ;
+
+				start_buffer = buffer + 1;
+				buf_length = 0;
+			} else if (*(buffer - 1) == '\r' && *buffer != '\n') {
+				if (buf_length > 2)
+					size_written = write(fd, start_buffer, buf_length - 2);
+				else
+					size_written =0;
+
+				if (size_written == -1)
+					return ;
+
+				size_written = write(fd, "\r\n", 2);
+				if (size_written == -1)
+					return ;
+
+				start_buffer = buffer;
+				buf_length = 1;
+			}
+			buffer++;
+			buf_length++;
+		}
+		if (buf_length>1)
+			bytes_written += write(fd, start_buffer, buf_length-1);
+		if (start_buffer[buf_length-2] == '\r')
+			bytes_written += write(fd, "\n", 1);
+	}
+#endif
+}
+static int lcrt_serial_connect(struct lcrt_terminal *lterminal)
+{
+    struct lcrtc_user *user;
+    struct lcrt_serial_tm *tserial;
+    /* port baud_rate databit parity stopbit software_control hardware_control*/
+    char s_port[USERNAME_LEN];
+    int s_baud_rate,s_databit,s_parity,s_stopbit,s_software,s_hardware;
+    debug_where();
+    if (lterminal == NULL)
+       return -EINVAL;
+
+    tserial = (struct lcrt_serial_tm *)calloc(1, sizeof(struct lcrt_serial_tm));
+    if (tserial == NULL)
+        return -ENOMEM;
+
+    user = lterminal->user;
+    sscanf(user->password, "%s %d %d %d %d %d %d", 
+            s_port,
+            &s_baud_rate,
+            &s_databit,
+            &s_parity,
+            &s_stopbit,
+            &s_software,
+            &s_hardware);
+    int fd ;
+    fd = lcrt_serial_config(s_port, s_baud_rate,s_databit,
+                            s_parity,s_stopbit,s_software,s_hardware);
+    if (fd <= 0) {
+        lcrt_message_error(lterminal->parent->parent->window, 
+                lterminal->parent->config.value[LCRT_TM_SERIAL_ERROR], s_port, strerror(fd));
+        free(tserial);
+        return fd;
+    }
+    tserial->fd = fd;
+    lterminal->private_data = tserial;
+    tserial->input = gtk_input_add_full(fd, GDK_INPUT_READ, 
+            (GdkInputFunction)lcrt_serial_read, NULL, lterminal, NULL);
+    tserial->commit = g_signal_connect(lterminal->terminal, "commit", 
+                     G_CALLBACK(lcrt_serial_write), lterminal);
+    lcrt_statusbar_set_user(lterminal->parent->parent->w_statusbar, lterminal->user);
+    lcrt_terminal_set_connected_status(lterminal);
+}
+
+static void lcrt_serial_disconnect(struct lcrt_terminal *lterminal)
+{
+    struct lcrt_serial_tm *tserial = lterminal->private_data;
+    debug_where();
+    if (lterminal->connected) {
+        if (tserial && tserial->fd > 0) {
+            close(tserial->fd);
+        }
+        lcrt_terminal_set_status(lterminal, NULL, LCRT_TERMINAL_DISCONNECT);
+        g_signal_handler_disconnect(lterminal->terminal, tserial->commit);
+        gtk_input_remove(tserial->input);
+    }
+    if (tserial) {
+        free(tserial);
+        lterminal->private_data = NULL;
+    }
+    debug_where();
+}
+static void lcrt_serial_show(struct lcrt_qconnect *lqconnect)
 {
     GtkWidget *vbox;
     GtkWidget *vbox_spec;
@@ -51,17 +346,21 @@ static void lcrt_serial_create_subbox(struct lcrt_qconnect *lqconnect)
     GtkWidget *alignment;
     GtkWidget *hbox_frame;
     GtkWidget *vbox_frame;
-    GtkWidget *checkbutton_dir_dsr;
-    GtkWidget *checkbutton_rts_cts;
-    GtkWidget *checkbutton_xon_xoff;
+    GtkWidget *checkbutton_none;
+    GtkWidget *checkbutton_software;
+    GtkWidget *checkbutton_hardware;
     GtkWidget *label_flow_control;
     int i;
-    static const char *sport[LCRT_SERIAL_PORT_NUMBER] = {LCRT_SERIAL_PORT};
-    static const char *sbaud_rate[LCRT_SERIAL_BAUD_RATE_NUMBER] = {LCRT_SERIAL_BAUD_RATE};
-    static const char *sdata_bits[LCRT_SERIAL_DATA_BITS_NUMBER] = {LCRT_SERIAL_DATA_BITS};
-    static const char *sparity[LCRT_SERIAL_PARITY_NUMBER] = {LCRT_SERIAL_PARITY};
-    static const char *sstop_bits[LCRT_SERIAL_STOP_BITS_NUMBER] = {LCRT_SERIAL_STOP_BITS};
-    static const char *flow_control[LCRT_FC_NUMBER] = {LCRT_FLOW_CONTROL};
+    const char *sport[LCRT_SERIAL_PORT_NUMBER] = {LCRT_SERIAL_PORT};
+    const struct lcrt_serial_map sbaud_rate[LCRT_SERIAL_BAUD_RATE_NUMBER] = {LCRT_SERIAL_BAUD_RATE_TABLE};
+    const struct lcrt_serial_map sdata_bits[LCRT_SERIAL_DATA_BITS_NUMBER] = {LCRT_SERIAL_DATA_BITS_TABLE};
+    const struct lcrt_serial_map sparity[LCRT_SERIAL_PARITY_NUMBER] = {LCRT_SERIAL_PARITY_TABLE};
+    const struct lcrt_serial_map sstop_bits[LCRT_SERIAL_STOP_BITS_NUMBER] = {LCRT_SERIAL_STOP_BITS_TABLE};
+    const struct lcrt_serial_map flow_control[LCRT_SEROAL_FLOW_CONTROL_NUMBER] = {LCRT_SEROAL_FLOW_CONTROL_TABLE};
+    static struct lcrt_serial_if slserial, *lserial = &slserial;
+
+    memset(lserial, 0, sizeof(struct lcrt_serial_if));
+    lqconnect->private_data = lserial;
 
     vbox = GTK_DIALOG (lqconnect->q_connect)->vbox;
     debug_where();
@@ -84,7 +383,7 @@ static void lcrt_serial_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_port), 0, 0.5);
 
     combobox_port = gtk_combo_box_entry_new_text ();
-    lqconnect->pserial.port = combobox_port;
+    lserial->port = combobox_port;
     gtk_widget_show (combobox_port);
     gtk_box_pack_start (GTK_BOX (hbox1), combobox_port, FALSE, TRUE, 0);
     gtk_widget_set_size_request (combobox_port, SERIAL_COMBOBOX_WIDTH, 25);
@@ -107,16 +406,16 @@ static void lcrt_serial_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_baud_rate), 0, 0.5);
 
     combobox_baud_rate = gtk_combo_box_entry_new_text ();
-    lqconnect->pserial.baud_rate = combobox_baud_rate;
+    lserial->baud_rate = combobox_baud_rate;
     gtk_widget_show (combobox_baud_rate);
     gtk_box_pack_start (GTK_BOX (hbox1), combobox_baud_rate, FALSE, TRUE, 0);
     gtk_widget_set_size_request (combobox_baud_rate, SERIAL_COMBOBOX_WIDTH, 25);
     
     for (i = 0; i < LCRT_SERIAL_BAUD_RATE_NUMBER; i++) {
-        gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_baud_rate), sbaud_rate[i]);
+        gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_baud_rate), sbaud_rate[i].name);
     }
     debug_where();
-    //gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(combobox_baud_rate)->child), FALSE);
+    gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(combobox_baud_rate)->child), FALSE);
 
     hbox1 = gtk_hbox_new (FALSE, 0);
     gtk_widget_show (hbox1);
@@ -130,13 +429,13 @@ static void lcrt_serial_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_data_bits), 0, 0.5);
 
     combobox_data_bits = gtk_combo_box_entry_new_text ();
-    lqconnect->pserial.data_bits = combobox_data_bits;
+    lserial->data_bits = combobox_data_bits;
     gtk_widget_show (combobox_data_bits);
     gtk_box_pack_start (GTK_BOX (hbox1), combobox_data_bits, FALSE, TRUE, 0);
     gtk_widget_set_size_request (combobox_data_bits, SERIAL_COMBOBOX_WIDTH, 25);
     
     for (i = 0; i < LCRT_SERIAL_DATA_BITS_NUMBER; i++) {
-        gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_data_bits), sdata_bits[i]);
+        gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_data_bits), sdata_bits[i].name);
     }
     debug_where();
     gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(combobox_data_bits)->child), FALSE);
@@ -153,13 +452,13 @@ static void lcrt_serial_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_parity), 0, 0.5);
 
     combobox_parity = gtk_combo_box_entry_new_text ();
-    lqconnect->pserial.parity = combobox_parity;
+    lserial->parity = combobox_parity;
     gtk_widget_show (combobox_parity);
     gtk_box_pack_start (GTK_BOX (hbox1), combobox_parity, FALSE, TRUE, 0);
     gtk_widget_set_size_request (combobox_parity, SERIAL_COMBOBOX_WIDTH, 25);
     
     for (i = 0; i < LCRT_SERIAL_PARITY_NUMBER; i++) {
-        gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_parity), sparity[i]);
+        gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_parity), sparity[i].name);
     }
     debug_where();
     gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(combobox_parity)->child), FALSE);
@@ -176,13 +475,13 @@ static void lcrt_serial_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_stop_bits), 0, 0.5);
 
     combobox_stop_bits = gtk_combo_box_entry_new_text ();
-    lqconnect->pserial.stop_bits = combobox_stop_bits;
+    lserial->stop_bits = combobox_stop_bits;
     gtk_widget_show (combobox_stop_bits);
     gtk_box_pack_start (GTK_BOX (hbox1), combobox_stop_bits, FALSE, TRUE, 0);
     gtk_widget_set_size_request (combobox_stop_bits, SERIAL_COMBOBOX_WIDTH, 25);
     
     for (i = 0; i < LCRT_SERIAL_STOP_BITS_NUMBER; i++) {
-        gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_stop_bits), sstop_bits[i]);
+        gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_stop_bits), sstop_bits[i].name);
     }
     debug_where();
     gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(combobox_stop_bits)->child), FALSE);
@@ -202,23 +501,17 @@ static void lcrt_serial_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_widget_show (hbox_frame);
     gtk_container_add (GTK_CONTAINER (alignment), hbox_frame);
 
-    checkbutton_dir_dsr = gtk_check_button_new_with_mnemonic (flow_control[LCRT_FC_DTR_DSR]);
-    lqconnect->pserial.dir_dsr= checkbutton_dir_dsr;
-    gtk_widget_show (checkbutton_dir_dsr);
-    gtk_box_pack_start (GTK_BOX (hbox_frame), checkbutton_dir_dsr, FALSE, FALSE, 0);
-    gtk_widget_set_size_request (checkbutton_dir_dsr, 100, -1);
+    checkbutton_software = gtk_check_button_new_with_mnemonic (flow_control[0].name);
+    lserial->software = checkbutton_software;
+    gtk_widget_show (checkbutton_software);
+    gtk_box_pack_start (GTK_BOX (hbox_frame), checkbutton_software, FALSE, FALSE, 0);
+    gtk_widget_set_size_request (checkbutton_software, 150, -1);
 
-    checkbutton_rts_cts = gtk_check_button_new_with_mnemonic (flow_control[LCRT_FC_CTS_CRS]);
-    lqconnect->pserial.rts_cts= checkbutton_rts_cts;
-    gtk_widget_show (checkbutton_rts_cts);
-    gtk_box_pack_start (GTK_BOX (hbox_frame), checkbutton_rts_cts, FALSE, FALSE, 0);
-    gtk_widget_set_size_request (checkbutton_rts_cts, 100, -1);
-
-    checkbutton_xon_xoff = gtk_check_button_new_with_mnemonic (flow_control[LCRT_FC_XON_XOFF]);
-    lqconnect->pserial.xon_xoff= checkbutton_xon_xoff;
-    gtk_widget_show (checkbutton_xon_xoff);
-    gtk_box_pack_start (GTK_BOX (hbox_frame), checkbutton_xon_xoff, FALSE, FALSE, 0);
-    gtk_widget_set_size_request (checkbutton_xon_xoff, 100, -1);
+    checkbutton_hardware = gtk_check_button_new_with_mnemonic (flow_control[1].name);
+    lserial->hardware = checkbutton_hardware;
+    gtk_widget_show (checkbutton_hardware);
+    gtk_box_pack_start (GTK_BOX (hbox_frame), checkbutton_hardware, FALSE, FALSE, 0);
+    gtk_widget_set_size_request (checkbutton_hardware, 150, -1);
 
     label_flow_control = gtk_label_new (lqconnect->config.value[LCRT_Q_SFLOW_CONTROL]);
     gtk_widget_show (label_flow_control);
@@ -232,21 +525,138 @@ static void lcrt_serial_create_subbox(struct lcrt_qconnect *lqconnect)
         gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_data_bits), 3); //8
         gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_parity), 0); //None
         gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_stop_bits), 0); //1
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_rts_cts), TRUE);
+        debug_print("active = %d\n", gtk_combo_box_get_active(GTK_COMBO_BOX(combobox_baud_rate)));
     }
     gtk_widget_set_sensitive(lqconnect->q_bt_connect, TRUE);
 
 }
 
-static struct lcrtc_user *lcrt_serial_create_session(struct lcrt_qconnect *lqconnect)
+static struct lcrtc_user *lcrt_serial_create(struct lcrt_qconnect *lqconnect)
 {
+    lcrt_protocol_t protocol = lqconnect->nproto;
+    struct lcrt_window *lwindow = lqconnect->parent;
+    struct lcrt_serial_if *lserial = (struct lcrt_serial_if *)lqconnect->private_data;
+    struct lcrt_serial_map serial_buad_rate[] = {
+        LCRT_SERIAL_BAUD_RATE_TABLE
+    };
+    struct lcrt_serial_map serial_databit[] = {
+        LCRT_SERIAL_DATA_BITS_TABLE
+    };
+    struct lcrtc_user *user;
+    int i;
+    char password[PASSWORD_LEN];
+    char s_port[USERNAME_LEN];
+    char name[HOSTNAME_LEN];
+    char hostname[HOSTNAME_LEN];
+#define get_text(widget) (gtk_combo_box_get_active_text(GTK_COMBO_BOX(lserial->widget)))
+#define get_active(widget) (gtk_combo_box_get_active(GTK_COMBO_BOX(lserial->widget)))
+    snprintf(s_port, USERNAME_LEN, "%s", get_text(port));
+    debug_where();
+    if (access(s_port, F_OK|R_OK|W_OK) == -1) {
+        switch (errno) {
+        case ENOENT:
+            debug_print("device %s is not exist.\n", s_port);
+            break;
+        case EPERM:
+            debug_print("you have no permition to open %s.\n", s_port);
+            break;
+        case EIO:
+            debug_print("device %s is not ready.\n", s_port);
+            break;
+        default:
+            debug_print("unknown error,error code is %d\n", errno);
+            break;
+        }
+        return;
+    }
+    int baud_rate,s_baud_rate;
+    baud_rate = get_active(baud_rate);
+    s_baud_rate = serial_buad_rate[baud_rate].data;
+    debug_where();
+
+    int databit, s_databit;
+    databit = atoi(get_text(data_bits));
+    databit = get_active(data_bits);
+    s_databit = serial_buad_rate[databit].data;
+    debug_where();
+    
+    int s_parity;
+    s_parity = get_active(parity);
+    debug_where();
+
+    int s_stopbits;
+    s_stopbits = get_active(stop_bits);
+    debug_where();
+
+    int s_software, s_hardware;
+    s_software = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lserial->software));
+    s_hardware = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lserial->hardware));
+    /* port baud_rate databit parity stopbit software_control hardware_control*/
+    snprintf(password, PASSWORD_LEN, "%s %d %d %d %d %d %d", 
+            s_port,
+            s_baud_rate,
+            s_databit,
+            s_parity,
+            s_stopbits,
+            s_software,
+            s_hardware);
+    strcpy(hostname, basename(s_port));
+    if (lqconnect->flag != LCRT_QCONNECT_SESSION_OPTION) {
+        if ((user = lcrtc_user_create()) == NULL) {
+            /* 
+             * FIXME: There is no more memory, how can 
+             * we handle this exception ?
+             */
+            return;
+        }
+
+        lcrt_user_find_unused_label(lwindow, hostname, name);
+
+        lcrtc_user_set_data(
+           user,
+           name,
+           hostname,
+           protocol,
+           NULL,
+           password,
+           gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
+           0,
+           TRUE
+        );
+        lcrtc_user_ref(user);
+        lcrt_user_add(&lwindow->u_config, user);
+        lcrt_window_set_current_user(lwindow, user);
+        if (lqconnect->flag == LCRT_QCONNECT_IN_TAB) {
+            lcrt_create_terminal(lwindow->w_notebook);
+        }
+    } else {
+        if ((user = lcrt_user_find_by_name(&lwindow->u_config, lqconnect->uname)) != NULL) {
+            lcrtc_user_set_data(
+               user,
+               lqconnect->uname,
+               hostname,
+               protocol,
+               NULL,
+               password,
+               gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
+               0,
+               TRUE
+            );
+        }
+    }
+    lcrtc_user_dump(user, __func__);
+    return user;
+#undef get_text
+#undef get_active
 }
 
 struct lcrt_protocol_callback lcrt_protocol_serial_callbacks = {
-    .protocol         = LCRT_PROTOCOL_SERIAL,
-    .contents_changed = lcrt_serial_contents_changed,
-    .connect_remote   = lcrt_serial_connect_remote,
-    .create_subbox    = lcrt_serial_create_subbox,
-    .create_session   = lcrt_serial_create_session,
+    .protocol   = LCRT_PROTOCOL_SERIAL,
+    .receive    = lcrt_serial_receive,
+    .connect    = lcrt_serial_connect,
+    .disconnect = lcrt_serial_disconnect,
+    .show       = lcrt_serial_show,
+    .create     = lcrt_serial_create,
+    .changed    = NULL,
 };
 

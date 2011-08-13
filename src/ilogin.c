@@ -10,7 +10,7 @@
  *
  * Description:  
  */
-#undef __LCRT_DEBUG__
+//#define __LCRT_DEBUG__
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -67,8 +67,6 @@ struct lcrt_login *lcrt_create_login(struct lcrt_terminal *parent, int again)
 
     lcrt_login_init_config(llogin);
     lcrt_login_load_config(llogin);
-
-    accel_group = gtk_accel_group_new ();
 
     dialog_login = gtk_dialog_new ();
     llogin->login = dialog_login;

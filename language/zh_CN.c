@@ -230,6 +230,13 @@ static struct lcrt_language_config iqconnect = {
          {"q_sstop_bits",                       "  停止位:"},
          {"q_sflow_control",                    "流控制"},
          {"q_shell",                            "  终端:"},
+         {"q_ptitle",                           "密码属性"},
+         {"q_pprompt",                          "修改密码"},
+         {"q_pstore_password",                  "  输入密码:"},
+         {"q_pconfirm_password",                "  确认密码:"},
+         {"p_pcancel",                          "取消"},
+         {"p_pok",                              "确定"},
+         {"p_ppw_unmatch",                      "密码不匹配!"},
     }
 };
 
@@ -335,7 +342,8 @@ static struct lcrt_language_config iterminal = {
         {"tm_connection_refused",               "连接失败，可能远端服务没有开启!"},
         {"tm_connection_failed",                "用户名或密码错误!"},
         {"tm_connection_prog_not_found",        "没有找到程序\"%s\", 请安装！"},
-        {"tm_connection_not_support",           "当前版本不支持！"}
+        {"tm_connection_not_support",           "当前版本不支持！"},
+        {"tm_serial_error",                     "无法打开 \"%s\",%s."},
     }
 };
 

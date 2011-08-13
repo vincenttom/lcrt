@@ -44,7 +44,6 @@ struct lcrt_terminal {
     pid_t child_pid;
     gboolean signal_connected;
     struct lcrtc_user *user;
-    struct lcrt_login *login;
     char lock_password[LCRT_PASSWORD_LEN + 1];
 
     GtkWidget *scrolledwindow;
@@ -55,17 +54,11 @@ struct lcrt_terminal {
     gboolean save_passwd;
     gboolean need_reset;
     gboolean locked;
-    int again;
-    int username_changed;
-    /* When we receive data from remote, we call this function to handle it */
-    void (*contents_changed)(struct lcrt_terminal *lterminal);
-    /* When we create a terminal, we should fork a child to connect with remote */
-    int (*connect_remote)(struct lcrt_terminal *lterminal);
-
+    void *private_data; /**< the pointer to point to private data of each protocol */
+    const struct lcrt_protocol_callback *ops; /**< callbacks for each protocl  */
 };
 
 int lcrt_create_terminal(struct lcrt_notebook *parent);
 void lcrt_destroy_terminal(struct lcrt_terminal *lterminal);
-int lcrt_terminal_fork(struct lcrt_terminal *lterminal);
 int lcrt_terminal_set_status(struct lcrt_terminal *lterminal, char *label_name, lcrt_terminal_status_t status);
 #endif

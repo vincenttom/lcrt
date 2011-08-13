@@ -48,7 +48,9 @@ void lcrt_login_on_okbutton_clicked(GtkButton *button, gpointer user_data)
 void lcrt_login_on_username_changed(GtkEditable *editable, gpointer user_data)
 {
     struct lcrt_login *llogin = (struct lcrt_login *)user_data;
-    llogin->parent->username_changed = TRUE;
+    struct lcrt_terminal *lterminal = llogin->parent;
+    if (lterminal->ops && lterminal->ops->changed)
+        lterminal->ops->changed(lterminal, TRUE);
     debug_where();
 }
 

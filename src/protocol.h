@@ -44,32 +44,7 @@ typedef enum {
     "Rlogin", \
     "Serial", \
     "Shell"
-#if 0
-#define LCRT_PROTOCOL_CONTENTS_CHANGED_CALLBACKS \
-    lcrt_terminal_ssh_contents_changed, \
-    lcrt_terminal_ssh_contents_changed, \
-    lcrt_terminal_telnet_contents_changed, \
-    lcrt_terminal_telnet_contents_changed, \
-    lcrt_terminal_rlogin_contents_changed, \
-    lcrt_terminal_serial_contents_changed, \
-    lcrt_terminal_shell_contents_changed
-#define LCRT_PROTOCOL_CREATE_SUBBOX_CALLBACKS \
-    lcrt_qconnect_create_ssh_subbox, \
-    lcrt_qconnect_create_ssh_subbox, \
-    lcrt_qconnect_create_telnet_subbox, \
-    lcrt_qconnect_create_telnet_subbox, \
-    lcrt_qconnect_create_rlogin_subbox, \
-    lcrt_qconnect_create_serial_subbox, \
-    lcrt_qconnect_create_shell_subbox
-#define LCRT_PROTOCOL_ON_BUTTON_CONNECT_CLICKED_CALLBACKS \
-    lcrt_qconnect_ssh_on_button_connect_clicked, \
-    lcrt_qconnect_ssh_on_button_connect_clicked, \
-    lcrt_qconnect_telnet_on_button_connect_clicked, \
-    lcrt_qconnect_telnet_on_button_connect_clicked, \
-    lcrt_qconnect_rlogin_on_button_connect_clicked, \
-    lcrt_qconnect_serial_on_button_connect_clicked, \
-    lcrt_qconnect_shell_on_button_connect_clicked
-#endif
+
 struct lcrt_qconnect;
 struct lcrt_terminal;
 
@@ -77,30 +52,56 @@ struct lcrt_terminal;
  * This structure is used to support more protocol
  */
 struct lcrt_protocol_callback {
+    /** the protocol mark */
     lcrt_protocol_t protocol;
-    /* 
-     * When a terminal receive data from remote, it will call this functions
-     * to handle.
-     * NOTE: The order of this functions must be same wtih lcrt_protocol_t 
+    /** 
+     * @brief When a terminal receive data from remote, it will call 
+     *        this functions to handle.
+     * NOTE: The order of this functions must be same wtih lcrt_protocol_t
+     * @param lterminal the terminal which receive data from remote.
      */
-    void (*contents_changed)(struct lcrt_terminal *lterminal);
+    void (*receive)(struct lcrt_terminal *lterminal);
 
-    /* When we create a terminal, we should fork a child to connect with remote */
-    int (*connect_remote)(struct lcrt_terminal *lterminal);
-
-    /*
-     * When we open the Quick connect dialog, we should show different
-     * options for each protocol, so we use these callbacks to create 
-     * sub box in quick connect dialog.
+    /** @brief When we create a terminal, we should fork a child to connect 
+     *         with remote 
+     *  @param lterminal the terminal which will be connected with remote.
+     *  @return return val.
+     *  - < 0 an error code
+     *  - = 0 success
      */
-    void (*create_subbox)(struct lcrt_qconnect *lqconnect);
+    int (*connect)(struct lcrt_terminal *lterminal);
 
-    /*
-     * When you click the connect button in quick connect dialog, we
-     * should create a terminal to connect with remote,each protocol
-     * has different method.
+    /** 
+     * @brief disconnect with remote, each protocol use connect method 
+     *        to connect with remote, use disconnect to close from 
+     *        remote.
+     * @param lterminal the terminal descriptor which will be disconnected.
      */
-    struct lcrtc_user *(*create_session)(struct lcrt_qconnect *lqconnect);
+    void (*disconnect)(struct lcrt_terminal *lterminal);
+    /**
+     * @brief When we open the Quick connect dialog, we should show different
+     *        options for each protocol, so we use these callbacks to create 
+     *        sub box in quick connect dialog.
+     * @param lqconnet the quick connect dialog descriptor
+     */
+    void (*show)(struct lcrt_qconnect *lqconnect);
+
+    /**
+     * @brief When you click the connect button in quick connect dialog, we
+     *        should create a terminal to connect with remote,each protocol
+     *        has different method.
+     * @param lqconnect contain all data which is used to create s session.
+     * @return a user information data structure
+     */
+    struct lcrtc_user *(*create)(struct lcrt_qconnect *lqconnect);
+    /**
+     * @brief For some protocol,like ssh, when username is changed,we should kill 
+     *        the previous connection and fork connect again, we use this callback
+     *        to mark whether the username is changed.
+     * @param lterminal the terminal which usernam changed.
+     * @param change whether the username is changed.
+     */
+    void (*changed)(struct lcrt_terminal *lterminal, int change);
 };
 
 enum {

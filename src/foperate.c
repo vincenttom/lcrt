@@ -1,5 +1,5 @@
 /**
- * @file    common.c
+ * @file    foperate.c
  * @brief   file operate functions
  * @author  niu.tao
  * @version v1.0

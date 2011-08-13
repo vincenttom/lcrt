@@ -28,3 +28,7 @@ src/lcrt
 stamp-h1
 
 autom4te.cache
+
+tmp
+*.swp
+cscope.out

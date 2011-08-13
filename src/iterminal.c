@@ -53,7 +53,6 @@ int lcrt_create_terminal(struct lcrt_notebook *parent)
 
     //GtkAccelGroup *accel_group = parent->parent->w_accel;
     struct lcrt_settings *lsettings = parent->parent->w_settings;
-    struct lcrt_protocol_callback *callback;
 
     struct lcrt_terminal *lterminal;
     char *err;
@@ -74,9 +73,7 @@ int lcrt_create_terminal(struct lcrt_notebook *parent)
     terminal = vte_terminal_new();
     lterminal->terminal = VTE_TERMINAL(terminal);
     debug_print("create VTETerminal = %p\n", lterminal->terminal);
-    callback = lcrt_protocol_get_callback(lterminal->user->protocol);
-    lterminal->contents_changed = callback->contents_changed;
-    lterminal->connect_remote = callback->connect_remote;
+    lterminal->ops = lcrt_protocol_get_callback(lterminal->user->protocol);
 
     scrolledwindow = gtk_scrolled_window_new(NULL, vte_terminal_get_adjustment(VTE_TERMINAL(terminal)));
     lterminal->scrolledwindow = scrolledwindow;
@@ -136,8 +133,8 @@ int lcrt_create_terminal(struct lcrt_notebook *parent)
     GTK_WIDGET_SET_FLAGS(terminal, GTK_CAN_FOCUS);
     gtk_container_add(GTK_CONTAINER(scrolledwindow), terminal);
     //lcrt_terminal_fork(lterminal);
-    if (lterminal->connect_remote)
-        lterminal->connect_remote(lterminal);
+    if (lterminal->ops && lterminal->ops->connect)
+        lterminal->ops->connect(lterminal);
     debug_print("terminal = %p, font = %s\n", lterminal->terminal, lsettings->lt_t_font);
     vte_terminal_set_font_from_string(lterminal->terminal, lsettings->lt_t_font);
     debug_where();
@@ -150,11 +147,6 @@ int lcrt_create_terminal(struct lcrt_notebook *parent)
     vte_terminal_set_background_image_file(VTE_TERMINAL(lterminal->terminal), lsettings->lt_t_backimage);
     vte_terminal_set_audible_bell(VTE_TERMINAL(lterminal->terminal), lsettings->lt_t_bell);
 
-
-    g_signal_connect_after(GTK_OBJECT(terminal), 
-                     "commit", 
-                     G_CALLBACK(lcrt_terminal_on_commit), 
-                     lterminal);
     g_signal_connect(GTK_OBJECT(terminal), 
                      "child-exited", 
                      G_CALLBACK(lcrt_terminal_on_child_exited), 
@@ -191,6 +183,7 @@ int lcrt_terminal_set_status(struct lcrt_terminal *lterminal, char *label_name, 
     case LCRT_TERMINAL_DISCONNECT:
     case LCRT_TERMINAL_CHILD_EXIT:
         sprintf(buf, "<span foreground=\"#CD0000\">%s</span>", title);
+        vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
         sensitive = TRUE;
         break;
     case LCRT_TERMINAL_CONNECTED:
@@ -213,87 +206,13 @@ int lcrt_terminal_set_status(struct lcrt_terminal *lterminal, char *label_name, 
 out:
     return LCRTE_OK;
 }
-int lcrt_terminal_fork(struct lcrt_terminal *lterminal)
-{
-    lcrt_protocol_t protocol;
-    struct lcrtc_user *user;
-    char *argv[5], *work_dir;
-    char hostname[256], port[32];
-    char *dep_prog[] = {LCRT_DEP_PROG};
-    int dep = -1;
-    char tmp[32];
-
-    if (lterminal == NULL)
-       return EINVAL;
-
-    user = lterminal->user;
-    protocol = user->protocol;
-    switch (protocol) {
-    case LCRT_PROTOCOL_SSH1:
-    case LCRT_PROTOCOL_SSH2:
-        argv[0] = dep_prog[LCRT_DEP_SSH];
-        argv[1] = protocol == LCRT_PROTOCOL_SSH2 ? "-2" : "-1";
-        if (strlen(user->username) == 0) {
-            strcpy(hostname, user->hostname);
-        } else {
-            sprintf(hostname, "%s@%s", user->username, user->hostname);
-        }
-        sprintf(port, "-p %d", user->port);
-        argv[1] = hostname;
-        argv[2] = port;
-        argv[3] = NULL;
-        work_dir = ".";
-        dep = LCRT_DEP_SSH;
-        break;
-    case LCRT_PROTOCOL_TELNET_SSL:
-    case LCRT_PROTOCOL_TELNET:
-    case LCRT_PROTOCOL_RLOGIN:
-        argv[0] = dep_prog[LCRT_DEP_TELNET];
-        strcpy(hostname, user->hostname);
-        argv[1] = hostname;
-
-        sprintf(port, "%d", user->port);
-        argv[2] = port;
-        argv[3] = NULL;
-        work_dir = ".";
-        dep = LCRT_DEP_TELNET;
-        break;
-    case LCRT_PROTOCOL_SHELL:
-        argv[0] = dep_prog[LCRT_DEP_SHELL];
-        sprintf(tmp, "/bin/%s", argv[0]);
-        if (access(tmp, F_OK | X_OK) != 0)
-            argv[0] = "sh";
-        argv[1] = NULL;
-        work_dir = getenv("HOME");
-        dep = LCRT_DEP_SHELL;
-        break;
-    default:
-        lcrt_message_info(lterminal->parent->parent->window, 
-                           lterminal->parent->config.value[LCRT_TM_CONNECTION_NOT_SUPPORT]);
-        return LCRTE_NOT_SUPPORT;
-    }
-    if (lcrt_exec_check(protocol) != 0) {
-        lcrt_message_info(lterminal->parent->parent->window, 
-                          lterminal->parent->config.value[LCRT_TM_CONNECTION_PROG_NOT_FOUND],
-                          dep_prog[dep]);
-        return LCRTE_NOT_FOUND;
-    }
-
-    lterminal->child_pid  = vte_terminal_fork_command(VTE_TERMINAL(lterminal->terminal), 
-                argv[0], argv, NULL , work_dir, FALSE, FALSE, FALSE);
-    debug_print("child_pid = %d\n", lterminal->child_pid);
-    lcrt_statusbar_set_user(lterminal->parent->parent->w_statusbar, lterminal->user);
-    debug_where();
-    return LCRTE_OK;
-}
 void lcrt_destroy_terminal(struct lcrt_terminal *lterminal)
 {
     if (lterminal == NULL)
         return;
     debug_where();
-    if (lterminal->connected) {
-        vte_terminal_feed_child(lterminal->terminal, 
-                LCRT_TERMINAL_EXIT_CMD, strlen(LCRT_TERMINAL_EXIT_CMD));
+    if (lterminal->ops && lterminal->ops->disconnect) {
+        lterminal->ops->disconnect(lterminal);
     }
 
     debug_where();

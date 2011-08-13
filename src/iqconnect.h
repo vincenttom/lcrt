@@ -25,15 +25,19 @@ enum {
     LCRT_Q_CONNECT,
     LCRT_Q_SESSION_OPTION,
     LCRT_Q_LB_PROTOCOL,
+    /* for ssh,telnet,rlogin */
     LCRT_Q_LB_HOSTNAME,
     LCRT_Q_LB_USERNAME,
     LCRT_Q_LB_FIREWALL,
     LCRT_Q_LB_PORT,
     LCRT_Q_LB_FRAME,
+    /* for ssh2,ssh1 */
     LCRT_Q_CB_PASSWD,
+    /* for ssh2 */
     LCRT_Q_CB_PUBLICKEY,
     LCRT_Q_CB_KEYBOARD,
     LCRT_Q_CB_GSSAPI,
+    /* for ssh1 */
     LCRT_Q_CB_RSA,
     LCRT_Q_CB_TIS,
     LCRT_Q_BT_PROPERTIES,
@@ -45,6 +49,7 @@ enum {
     LCRT_Q_BT_OK,
     LCRT_Q_BT_CANCEL,
     LCRT_Q_ERR_MSG,
+    /* for protocol serial */
     LCRT_Q_SPORT,
     LCRT_Q_SBAUD_RATE,
     LCRT_Q_SDATA_BITS,
@@ -52,6 +57,14 @@ enum {
     LCRT_Q_SSTOP_BITS,
     LCRT_Q_SFLOW_CONTROL,
     LCRT_Q_SHELL,
+    /* for authentication password */
+    LCRT_Q_PTITLE,
+    LCRT_Q_PPROMPT,
+    LCRT_Q_PSTORE_PASSWORD,
+    LCRT_Q_PCONFIRM_PASSWORD,
+    LCRT_Q_PCANCEL,
+    LCRT_Q_POK,
+    LCRT_Q_PPW_UNMATCH, /* password can not match */
     LCRT_Q_NUMBER
 };
 #define LCRT_Q_NAME \
@@ -84,7 +97,14 @@ enum {
     "q_sparity", \
     "q_sstop_bits", \
     "q_sflow_control", \
-    "q_shell"
+    "q_shell", \
+    "q_ptitle", \
+    "q_pprompt", \
+    "q_pstore_password", \
+    "q_pconfirm_password", \
+    "q_pcancel", \
+    "q_pok", \
+    "q_ppw_unmatch", \
 
 #define LCRT_Q_VALUE \
     "Quick connect", \
@@ -110,13 +130,22 @@ enum {
     "OK", \
     "Cancel", \
     "There is no memory to create window" , \
-    "  Part:", \
+    /* for protocol serial */ \
+    "  Port:", \
     "  Baud rate:", \
     "  Data bits:", \
     "  Parity:", \
     "  Stop bits:", \
     "Flow control", \
-    "  Shell:"
+    "  Shell:", \
+    /* for authentication password */ \
+    "Password Properties", \
+    "Change password", \
+    "  Store password:", \
+    "  Confirm password:", \
+    "Cancel", \
+    "OK", \
+    "Password can not match!", \
 
 #define LCRT_Q_SHORTCUT \
     {0, 0}
@@ -145,61 +174,6 @@ struct lcrt_qconnect {
 
     lcrt_protocol_t nproto;
 
-    union {
-        struct {
-            GtkWidget *hostname;
-            GtkWidget *username;
-            GtkWidget *firewall;
-            GtkWidget *port;
-            GtkWidget *passwd;
-            GtkWidget *publickey;
-            GtkWidget *keyboard;
-            GtkWidget *gssapi;
-            GtkWidget *rsa;
-            GtkWidget *tis;
-            GtkListStore *authliststore;
-            GtkWidget *authtreeview;
-			GtkWidget *properties;
-        } ssh;
-#define pssh q_proto.ssh
-        struct {
-            GtkWidget *hostname;
-            GtkWidget *username;
-            GtkWidget *firewall;
-            GtkWidget *port;
-        } telnet;
-#define ptelnet q_proto.telnet
-        struct {
-            GtkWidget *hostname;
-            GtkWidget *username;
-        } rlogin;
-#define prlogin q_proto.rlogin    
-        struct {
-            GtkWidget *port;
-            GtkWidget *baud_rate;
-            GtkWidget *data_bits;
-            GtkWidget *parity;
-            GtkWidget *stop_bits;
-            GtkWidget *dir_dsr;
-            GtkWidget *rts_cts;
-            GtkWidget *xon_xoff;
-        } serial;
-#define pserial q_proto.serial
-    
-        struct {
-            GtkWidget *hostname;
-            GtkWidget *username;
-            GtkWidget *firewall;
-            GtkWidget *port;
-        } raw;
-#define praw q_proto.raw
-
-        struct {
-            GtkWidget *shell;
-        } shell;
-#define pshell q_proto.shell
-
-    } q_proto;
     GtkWidget *q_et_default_command;
     GtkWidget *q_cb_show_qconnect;
     GtkWidget *q_cb_save_session;
@@ -210,8 +184,9 @@ struct lcrt_qconnect {
     struct lcrtc_qconnect config;
     const char *(*get_db)(struct lcrt_qconnect *lqconnect);
     const char *(*get_tb)(struct lcrt_qconnect *lqconnect);
-    struct lcrtc_user *(*create_session)(struct lcrt_qconnect *lqconnect);
-    void (*create_subbox)(struct lcrt_qconnect *lqconnect);
+
+    void *private_data; /**< the pointer to point to private data of each protocol */
+    const struct lcrt_protocol_callback *ops; /**< callbacks for each protocl  */
 };
 
 int lcrt_create_qconnect(

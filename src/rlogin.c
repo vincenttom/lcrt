@@ -12,21 +12,32 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include "iterminal.h"
 #include "iqconnect.h"
 #include "cqconnect.h"
 #include "user.h"
 #include "debug.h"
+#include "rlogin.h"
 
-static void lcrt_rlogin_contents_changed(struct lcrt_terminal *lterminal)
+struct lcrt_rlogin_if {
+    GtkWidget *hostname;
+    GtkWidget *username;
+};
+
+static void lcrt_rlogin_receive(struct lcrt_terminal *lterminal)
 {
 }
 
-static int lcrt_rlogin_connect_remote(struct lcrt_terminal *lterminal)
+static int lcrt_rlogin_connect(struct lcrt_terminal *lterminal)
 {
 }
 
-static void lcrt_rlogin_create_subbox(struct lcrt_qconnect *lqconnect)
+static void lcrt_rlogin_disconnect(struct lcrt_terminal *lterminal)
+{
+}
+
+static void lcrt_rlogin_show(struct lcrt_qconnect *lqconnect)
 {
     GtkWidget *vbox;
     GtkWidget *vbox_spec;
@@ -38,6 +49,10 @@ static void lcrt_rlogin_create_subbox(struct lcrt_qconnect *lqconnect)
     GtkWidget *entry_username;
     GtkWidget *hbox3;
     struct lcrt_window *parent;
+    static struct lcrt_rlogin_if slrlogin, *lrlogin = &slrlogin;
+
+    memset(lrlogin, 0, sizeof(struct lcrt_rlogin_if));
+    lqconnect->private_data = lrlogin;
 
     parent = lqconnect->parent;
 
@@ -62,7 +77,7 @@ static void lcrt_rlogin_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_hostname), 0, 0.5);
 
     entry_hostname = gtk_entry_new_with_max_length(HOSTNAME_LEN);
-    lqconnect->prlogin.hostname = entry_hostname;
+    lrlogin->hostname = entry_hostname;
     gtk_widget_show (entry_hostname);
     gtk_box_pack_start (GTK_BOX (hbox2), entry_hostname, FALSE, TRUE, 0);
     gtk_widget_set_size_request (entry_hostname, 220, 30);
@@ -83,7 +98,7 @@ static void lcrt_rlogin_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_username), 0, 0.5);
 
     entry_username = gtk_entry_new_with_max_length(USERNAME_LEN);
-    lqconnect->prlogin.username = entry_username;
+    lrlogin->username = entry_username;
     gtk_widget_show (entry_username);
     gtk_box_pack_start (GTK_BOX (hbox4), entry_username, FALSE, TRUE, 0);
     gtk_widget_set_size_request (entry_username, 220, 30);
@@ -97,26 +112,28 @@ static void lcrt_rlogin_create_subbox(struct lcrt_qconnect *lqconnect)
     if (lqconnect->flag == LCRT_QCONNECT_SESSION_OPTION) {
         struct lcrtc_user *user;
         if ((user = lcrt_user_find_by_name(&parent->u_config, lqconnect->uname)) != NULL) {
-            gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lqconnect->prlogin.hostname);
-            gtk_entry_set_text(GTK_ENTRY(lqconnect->prlogin.hostname), user->hostname);
-            gtk_entry_set_text(GTK_ENTRY(lqconnect->prlogin.username), user->username);
+            gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lrlogin->hostname);
+            gtk_entry_set_text(GTK_ENTRY(lrlogin->hostname), user->hostname);
+            gtk_entry_set_text(GTK_ENTRY(lrlogin->username), user->username);
             gtk_entry_set_text(GTK_ENTRY(lqconnect->q_et_default_command), user->command);
         }
     } else {
-        gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lqconnect->prlogin.hostname);
+        gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lrlogin->hostname);
     	gtk_widget_set_sensitive(lqconnect->q_bt_connect, FALSE);
     }
 }
 
-static struct lcrtc_user *lcrt_rlogin_create_session(struct lcrt_qconnect *lqconnect)
+static struct lcrtc_user *lcrt_rlogin_create(struct lcrt_qconnect *lqconnect)
 {
 }
 
 struct lcrt_protocol_callback lcrt_protocol_rlogin_callbacks = {
-    .protocol         = LCRT_PROTOCOL_RLOGIN,
-    .contents_changed = lcrt_rlogin_contents_changed,
-    .connect_remote   = lcrt_rlogin_connect_remote,
-    .create_subbox    = lcrt_rlogin_create_subbox,
-    .create_session   = lcrt_rlogin_create_session,
+    .protocol   = LCRT_PROTOCOL_RLOGIN,
+    .receive    = lcrt_rlogin_receive,
+    .connect    = lcrt_rlogin_connect,
+    .disconnect = lcrt_rlogin_disconnect,
+    .show       = lcrt_rlogin_show,
+    .create     = lcrt_rlogin_create,
+    .changed    = NULL,
 };
 

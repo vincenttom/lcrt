@@ -10,9 +10,10 @@
  *
  * Description:  
  */
-
+//#define __LCRT_DEBUG__
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "iterminal.h"
 #include "iwindow.h"
 #include "user.h"
@@ -21,10 +22,24 @@
 #include "iterminal.h"
 #include "ilogin.h"
 #include "debug.h"
-static void lcrt_telnet_contents_changed(struct lcrt_terminal *lterminal)
+#include "telnet.h"
+
+struct lcrt_telnet_if {
+    GtkWidget *hostname;
+    GtkWidget *username;
+    GtkWidget *firewall;
+    GtkWidget *port;
+};
+
+struct lcrt_telnet_tm {
+    struct lcrt_login *login;
+};
+
+static void lcrt_telnet_receive(struct lcrt_terminal *lterminal)
 {
     struct lcrt_window *lwindow = lterminal->parent->parent;
     VteTerminal *vteterminal = lterminal->terminal;
+    struct lcrt_telnet_tm *ttelnet = (struct lcrt_telnet_tm *)lterminal->private_data;
     struct lcrtc_user *user = lterminal->user;
     char *text;
 
@@ -33,24 +48,30 @@ static void lcrt_telnet_contents_changed(struct lcrt_terminal *lterminal)
         debug_print("text null\n");
         return;
     }
-
-    if (strstr(text, "Connection refused") != NULL ||
-        strstr(text, "Connection closed") != NULL) {
+#if 1
+    debug_print("++++++++++++++++++++++++CONTENTS++++++++++++++++++++++++\n");
+    debug_print("%s", text);
+    debug_print("++++++++++++++++++++++++CONTENTS++++++++++++++++++++++++\n");
+#endif
+    if (strstr(text, "Connection refused") != NULL) {
         lcrt_message_error(lwindow->window, 
                            lcrt_terminal_get_config(lterminal, LCRT_TM_CONNECTION_REFUSED));
+        vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
+        return;
+    }
+    if (strstr(text, "Connection closed") != NULL) {
+        vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
         return;
     }
     if (strstr(text, "Login incorrect") != NULL) {
         vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
-        struct lcrt_login *login = lcrt_create_login(lterminal, TRUE);
-        lterminal->login = login;
+        ttelnet->login = lcrt_create_login(lterminal, TRUE);
     }
     if (strstr(text, "login:") != NULL && 
         (lterminal->connected & LCRT_TERMINAL_SEND_USERNAME) == 0) {
         vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
         if (strlen(user->username) == 0) {
-            struct lcrt_login *login = lcrt_create_login(lterminal, FALSE);
-            lterminal->login = login;
+            ttelnet->login = lcrt_create_login(lterminal, FALSE);
             debug_where();
         }
         debug_where();
@@ -65,7 +86,7 @@ static void lcrt_telnet_contents_changed(struct lcrt_terminal *lterminal)
         vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
         if (strlen(user->password) == 0) {
             struct lcrt_login *login = lcrt_create_login(lterminal, FALSE);
-            lterminal->login = login;
+            ttelnet->login = login;
             debug_where();
         }
         debug_where();
@@ -80,7 +101,7 @@ static void lcrt_telnet_contents_changed(struct lcrt_terminal *lterminal)
         lcrt_terminal_set_connected_status(lterminal);
 }
 
-static int lcrt_telnet_connect_remote(struct lcrt_terminal *lterminal)
+static int lcrt_telnet_connect(struct lcrt_terminal *lterminal)
 {
     lcrt_protocol_t protocol;
     struct lcrtc_user *user;
@@ -89,10 +110,15 @@ static int lcrt_telnet_connect_remote(struct lcrt_terminal *lterminal)
     char *dep_prog[] = {LCRT_DEP_PROG};
     int dep = -1;
     char tmp[32];
+    struct lcrt_telnet_tm *ttelnet;
 
     if (lterminal == NULL)
        return EINVAL;
 
+    ttelnet = (struct lcrt_telnet_tm *)calloc(1, sizeof(struct lcrt_telnet_tm));
+    if (ttelnet == NULL)
+        return -ENOMEM;
+    lterminal->private_data = ttelnet;
     user = lterminal->user;
     argv[0] = dep_prog[LCRT_DEP_TELNET];
     strcpy(hostname, user->hostname);
@@ -118,7 +144,21 @@ static int lcrt_telnet_connect_remote(struct lcrt_terminal *lterminal)
     return LCRTE_OK;
 
 }
-static void lcrt_telnet_create_subbox(struct lcrt_qconnect *lqconnect)
+void lcrt_telnet_disconnect(struct lcrt_terminal *lterminal)
+{
+    if (lterminal->connected) {
+        vte_terminal_feed_child(lterminal->terminal, 
+                            LCRT_TERMINAL_EXIT_CMD, 
+                            strlen(LCRT_TERMINAL_EXIT_CMD));
+        lcrt_terminal_set_status(lterminal, NULL, LCRT_TERMINAL_DISCONNECT);
+    }
+    if (lterminal->private_data) {
+        free(lterminal->private_data);
+        lterminal->private_data = NULL;
+    }
+}
+
+static void lcrt_telnet_show(struct lcrt_qconnect *lqconnect)
 {
     GtkWidget *vbox;
     GtkWidget *vbox_spec;
@@ -138,6 +178,11 @@ static void lcrt_telnet_create_subbox(struct lcrt_qconnect *lqconnect)
     int i;
     struct lcrt_window *parent;
     const char *str_port[LCRT_PROTOCOL_NUMBER] = {LCRT_PROTOCOL_PORT};
+    static struct lcrt_telnet_if sltelnet, *ltelnet = &sltelnet;
+
+    memset(ltelnet, 0, sizeof(struct lcrt_telnet_if));
+    lqconnect->private_data = ltelnet;
+
 
     parent = lqconnect->parent;
 
@@ -162,7 +207,7 @@ static void lcrt_telnet_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_hostname), 0, 0.5);
 
     entry_hostname = gtk_entry_new_with_max_length(HOSTNAME_LEN);
-    lqconnect->ptelnet.hostname = entry_hostname;
+    ltelnet->hostname = entry_hostname;
     gtk_widget_show (entry_hostname);
     gtk_box_pack_start (GTK_BOX (hbox2), entry_hostname, FALSE, TRUE, 0);
     gtk_widget_set_size_request (entry_hostname, 220, 30);
@@ -183,7 +228,7 @@ static void lcrt_telnet_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_username), 0, 0.5);
 
     entry_username = gtk_entry_new_with_max_length(USERNAME_LEN);
-    lqconnect->ptelnet.username = entry_username;
+    ltelnet->username = entry_username;
     gtk_widget_show (entry_username);
     gtk_box_pack_start (GTK_BOX (hbox4), entry_username, FALSE, TRUE, 0);
     gtk_widget_set_size_request (entry_username, 220, 30);
@@ -201,7 +246,7 @@ static void lcrt_telnet_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_firewall), 0, 0.5);
 
     combobox_firewall = gtk_combo_box_entry_new_text ();
-    lqconnect->ptelnet.firewall = combobox_firewall;
+    ltelnet->firewall = combobox_firewall;
     gtk_widget_show (combobox_firewall);
     gtk_box_pack_start (GTK_BOX (hbox3), combobox_firewall, FALSE, TRUE, 0);
     gtk_widget_set_size_request (combobox_firewall, 110, 25);
@@ -219,7 +264,7 @@ static void lcrt_telnet_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_port), 0, 0.49);
 
     entry_port = gtk_entry_new ();
-    lqconnect->ptelnet.port = entry_port;
+    ltelnet->port = entry_port;
     gtk_widget_show (entry_port);
     gtk_box_pack_start (GTK_BOX (hbox3), entry_port, FALSE, TRUE, 0);
     gtk_widget_set_size_request (entry_port, 60, 30);
@@ -236,31 +281,32 @@ static void lcrt_telnet_create_subbox(struct lcrt_qconnect *lqconnect)
         struct lcrtc_user *user;
         char tmp[32];
         if ((user = lcrt_user_find_by_name(&parent->u_config, lqconnect->uname)) != NULL) {
-            gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lqconnect->ptelnet.hostname);
-            gtk_entry_set_text(GTK_ENTRY(lqconnect->ptelnet.hostname), user->hostname);
-            gtk_entry_set_text(GTK_ENTRY(lqconnect->ptelnet.username), user->username);
+            gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), ltelnet->hostname);
+            gtk_entry_set_text(GTK_ENTRY(ltelnet->hostname), user->hostname);
+            gtk_entry_set_text(GTK_ENTRY(ltelnet->username), user->username);
             sprintf(tmp, "%d", user->port);
-            gtk_entry_set_text(GTK_ENTRY(lqconnect->ptelnet.port), tmp);
+            gtk_entry_set_text(GTK_ENTRY(ltelnet->port), tmp);
             gtk_entry_set_text(GTK_ENTRY(lqconnect->q_et_default_command), user->command);
         }
     } else {
-        gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lqconnect->ptelnet.hostname);
+        gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), ltelnet->hostname);
     	gtk_widget_set_sensitive(lqconnect->q_bt_connect, FALSE);
     }
-    gtk_entry_set_text(GTK_ENTRY(lqconnect->ptelnet.port), str_port[lqconnect->nproto]);
-    gtk_entry_set_editable(GTK_ENTRY(lqconnect->ptelnet.port), FALSE);
+    gtk_entry_set_text(GTK_ENTRY(ltelnet->port), str_port[lqconnect->nproto]);
+    gtk_entry_set_editable(GTK_ENTRY(ltelnet->port), FALSE);
 }
 
-static struct lcrtc_user *lcrt_telnet_create_session(struct lcrt_qconnect *lqconnect)
+static struct lcrtc_user *lcrt_telnet_create(struct lcrt_qconnect *lqconnect)
 {
     lcrt_protocol_t protocol = lqconnect->nproto;
     struct lcrt_window *lwindow = lqconnect->parent;
+    struct lcrt_telnet_if *ltelnet = (struct lcrt_telnet_if *)lqconnect->private_data;
     const char *hostname;
     struct lcrtc_user *user;
     int i = 1;
     char name[HOSTNAME_LEN + 256];
     debug_where();
-    hostname = gtk_entry_get_text(GTK_ENTRY(lqconnect->ptelnet.hostname));
+    hostname = gtk_entry_get_text(GTK_ENTRY(ltelnet->hostname));
     
     strcpy(name, hostname);
 
@@ -281,10 +327,10 @@ static struct lcrtc_user *lcrt_telnet_create_session(struct lcrt_qconnect *lqcon
            name,
            hostname,
            protocol,
-           gtk_entry_get_text(GTK_ENTRY(lqconnect->ptelnet.username)),
+           gtk_entry_get_text(GTK_ENTRY(ltelnet->username)),
            NULL,
            gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
-           atoi(gtk_entry_get_text(GTK_ENTRY(lqconnect->ptelnet.port))),
+           atoi(gtk_entry_get_text(GTK_ENTRY(ltelnet->port))),
            TRUE
         );
         lcrtc_user_ref(user);
@@ -300,10 +346,10 @@ static struct lcrtc_user *lcrt_telnet_create_session(struct lcrt_qconnect *lqcon
                lqconnect->uname,
                hostname,
                protocol,
-               gtk_entry_get_text(GTK_ENTRY(lqconnect->ptelnet.username)),
+               gtk_entry_get_text(GTK_ENTRY(ltelnet->username)),
                NULL,
                gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
-               atoi(gtk_entry_get_text(GTK_ENTRY(lqconnect->ptelnet.port))),
+               atoi(gtk_entry_get_text(GTK_ENTRY(ltelnet->port))),
                TRUE
             );
         }
@@ -314,19 +360,23 @@ static struct lcrtc_user *lcrt_telnet_create_session(struct lcrt_qconnect *lqcon
 }
 
 struct lcrt_protocol_callback lcrt_protocol_telnet_callbacks = {
-    .protocol         = LCRT_PROTOCOL_TELNET,
-    .contents_changed = lcrt_telnet_contents_changed,
-    .connect_remote   = lcrt_telnet_connect_remote,
-    .create_subbox    = lcrt_telnet_create_subbox,
-    .create_session   = lcrt_telnet_create_session,
+    .protocol   = LCRT_PROTOCOL_TELNET,
+    .receive    = lcrt_telnet_receive,
+    .connect    = lcrt_telnet_connect,
+    .disconnect = lcrt_telnet_disconnect,
+    .show       = lcrt_telnet_show,
+    .create     = lcrt_telnet_create,
+    .changed    = NULL
 };
 
 struct lcrt_protocol_callback lcrt_protocol_telnet_ssl_callbacks = {
-    .protocol         = LCRT_PROTOCOL_TELNET_SSL,
-    .contents_changed = lcrt_telnet_contents_changed,
-    .connect_remote   = lcrt_telnet_connect_remote,
-    .create_subbox    = lcrt_telnet_create_subbox,
-    .create_session   = lcrt_telnet_create_session,
+    .protocol   = LCRT_PROTOCOL_TELNET_SSL,
+    .receive    = lcrt_telnet_receive,
+    .connect    = lcrt_telnet_connect,
+    .disconnect = lcrt_telnet_disconnect,
+    .show       = lcrt_telnet_show,
+    .create     = lcrt_telnet_create,
+    .changed    = NULL
 };
 
 #if 0

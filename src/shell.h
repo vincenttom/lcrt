@@ -1,6 +1,7 @@
 #ifndef __LCRT_SHELL_H__
 #define __LCRT_SHELL_H__
 
+#include <gtk/gtk.h>
 #include "protocol.h"
 
 #define LCRT_SHELL_SUPPORT_NUMBER 4

@@ -10,16 +10,49 @@
  *
  * Description:  
  */
-#define __LCRT_DEBUG__
+//#define __LCRT_DEBUG__
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "iterminal.h"
 #include "iqconnect.h"
 #include "cqconnect.h"
 #include "ilogin.h"
 #include "debug.h"
 #include "ssh.h"
+/* authentication for ssh */
+enum {
+    LCRT_AUTH_PASSWD = 0,
+    LCRT_AUTH_PUBLICKEY,
+    LCRT_AUTH_KEYBOARD,
+    LCRT_AUTH_GSSAPI,
+    LCRT_AUTH_RSA,
+    LCRT_AUTH_TIS,
+    LCRT_AUTH_NUMBER
+};
+struct lcrt_ssh_if {
+    GtkWidget *hostname;
+    GtkWidget *username;
+    GtkWidget *firewall;
+    GtkWidget *port;
+    GtkWidget *passwd;
+    GtkWidget *publickey;
+    GtkWidget *keyboard;
+    GtkWidget *gssapi;
+    GtkWidget *rsa;
+    GtkWidget *tis;
+    GtkListStore *authliststore;
+    GtkWidget *authtreeview;
+    GtkWidget *properties;
+    GtkWidget *ext[5];
+};
 
+struct lcrt_ssh_tm {
+    int again; /**<  the counter of try again to connect with remote */
+    int username_changed; /**< the flag to mark user change the username */
+    struct lcrt_login *login; /**<  when create a new session, user should
+                                use login dialog to enter username and password */
+};
 static void lcrt_authentication_passwd_callback(struct lcrt_qconnect *lqconnect);
 static void lcrt_authentication_publickey_callback(struct lcrt_qconnect *lqconnect);
 static void lcrt_authentication_ketboard_callback(struct lcrt_qconnect *lqconnect);
@@ -45,10 +78,11 @@ static struct __lcrt_ssh_auth g_lcrt_ssh_auth[LCRT_AUTH_NUMBER] = {
     {TRUE, lcrt_authentication_tis_callback, NULL},
 };
 
-static void lcrt_ssh_contents_changed(struct lcrt_terminal *lterminal)
+static void lcrt_ssh_receive(struct lcrt_terminal *lterminal)
 {
     VteTerminal *vteterminal = lterminal->terminal;
     struct lcrt_window *lwindow = lterminal->parent->parent;
+    struct lcrt_ssh_tm *tssh = (struct lcrt_ssh_tm *)lterminal->private_data;
     struct lcrtc_user *user = lterminal->user;
     char *text;
 
@@ -59,9 +93,11 @@ static void lcrt_ssh_contents_changed(struct lcrt_terminal *lterminal)
         debug_print("text null\n");
         return;
     }
+#if 0
     debug_print("++++++++++++++++++++++++CONTENTS++++++++++++++++++++++++\n");
     debug_print("%s", text);
     debug_print("++++++++++++++++++++++++CONTENTS++++++++++++++++++++++++\n");
+#endif
     if (strstr(text, "Connection timed out") != NULL) {
         vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE); 
         lcrt_message_error(lwindow->window,
@@ -75,26 +111,27 @@ static void lcrt_ssh_contents_changed(struct lcrt_terminal *lterminal)
         return;
     }
     if (strstr(text, "Permission denied") != NULL) {
-        lterminal->again++;
-        debug_print("Password or username error, try again %d\n", lterminal->again);
+        tssh->again++;
+        debug_print("Password or username error, try again %d\n", tssh->again);
 
         vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE); 
 
-        if (lterminal->again == 3) {
+        if (tssh->again >= 3) {
             //vte_terminal_feed(lterminal->terminal, "connect field\n", strlen("connect field\n"));
             lcrt_terminal_set_status(lterminal, NULL, LCRT_TERMINAL_DISCONNECT);
             lcrt_message_error(lterminal->parent->parent->window, 
                                lcrt_terminal_get_config(lterminal, LCRT_TM_CONNECTION_FAILED));
-            lterminal->again = 0;
+            tssh->again = 0;
             return;
         }
         struct lcrt_login *login = lcrt_create_login(lterminal, TRUE);
-        lterminal->login = login;
-        if (lterminal->username_changed == TRUE) {
+        tssh->login = login;
+        if (tssh->username_changed == TRUE) {
             kill(lterminal->child_pid, SIGKILL);
             lterminal->child_pid = 0;
-            lterminal->username_changed = FALSE;
-            lcrt_terminal_fork(lterminal);
+            tssh->username_changed = FALSE;
+            if (lterminal->ops && lterminal->ops->connect)
+                lterminal->ops->connect(lterminal);
             return;
         }
         //lcrt_terminal_fork(lterminal);
@@ -115,16 +152,16 @@ static void lcrt_ssh_contents_changed(struct lcrt_terminal *lterminal)
             strlen(user->username) == 0) { /* ||
             (lterminal->connected == LCRT_TERMINAL_CONNECTING)) {*/
             debug_print("Enter username or password\n");
-            struct lcrt_login *login = lcrt_create_login(lterminal, FALSE);
-            lterminal->login = login;
+            tssh->login = lcrt_create_login(lterminal, FALSE);
             debug_where();
         }
         debug_print("Auto send username and password\n");
-        if (lterminal->username_changed == TRUE) {
+        if (tssh->username_changed == TRUE) {
             kill(lterminal->child_pid, SIGKILL);
             lterminal->child_pid = 0;
-            lterminal->username_changed = FALSE;
-            lcrt_terminal_fork(lterminal);
+            tssh->username_changed = FALSE;
+            if (lterminal->ops && lterminal->ops->connect)
+                lterminal->ops->connect(lterminal);
             return;
         }
         vte_terminal_feed_child(vteterminal, user->password, strlen(user->password));
@@ -156,7 +193,7 @@ static void lcrt_ssh_contents_changed(struct lcrt_terminal *lterminal)
     return;
 }
 
-static int lcrt_ssh_connect_remote(struct lcrt_terminal *lterminal)
+static int lcrt_ssh_connect(struct lcrt_terminal *lterminal)
 {
     lcrt_protocol_t protocol;
     struct lcrtc_user *user;
@@ -165,9 +202,16 @@ static int lcrt_ssh_connect_remote(struct lcrt_terminal *lterminal)
     char *dep_prog[] = {LCRT_DEP_PROG};
     int dep = -1;
     char tmp[32];
+    struct lcrt_ssh_tm *tssh;
 
     if (lterminal == NULL)
-       return EINVAL;
+       return -EINVAL;
+
+    tssh = (struct lcrt_ssh_tm *)calloc(1, sizeof(struct lcrt_ssh_tm));
+    if (tssh == NULL)
+        return -ENOMEM;
+
+    lterminal->private_data = tssh;
 
     user = lterminal->user;
     argv[0] = dep_prog[LCRT_DEP_SSH];
@@ -187,7 +231,7 @@ static int lcrt_ssh_connect_remote(struct lcrt_terminal *lterminal)
         lcrt_message_info(lterminal->parent->parent->window, 
                           lterminal->parent->config.value[LCRT_TM_CONNECTION_PROG_NOT_FOUND],
                           argv[0]);
-        return LCRTE_NOT_FOUND;
+        return -LCRTE_NOT_FOUND;
     }
 
     lterminal->child_pid  = vte_terminal_fork_command(VTE_TERMINAL(lterminal->terminal), 
@@ -199,16 +243,30 @@ static int lcrt_ssh_connect_remote(struct lcrt_terminal *lterminal)
 
 }
 
+void lcrt_ssh_disconnect(struct lcrt_terminal *lterminal)
+{
+    if (lterminal->connected) {
+        vte_terminal_feed_child(lterminal->terminal, 
+                            LCRT_TERMINAL_EXIT_CMD, 
+                            strlen(LCRT_TERMINAL_EXIT_CMD));
+        lcrt_terminal_set_status(lterminal, NULL, LCRT_TERMINAL_DISCONNECT);
+    }
+    if (lterminal->private_data) {
+        free(lterminal->private_data);
+        lterminal->private_data = NULL;
+    }
+}
 static void __lcrt_set_authentication_func(
     GtkCellRendererToggle *cell, 
     const gchar *path_str,
     gpointer user_data)
 {
     struct lcrt_qconnect *lqconnect = (struct lcrt_qconnect *)user_data;
+    struct lcrt_ssh_if *lssh = (struct lcrt_ssh_if *)lqconnect->private_data;
     GtkTreePath *path;
     GtkTreeIter iter;
     struct __lcrt_ssh_auth *lcrt_ssh_auth;
-    GtkTreeModel *model = GTK_TREE_MODEL(lqconnect->pssh.authliststore);
+    GtkTreeModel *model = GTK_TREE_MODEL(lssh->authliststore);
   
     path = gtk_tree_path_new_from_string (path_str);
     gtk_tree_model_get_iter (model, &iter, path);
@@ -219,7 +277,7 @@ static void __lcrt_set_authentication_func(
     debug_where();
     gtk_tree_model_row_changed (model, path, &iter);
     gtk_tree_path_free (path);
-    gtk_widget_set_sensitive(lqconnect->pssh.properties, lcrt_ssh_auth->auth);
+    gtk_widget_set_sensitive(lssh->properties, lcrt_ssh_auth->auth);
 }
 static void __lcrt_qconnect_create_ssh_authentication(
     GtkListStore *store, 
@@ -234,7 +292,8 @@ static void __lcrt_qconnect_create_ssh_authentication(
 }
 static void __lcrt_qconnect_create_ssh2_authentication(struct lcrt_qconnect *lqconnect)
 {
-    GtkListStore *store = lqconnect->pssh.authliststore;
+    struct lcrt_ssh_if *lssh = (struct lcrt_ssh_if *)lqconnect->private_data;
+    GtkListStore *store = lssh->authliststore;
     int i;
 
     for (i = 0; i < LCRT_AUTH_NUMBER; i++) {
@@ -257,7 +316,8 @@ static void __lcrt_qconnect_create_ssh2_authentication(struct lcrt_qconnect *lqc
 }
 static void __lcrt_qconnect_create_ssh1_authentication(struct lcrt_qconnect *lqconnect)
 {
-    GtkListStore *store = lqconnect->pssh.authliststore;
+    struct lcrt_ssh_if *lssh = (struct lcrt_ssh_if *)lqconnect->private_data;
+    GtkListStore *store = lssh->authliststore;
     int i;
 
     for (i = 0; i < LCRT_AUTH_NUMBER; i++) {
@@ -288,11 +348,187 @@ static void __lcrt_toggled_authentication(
     gtk_tree_model_get (model, iter, 0, &selected, -1);
     g_object_set (cell, "active", *selected, NULL);
 }
+/* start functions for authentication password */
+void lcrt_ssh_password_on_cancelbutton_clicked(GtkButton *button, gpointer user_data)
+{
+    struct lcrt_qconnect *lqconnect = (struct lcrt_qconnect *)user_data;
+    struct lcrt_ssh_if *lssh = (struct lcrt_ssh_if *)lqconnect->private_data;
+    debug_where();
+    gtk_widget_destroy(lssh->ext[0]);
+}
+static gboolean lcrt_ssh_password_on_window_delete(GtkWidget *widget, GdkEvent  *event, gpointer user_data)
+{
+    lcrt_ssh_password_on_cancelbutton_clicked(NULL, user_data);
+    return FALSE;
+}
+
+void lcrt_ssh_password_on_okbutton_clicked(GtkButton *button, gpointer user_data)
+{
+    struct lcrt_qconnect *lqconnect = (struct lcrt_qconnect *)user_data;
+    struct lcrt_ssh_if *lssh = (struct lcrt_ssh_if *)lqconnect->private_data;
+    struct lcrtc_user *user;
+    
+    if (strcmp(gtk_entry_get_text(GTK_ENTRY(lssh->ext[1])),
+        gtk_entry_get_text(GTK_ENTRY(lssh->ext[2]))) != 0) {
+        lcrt_message_error(lssh->ext[0], lqconnect->config.value[LCRT_Q_PPW_UNMATCH]);
+        return;
+    }
+    if ((user = lcrt_user_find_by_name(&lqconnect->parent->u_config, lqconnect->uname)) == NULL) {
+        lcrt_message_error(lssh->ext[0], "Can not find user %s.\n", lqconnect->uname);
+        return;
+    }
+    lcrtc_user_set_data(
+       user,
+       NULL,
+       NULL,
+       LCRT_PROTOCOL_UNKNOWN,
+       NULL,
+       gtk_entry_get_text(GTK_ENTRY(lssh->ext[1])),
+       NULL,
+       -1,
+       1
+       );
+    lcrt_ssh_password_on_cancelbutton_clicked(NULL, lqconnect);
+    if (lcrt_window_get_auto_save(lqconnect->parent)) {
+        lcrt_user_save_one(&lqconnect->parent->u_config, user);
+    }
+    debug_where();
+    return;
+
+}
+
+void lcrt_ssh_auth_password_dialog(struct lcrt_qconnect *lqconnect)
+{
+    GtkWidget *dialog_password;
+    GtkWidget *dialog_vbox1;
+    GtkWidget *label_info;
+    GtkWidget *vbox1;
+    GtkWidget *table1;
+    GtkWidget *label_spassword;
+    GtkWidget *label_cpassword;
+    GtkWidget *entry_spassword;
+    GtkWidget *entry_cpassword;
+    GtkWidget *checkbutton_remember;
+    GtkWidget *dialog_action_area1;
+    GtkWidget *cancelbutton;
+    GtkWidget *okbutton;
+    GtkAccelGroup *accel_group;
+
+    struct lcrt_ssh_if *lssh = (struct lcrt_ssh_if *)lqconnect->private_data;
+    accel_group = gtk_accel_group_new ();
+
+    debug_where();
+    
+    dialog_password = gtk_dialog_new ();
+    lssh->ext[0] = dialog_password;
+    gtk_window_set_transient_for(GTK_WINDOW(dialog_password), 
+            GTK_WINDOW(lqconnect->parent->window));
+
+    gtk_window_set_title (GTK_WINDOW (dialog_password), lqconnect->config.value[LCRT_Q_PTITLE]);
+    gtk_window_set_modal(GTK_WINDOW(dialog_password), TRUE);
+    gtk_window_set_position (GTK_WINDOW (dialog_password), GTK_WIN_POS_CENTER_ON_PARENT);
+    gtk_window_set_resizable (GTK_WINDOW (dialog_password), FALSE);
+    //gtk_window_set_type_hint (GTK_WINDOW (dialog_password), GDK_WINDOW_TYPE_HINT_DIALOG);
+    gtk_dialog_set_has_separator (GTK_DIALOG (dialog_password), FALSE);
+
+    g_signal_connect ((gpointer) dialog_password, "delete_event",
+                    G_CALLBACK (lcrt_ssh_password_on_window_delete),
+                    lqconnect);
+
+    dialog_vbox1 = GTK_DIALOG (dialog_password)->vbox;
+    gtk_widget_show (dialog_vbox1);
+    gtk_widget_set_size_request (dialog_vbox1, 320, 139);
+
+    label_info = gtk_label_new (lqconnect->config.value[LCRT_Q_PPROMPT]);
+    gtk_widget_show (label_info);
+    gtk_box_pack_start (GTK_BOX (dialog_vbox1), label_info, FALSE, FALSE, 0);
+    gtk_widget_set_size_request (label_info, 40, 30);
+    gtk_misc_set_alignment (GTK_MISC (label_info), 0.5, 0.5);
+
+    vbox1 = gtk_vbox_new (FALSE, 0);
+    gtk_widget_show (vbox1);
+    gtk_box_pack_start (GTK_BOX (dialog_vbox1), vbox1, TRUE, TRUE, 0);
+
+    table1 = gtk_table_new (2, 2, FALSE);
+    gtk_widget_show (table1);
+    gtk_box_pack_start (GTK_BOX (vbox1), table1, FALSE, FALSE, 0);
+
+    label_spassword = gtk_label_new (lqconnect->config.value[LCRT_Q_PSTORE_PASSWORD]);
+    gtk_widget_show (label_spassword);
+    gtk_table_attach (GTK_TABLE (table1), label_spassword, 0, 1, 0, 1,
+                      (GtkAttachOptions) (GTK_FILL),
+                      (GtkAttachOptions) (0), 0, 0);
+    gtk_widget_set_size_request (label_spassword, 140, 30);
+    gtk_misc_set_alignment (GTK_MISC (label_spassword), 0, 0.5);
+
+    entry_spassword = gtk_entry_new ();
+    lssh->ext[1]= entry_spassword;
+    gtk_widget_show (entry_spassword);
+    gtk_table_attach (GTK_TABLE (table1), entry_spassword, 1, 2, 0, 1,
+                      (GtkAttachOptions) (0),
+                      (GtkAttachOptions) (0), 0, 0);
+    gtk_widget_set_size_request (entry_spassword, 160, 30);
+    gtk_entry_set_visibility(GTK_ENTRY(entry_spassword),FALSE);
+    gtk_entry_set_invisible_char (GTK_ENTRY (entry_spassword), 9679);
+
+    label_cpassword = gtk_label_new (lqconnect->config.value[LCRT_Q_PCONFIRM_PASSWORD]);
+    gtk_widget_show (label_cpassword);
+    gtk_table_attach (GTK_TABLE (table1), label_cpassword, 0, 1, 1, 2,
+                      (GtkAttachOptions) (GTK_FILL),
+                      (GtkAttachOptions) (0), 0, 0);
+    gtk_widget_set_size_request (label_cpassword, 140, 30);
+    gtk_misc_set_alignment (GTK_MISC (label_cpassword), 0, 0.5);
+
+    entry_cpassword = gtk_entry_new ();
+    lssh->ext[2]= entry_cpassword;
+    gtk_widget_show (entry_cpassword);
+    gtk_entry_set_visibility(GTK_ENTRY(entry_cpassword),FALSE);
+    gtk_table_attach (GTK_TABLE (table1), entry_cpassword, 1, 2, 1, 2,
+                      (GtkAttachOptions) (0),
+                      (GtkAttachOptions) (0), 0, 0);
+    gtk_widget_set_size_request (entry_cpassword, 160, 30);
+    gtk_entry_set_invisible_char (GTK_ENTRY (entry_cpassword), 9679);
+
+    dialog_action_area1 = GTK_DIALOG (dialog_password)->action_area;
+    gtk_widget_show (dialog_action_area1);
+    gtk_button_box_set_layout (GTK_BUTTON_BOX (dialog_action_area1), GTK_BUTTONBOX_END);
+
+    cancelbutton = gtk_button_new_with_mnemonic (lqconnect->config.value[LCRT_Q_PCANCEL]);
+    gtk_widget_show (cancelbutton);
+    gtk_dialog_add_action_widget (GTK_DIALOG (dialog_password), cancelbutton, GTK_RESPONSE_CANCEL);
+    GTK_WIDGET_SET_FLAGS (cancelbutton, GTK_CAN_DEFAULT);
+
+    g_signal_connect ((gpointer) cancelbutton, "clicked",
+                      G_CALLBACK (lcrt_ssh_password_on_cancelbutton_clicked),
+                      lqconnect);
+
+    okbutton = gtk_button_new_with_mnemonic(lqconnect->config.value[LCRT_Q_POK]);
+    gtk_widget_show (okbutton);
+    gtk_dialog_add_action_widget (GTK_DIALOG (dialog_password), okbutton, GTK_RESPONSE_OK);
+    GTK_WIDGET_SET_FLAGS (okbutton, GTK_CAN_DEFAULT);
+    gtk_widget_add_accelerator(okbutton, "clicked", accel_group,
+                               GDK_Return, (GdkModifierType) 0,
+                               GTK_ACCEL_VISIBLE);
+
+    g_signal_connect ((gpointer) okbutton, "clicked",
+                      G_CALLBACK (lcrt_ssh_password_on_okbutton_clicked),
+                      lqconnect);
+
+    gtk_window_add_accel_group (GTK_WINDOW (dialog_password), accel_group);
+    gtk_widget_show(dialog_password);
+    gtk_dialog_run(GTK_DIALOG(dialog_password));
+
+    return;
+err:
+    lcrt_message_error(lqconnect->q_connect, lqconnect->config.value[LCRT_Q_ERR_MSG]);
+}
 
 static void lcrt_authentication_passwd_callback(struct lcrt_qconnect *lqconnect)
 {
     debug_where();
+    lcrt_ssh_auth_password_dialog(lqconnect);
 }
+/* end functions for authentication password */
 
 static void lcrt_authentication_publickey_callback(struct lcrt_qconnect *lqconnect)
 {
@@ -322,16 +558,18 @@ static void lcrt_authentication_tis_callback(struct lcrt_qconnect *lqconnect)
 static void lcrt_ssh_on_button_properties_clicked(GtkButton *button, gpointer user_data)
 {
     struct lcrt_qconnect *lqconnect = (struct lcrt_qconnect *)user_data;
+    struct lcrt_ssh_if *lssh = (struct lcrt_ssh_if *)lqconnect->private_data;
     GtkTreeIter iter;
     GtkTreeModel *model;
-    GtkTreeView *treeview = GTK_TREE_VIEW (lqconnect->pssh.authtreeview);
+    GtkTreeView *treeview = GTK_TREE_VIEW (lssh->authtreeview);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);;
     char *value;
     struct __lcrt_ssh_auth *lcrt_ssh_auth;
 
     if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
         gtk_tree_model_get(model, &iter, 0, &lcrt_ssh_auth, -1);
-        if (lcrt_ssh_auth->auth == TRUE)
+        if (lcrt_ssh_auth->auth == TRUE && 
+            lqconnect->flag == LCRT_QCONNECT_SESSION_OPTION)
             lcrt_ssh_auth->callback(lcrt_ssh_auth->user_data);
 #if 0
         printf("selected = %d\n", *selected);
@@ -363,21 +601,22 @@ static void lcrt_ssh_on_button_properties_clicked(GtkButton *button, gpointer us
 void lcrt_ssh_on_authentication_selection_changed(GtkWidget *widget, gpointer user_data)
 {
     struct lcrt_qconnect *lqconnect = (struct lcrt_qconnect *)user_data;
+    struct lcrt_ssh_if *lssh = (struct lcrt_ssh_if *)lqconnect->private_data;
     GtkTreeIter iter;
     GtkTreeModel *model;
-    GtkTreeView *treeview = GTK_TREE_VIEW (lqconnect->pssh.authtreeview);
+    GtkTreeView *treeview = GTK_TREE_VIEW (lssh->authtreeview);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);;
     gboolean *selected;
 
     if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
         gtk_tree_model_get(model, &iter, 0, &selected, -1);
-        gtk_widget_set_sensitive(lqconnect->pssh.properties, *selected);
+        gtk_widget_set_sensitive(lssh->properties, *selected);
     } else {
-        gtk_widget_set_sensitive(lqconnect->pssh.properties, FALSE);
+        gtk_widget_set_sensitive(lssh->properties, FALSE);
     }
 }
 
-static void lcrt_ssh_create_subbox(struct lcrt_qconnect *lqconnect)
+static void lcrt_ssh_show(struct lcrt_qconnect *lqconnect)
 {
     GtkWidget *vbox;
     GtkWidget *vbox_spec;
@@ -412,6 +651,10 @@ static void lcrt_ssh_create_subbox(struct lcrt_qconnect *lqconnect)
     int i;
     struct lcrt_window *parent;
     const char *str_port[LCRT_PROTOCOL_NUMBER] = {LCRT_PROTOCOL_PORT};
+    static struct lcrt_ssh_if slssh, *lssh = &slssh;
+
+    memset(lssh, 0, sizeof(struct lcrt_ssh_if));
+    lqconnect->private_data = lssh;
 
     parent = lqconnect->parent;
 
@@ -436,7 +679,7 @@ static void lcrt_ssh_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_hostname), 0, 0.5);
 
     entry_hostname = gtk_entry_new_with_max_length(HOSTNAME_LEN);
-    lqconnect->pssh.hostname = entry_hostname;
+    lssh->hostname = entry_hostname;
     gtk_widget_show (entry_hostname);
     gtk_box_pack_start (GTK_BOX (hbox2), entry_hostname, FALSE, TRUE, 0);
     gtk_widget_set_size_request (entry_hostname, 220, 30);
@@ -457,7 +700,7 @@ static void lcrt_ssh_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_username), 0, 0.5);
 
     entry_username = gtk_entry_new_with_max_length(USERNAME_LEN);
-    lqconnect->pssh.username = entry_username;
+    lssh->username = entry_username;
     gtk_widget_show (entry_username);
     gtk_box_pack_start (GTK_BOX (hbox4), entry_username, FALSE, TRUE, 0);
     gtk_widget_set_size_request (entry_username, 220, 30);
@@ -475,7 +718,7 @@ static void lcrt_ssh_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_firewall), 0, 0.5);
 
     combobox_firewall = gtk_combo_box_entry_new_text ();
-    lqconnect->pssh.firewall = combobox_firewall;
+    lssh->firewall = combobox_firewall;
     gtk_widget_show (combobox_firewall);
     gtk_box_pack_start (GTK_BOX (hbox3), combobox_firewall, FALSE, TRUE, 0);
     gtk_widget_set_size_request (combobox_firewall, 110, 25);
@@ -493,7 +736,7 @@ static void lcrt_ssh_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_misc_set_alignment (GTK_MISC (label_port), 0, 0.49);
 
     entry_port = gtk_entry_new ();
-    lqconnect->pssh.port = entry_port;
+    lssh->port = entry_port;
     gtk_widget_show (entry_port);
     gtk_box_pack_start (GTK_BOX (hbox3), entry_port, FALSE, TRUE, 0);
     gtk_widget_set_size_request (entry_port, 60, 30);
@@ -523,8 +766,10 @@ static void lcrt_ssh_create_subbox(struct lcrt_qconnect *lqconnect)
      * we should change the status of button_properties by tree_view.
      */
     button_properties = gtk_button_new_with_mnemonic (lqconnect->config.value[LCRT_Q_BT_PROPERTIES]);
-    lqconnect->pssh.properties= button_properties;
+    lssh->properties= button_properties;
     gtk_widget_show (button_properties);
+    gtk_widget_set_size_request (button_properties, 80, 30);
+    gtk_widget_set_sensitive(button_properties, FALSE);
 
     scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
     gtk_widget_set_size_request (scrolledwindow, 200, -1);
@@ -536,10 +781,10 @@ static void lcrt_ssh_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_SHADOW_IN);
 
     list_store = gtk_list_store_new (2, GTK_TYPE_POINTER, G_TYPE_STRING);
-    lqconnect->pssh.authliststore = list_store;
+    lssh->authliststore = list_store;
 
     tree_view = gtk_tree_view_new_with_model (GTK_TREE_MODEL (list_store));
-    lqconnect->pssh.authtreeview = tree_view;
+    lssh->authtreeview = tree_view;
     gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (tree_view), FALSE);
     gtk_widget_show (tree_view);
     gtk_container_add (GTK_CONTAINER (scrolledwindow), tree_view);
@@ -574,8 +819,6 @@ static void lcrt_ssh_create_subbox(struct lcrt_qconnect *lqconnect)
     gtk_box_pack_start (GTK_BOX (hbox_frame), vbox2, TRUE, FALSE, 0);
 
     gtk_box_pack_start (GTK_BOX (vbox2), button_properties, FALSE, FALSE, 0);
-    gtk_widget_set_size_request (button_properties, -1, 30);
-    gtk_widget_set_sensitive(button_properties, FALSE);
     g_signal_connect ((gpointer) button_properties, "clicked",
                       G_CALLBACK (lcrt_ssh_on_button_properties_clicked),
                       lqconnect);
@@ -595,31 +838,32 @@ static void lcrt_ssh_create_subbox(struct lcrt_qconnect *lqconnect)
         struct lcrtc_user *user;
         char tmp[32];
         if ((user = lcrt_user_find_by_name(&parent->u_config, lqconnect->uname)) != NULL) {
-            gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lqconnect->pssh.hostname);
-            gtk_entry_set_text(GTK_ENTRY(lqconnect->pssh.hostname), user->hostname);
-            gtk_entry_set_text(GTK_ENTRY(lqconnect->pssh.username), user->username);
+            gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lssh->hostname);
+            gtk_entry_set_text(GTK_ENTRY(lssh->hostname), user->hostname);
+            gtk_entry_set_text(GTK_ENTRY(lssh->username), user->username);
             sprintf(tmp, "%d", user->port);
-            gtk_entry_set_text(GTK_ENTRY(lqconnect->pssh.port), tmp);
+            gtk_entry_set_text(GTK_ENTRY(lssh->port), tmp);
             gtk_entry_set_text(GTK_ENTRY(lqconnect->q_et_default_command), user->command);
         }
     } else {
-        gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lqconnect->pssh.hostname);
+        gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lssh->hostname);
     	gtk_widget_set_sensitive(lqconnect->q_bt_connect, FALSE);
     }
-    gtk_entry_set_text(GTK_ENTRY(lqconnect->pssh.port), str_port[lqconnect->nproto]);
+    gtk_entry_set_text(GTK_ENTRY(lssh->port), str_port[lqconnect->nproto]);
 
 }
 
-static struct lcrtc_user *lcrt_ssh_create_session(struct lcrt_qconnect *lqconnect)
+static struct lcrtc_user *lcrt_ssh_create(struct lcrt_qconnect *lqconnect)
 {
     lcrt_protocol_t protocol = lqconnect->nproto;
     struct lcrt_window *lwindow = lqconnect->parent;
+    struct lcrt_ssh_if *lssh = (struct lcrt_ssh_if *)lqconnect->private_data;
     const char *hostname;
     struct lcrtc_user *user;
     int i = 1;
     char name[HOSTNAME_LEN + 256];
     debug_where();
-    hostname = gtk_entry_get_text(GTK_ENTRY(lqconnect->pssh.hostname));
+    hostname = gtk_entry_get_text(GTK_ENTRY(lssh->hostname));
     
     strcpy(name, hostname);
 
@@ -640,10 +884,10 @@ static struct lcrtc_user *lcrt_ssh_create_session(struct lcrt_qconnect *lqconnec
            name,
            hostname,
            protocol,
-           gtk_entry_get_text(GTK_ENTRY(lqconnect->pssh.username)),
+           gtk_entry_get_text(GTK_ENTRY(lssh->username)),
            NULL,
            gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
-           atoi(gtk_entry_get_text(GTK_ENTRY(lqconnect->pssh.port))),
+           atoi(gtk_entry_get_text(GTK_ENTRY(lssh->port))),
            TRUE
         );
         lcrtc_user_ref(user);
@@ -659,10 +903,10 @@ static struct lcrtc_user *lcrt_ssh_create_session(struct lcrt_qconnect *lqconnec
                lqconnect->uname,
                hostname,
                protocol,
-               gtk_entry_get_text(GTK_ENTRY(lqconnect->pssh.username)),
+               gtk_entry_get_text(GTK_ENTRY(lssh->username)),
                NULL,
                gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
-               atoi(gtk_entry_get_text(GTK_ENTRY(lqconnect->pssh.port))),
+               atoi(gtk_entry_get_text(GTK_ENTRY(lssh->port))),
                TRUE
             );
         }
@@ -671,19 +915,28 @@ static struct lcrtc_user *lcrt_ssh_create_session(struct lcrt_qconnect *lqconnec
     return user;
 }
 
+void lcrt_ssh_username_changed(struct lcrt_terminal *lterminal, int change)
+{
+    struct lcrt_ssh_tm *tssh = (struct lcrt_ssh_tm *)lterminal->private_data;
+    tssh->username_changed = change;
+}
 struct lcrt_protocol_callback lcrt_protocol_ssh2_callbacks = {
-    .protocol         = LCRT_PROTOCOL_SSH2,
-    .contents_changed = lcrt_ssh_contents_changed,
-    .connect_remote   = lcrt_ssh_connect_remote,
-    .create_subbox    = lcrt_ssh_create_subbox,
-    .create_session   = lcrt_ssh_create_session,
+    .protocol  =  LCRT_PROTOCOL_SSH2,
+    .receive    = lcrt_ssh_receive,
+    .connect    = lcrt_ssh_connect,
+    .disconnect = lcrt_ssh_disconnect,
+    .show       = lcrt_ssh_show,
+    .create     = lcrt_ssh_create,
+    .changed    = lcrt_ssh_username_changed,
 };
 
 struct lcrt_protocol_callback lcrt_protocol_ssh1_callbacks = {
-    .protocol         = LCRT_PROTOCOL_SSH1,
-    .contents_changed = lcrt_ssh_contents_changed,
-    .connect_remote   = lcrt_ssh_connect_remote,
-    .create_subbox    = lcrt_ssh_create_subbox,
-    .create_session   = lcrt_ssh_create_session,
+    .protocol   = LCRT_PROTOCOL_SSH1,
+    .receive    = lcrt_ssh_receive,
+    .connect    = lcrt_ssh_connect,
+    .disconnect = lcrt_ssh_disconnect,
+    .show       = lcrt_ssh_show,
+    .create     = lcrt_ssh_create,
+    .changed    = lcrt_ssh_username_changed,
 };
 

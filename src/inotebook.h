@@ -36,6 +36,7 @@ enum {
     LCRT_TM_CONNECTION_FAILED,
     LCRT_TM_CONNECTION_PROG_NOT_FOUND,
     LCRT_TM_CONNECTION_NOT_SUPPORT,
+    LCRT_TM_SERIAL_ERROR,
     LCRT_TM_NUMBER
 };
 #define LCRT_TM_NAME \
@@ -43,14 +44,16 @@ enum {
     "tm_connection_refused", \
     "tm_connection_failed", \
     "tm_connection_prog_not_found", \
-    "tm_connection_not_support"
+    "tm_connection_not_support", \
+    "tm_serial_error", \
 
 #define LCRT_TM_VALUE \
     "Connection timed out!", \
     "Connection refused!", \
     "Username or password error,exit!", \
     "Can't find the programe \"%s\",please install it!", \
-    "Current version not support!"
+    "Current version not support!", \
+    "Can't open \"%s\",%s.", \
 
 struct lcrtc_notebook {
     struct lcrt_config db;

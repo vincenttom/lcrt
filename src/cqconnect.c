@@ -36,9 +36,9 @@ void lcrt_qconnect_on_button_connect_clicked(GtkButton *button, gpointer user_da
     struct lcrtc_user *user;
 
     debug_where();
-    if (lqconnect->create_session) {
+    if (lqconnect->ops && lqconnect->ops->create) {
         debug_where();
-        user = lqconnect->create_session(lqconnect);
+        user = lqconnect->ops->create(lqconnect);
     }
 
     lcrt_qconnect_on_button_cancel_clicked(NULL, lqconnect);
@@ -75,7 +75,6 @@ void lcrt_qconnect_on_protocol_changed(GtkComboBox *widget, gpointer user_data)
     const char *str_port[LCRT_PROTOCOL_NUMBER] = {LCRT_PROTOCOL_PORT};
     const char *proto = gtk_combo_box_get_active_text(GTK_COMBO_BOX(widget));
 	const char *str_proto[LCRT_PROTOCOL_NUMBER] = {LCRT_PROTOCOL_NAME};
-    struct lcrt_protocol_callback *callback;
 
     lqconnect->nproto = lcrt_user_get_protocol(proto);
 
@@ -86,10 +85,8 @@ void lcrt_qconnect_on_protocol_changed(GtkComboBox *widget, gpointer user_data)
         lqconnect->q_vbox_spec = NULL;
     }
 
-    callback = lcrt_protocol_get_callback(lqconnect->nproto);
-    lqconnect->create_session = callback->create_session;
-    lqconnect->create_subbox = callback->create_subbox;
+    lqconnect->ops = lcrt_protocol_get_callback(lqconnect->nproto);
     
-    if (lqconnect->create_subbox)
-        lqconnect->create_subbox(lqconnect);
+    if (lqconnect->ops && lqconnect->ops->show)
+        lqconnect->ops->show(lqconnect);
 }

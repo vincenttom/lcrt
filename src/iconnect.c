@@ -34,7 +34,7 @@ int lcrt_connect_init_config(struct lcrt_connect *lconnect);
 int lcrt_connect_load_config(struct lcrt_connect *lconnect);
 int lcrt_connect_create_config(struct lcrt_connect *lconnect);
 int lcrt_connect_create_toolitem(struct lcrt_connect *lconnect);
-static GtkWidget *lcrt_connect_create_session_view(struct lcrt_connect *lconnect);
+static GtkWidget *lcrt_connect_create_view(struct lcrt_connect *lconnect);
 
 int lcrt_create_connect(struct lcrt_window *parent, gboolean tab)
 {
@@ -105,7 +105,7 @@ int lcrt_create_connect(struct lcrt_window *parent, gboolean tab)
             GTK_POLICY_ALWAYS);
     gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_SHADOW_IN);
 
-    treeview = lcrt_connect_create_session_view(lconnect);
+    treeview = lcrt_connect_create_view(lconnect);
     gtk_widget_show (treeview);
     gtk_container_add (GTK_CONTAINER (scrolledwindow), treeview);
 
@@ -211,7 +211,7 @@ static int lcrt_connect_compare_func(GtkTreeModel *model,
     g_free(value_b);
     return ret;
 }
-static GtkWidget *lcrt_connect_create_session_view(struct lcrt_connect *lconnect)
+static GtkWidget *lcrt_connect_create_view(struct lcrt_connect *lconnect)
 {
     GtkTreeViewColumn *col;
     GtkCellRenderer *renderer;

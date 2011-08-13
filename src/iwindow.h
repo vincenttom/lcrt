@@ -46,28 +46,31 @@ struct lcrt_notebook;
 struct lcrt_status;
 struct lcrt_settings;
 struct lcrt_accels;
-
+/**
+ * @brief main window structure. contain all it's children 
+ *        elements and structures.
+ */
 struct lcrt_window {
-    GtkWidget *window;
-    int full_screen;
-    gboolean hide;
+    GtkWidget *window; /**< main window component */
+    int full_screen; /**<  flag to mark wethere is run in full screen */
+    gboolean hide; /**<  flag to mark wethere is hidden from desktop status bar */
 
     GtkWidget *w_vbox;
-    GtkAccelGroup *w_accel;
+    GtkAccelGroup *w_accel; /**< keyboard shortkey group */
 
-    struct lcrt_menubar *w_menubar;
-    struct lcrt_toolbar *w_toolbar;
-    struct lcrt_statusbar *w_statusbar;
-    struct lcrt_notebook *w_notebook;
-    struct lcrt_status *w_status;
-    struct lcrt_accels *w_accels;
-    struct lcrt_settings *w_settings;
+    struct lcrt_menubar *w_menubar; /**< menubar component */
+    struct lcrt_toolbar *w_toolbar; /**< toolbar component */
+    struct lcrt_statusbar *w_statusbar; /**< statusbar component */
+    struct lcrt_notebook *w_notebook; /**< notebook component */
+    struct lcrt_status *w_status; /**< the status of main window */
+    struct lcrt_accels *w_accels; /**< shortkey configuration */
+    struct lcrt_settings *w_settings; /**< global settings component */
 
-    struct lcrtc_window w_config;
-    struct lcrt_user u_config;
-    struct lcrtc_user *current_user;
-    char current_uname[HOSTNAME_LEN + 1];
-    char programe_name[512];
+    struct lcrtc_window w_config; /**< databse of window*/
+    struct lcrt_user u_config; /**< user list, contain informations of saved session*/
+    struct lcrtc_user *current_user; /**< current session information,used to connect with remote*/
+    char current_uname[HOSTNAME_LEN + 1]; /**< username of current session */
+    char programe_name[512]; /**< ourself name */
 
     const char *(*get_db)(struct lcrt_window *lwindow);
     const char *(*get_tb)(struct lcrt_window *lwindow);

@@ -43,7 +43,8 @@ gboolean lcrt_terminal_on_key_press_event(GtkWidget*widget,
     debug_where();
     if (event->type == GDK_KEY_PRESS && event->keyval == GDK_Return) {
         debug_print("reconnect...\n");
-        lcrt_terminal_fork(lterminal);
+        if (lterminal->ops && lterminal->ops->connect)
+            lterminal->ops->connect(lterminal);
     }
     return FALSE;
 }
@@ -125,8 +126,8 @@ void lcrt_terminal_on_contents_changed(VteTerminal *vteterminal, gpointer user_d
     if (lterminal->connected == TRUE)
         return;
     lcrtc_user_dump(user, __func__);
-    if (lterminal->contents_changed) 
-        lterminal->contents_changed(lterminal);
+    if (lterminal->ops && lterminal->ops->receive) 
+        lterminal->ops->receive(lterminal);
 
 }
 gboolean lcrt_terminal_on_label_title_button_press_event(GtkWidget *widget,

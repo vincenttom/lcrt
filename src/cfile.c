@@ -68,12 +68,15 @@ void lcrt_file_on_reconnect_activate(GtkMenuItem *menuitem, gpointer user_data)
     struct lcrt_file *lfile = (struct lcrt_file *)user_data;
     struct lcrt_terminal *lterminal = lfile->parent->parent->w_notebook->current_terminal;
 
-    if (lterminal == NULL || lterminal->connected != LCRT_TERMINAL_DISCONNECT)
+    debug_print("status = %d\n", lterminal->connected);
+    if (lterminal == NULL || (
+        lterminal->connected != LCRT_TERMINAL_DISCONNECT &&
+        lterminal->connected != LCRT_TERMINAL_CHILD_EXIT))
         return;
-
-    lcrt_terminal_fork(lterminal);
+    debug_where();
+    if (lterminal->ops && lterminal->ops->connect)
+        lterminal->ops->connect(lterminal);
 }
-
 
 void lcrt_file_on_reconnect_all_activate(GtkMenuItem *menuitem, gpointer user_data)
 {
@@ -87,10 +90,10 @@ void lcrt_file_on_reconnect_all_activate(GtkMenuItem *menuitem, gpointer user_da
                 LCRT_TERMINAL_EXIT_CMD, strlen(LCRT_TERMINAL_EXIT_CMD));
         }
         lcrt_terminal_set_status(lterminal, NULL, LCRT_TERMINAL_DISCONNECT);
-        lcrt_terminal_fork(lterminal);
+        if (lterminal->ops && lterminal->ops->connect)
+            lterminal->ops->connect(lterminal);
     }
 }
-
 
 void lcrt_file_on_disconnect_activate(GtkMenuItem *menuitem, gpointer user_data)
 {
@@ -99,9 +102,8 @@ void lcrt_file_on_disconnect_activate(GtkMenuItem *menuitem, gpointer user_data)
 
     if (lterminal == NULL || lterminal->connected != LCRT_TERMINAL_CONNECTED)
         return;
-
-     vte_terminal_feed_child(lterminal->terminal, 
-                LCRT_TERMINAL_EXIT_CMD, strlen(LCRT_TERMINAL_EXIT_CMD));
+    if (lterminal->ops && lterminal->ops->disconnect)
+        lterminal->ops->disconnect(lterminal);
 }
 
 
@@ -112,11 +114,10 @@ void lcrt_file_on_disconnect_all_activate(GtkMenuItem *menuitem, gpointer user_d
 
     struct lcrt_terminal *lterminal;
     list_for_each_entry(lterminal, &lnotebook->child, brother) {
-        if (lterminal->connected) {
-            vte_terminal_feed_child(lterminal->terminal, 
-                LCRT_TERMINAL_EXIT_CMD, strlen(LCRT_TERMINAL_EXIT_CMD));
+        if (lterminal->connected == LCRT_TERMINAL_CONNECTED) {
+            if (lterminal->ops && lterminal->ops->disconnect)
+                lterminal->ops->disconnect(lterminal);
         }
-        lcrt_terminal_set_status(lterminal, NULL, LCRT_TERMINAL_DISCONNECT);
     }
 }
 

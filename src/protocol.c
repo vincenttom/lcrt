@@ -22,11 +22,14 @@
 #define LCRT_INSTALL_PROTOCOL(support_protocol) &lcrt_protocol_##support_protocol##_callbacks,
 
 struct lcrt_protocol_callback lcrt_protocol_null_callbacks = {
-    .protocol         = LCRT_PROTOCOL_UNKNOWN,
-    .contents_changed = NULL,
-    .connect_remote   = NULL,
-    .create_subbox    = NULL,
-    .create_session   = NULL,
+    .protocol   = LCRT_PROTOCOL_UNKNOWN,
+    .receive    = NULL,
+    .connect    = NULL,
+    .disconnect = NULL,
+    .show       = NULL,
+    .create     = NULL,
+    .changed    = NULL,
+
 };
 
 /* list the protocol we support */
