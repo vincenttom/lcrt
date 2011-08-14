@@ -1,6 +1,6 @@
 SUBDIRS = language src help pixmaps gnome
 
-EXTRA_DIST = AUTHORS NEWS ChangeLog COPYING README
+EXTRA_DIST = AUTHORS NEWS ChangeLog COPYING README Doxyfile
 
 uninstall-local:
 	rm -rf $(DESTDIR)$(datadir)/$(PACKAGE)
