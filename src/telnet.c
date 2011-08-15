@@ -118,7 +118,10 @@ static int lcrt_telnet_connect(struct lcrt_terminal *lterminal)
     ttelnet = (struct lcrt_telnet_tm *)calloc(1, sizeof(struct lcrt_telnet_tm));
     if (ttelnet == NULL)
         return -ENOMEM;
+
     lterminal->private_data = ttelnet;
+    vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
+
     user = lterminal->user;
     argv[0] = dep_prog[LCRT_DEP_TELNET];
     strcpy(hostname, user->hostname);
@@ -151,6 +154,7 @@ void lcrt_telnet_disconnect(struct lcrt_terminal *lterminal)
                             LCRT_TERMINAL_EXIT_CMD, 
                             strlen(LCRT_TERMINAL_EXIT_CMD));
         lcrt_terminal_set_status(lterminal, NULL, LCRT_TERMINAL_DISCONNECT);
+        vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
     }
     if (lterminal->private_data) {
         free(lterminal->private_data);

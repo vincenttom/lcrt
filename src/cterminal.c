@@ -56,12 +56,7 @@ void lcrt_terminal_on_child_exited(VteTerminal *vteterminal, gpointer user_data)
 
     if (lterminal->connected != LCRT_TERMINAL_CONNECTED)
         return;
-    lterminal->connected = FALSE;
     lterminal->child_pid = 0;
-    debug_where();
-#ifdef RESET
-    vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
-#endif
     debug_where();
     lcrt_terminal_set_status(lterminal, NULL, LCRT_TERMINAL_CHILD_EXIT);
     g_signal_connect ((gpointer) lterminal->terminal, "key-press-event",

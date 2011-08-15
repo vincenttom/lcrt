@@ -1,3 +1,67 @@
+/**
+ * @mainpage Introduction
+ *
+ * <h2>What is lcrt?</h2>
+ *
+ * lcrt is a Linux remote login tool. Just like ssh or telnet, but it has a 
+ * GUI and can manage many connections. User can use it to save connection 
+ * information such as hostname, username and password(optionally), and 
+ * auto login next time. lcrt also can clone a connected session, so user 
+ * can open many connections quickly.
+ *
+ * <h2>Why choose lcrt?</h2>
+ *
+ * As we known, ssh is a popular login tool to connect to remote server, but
+ * in Linux system, it only have a command line programe.Every time when you
+ * connect to remote server, you should enter user name and password. If you
+ * are a system administrator and manage hundreds of server, or you are a 
+ * software engineer in embedded field, you may need open several connection
+ * to watch different state of your programe, this time you should enter
+ * user name and password again and again,this will be very troublesome.\n
+ * So lcrt can help you to manage user information(such as user name and 
+ * password), auto login at next time. And, lcrt can clone a connected 
+ * session so you can open many connections as you can.
+ *
+ * <h2>Where does lcrt come from?</h2>
+ *
+ * About December 2010, i visit to SLUG(shlug@googlegroups.com), In one 
+ * thread, someone want to find a useful graphic ssh login tool in Linux,
+ * like <em>SecureCRT</em>(http://www.vandyke.com/products/securecrt/), the other
+ * one recommend he to use <em>PAC</em>(http://sourceforge.net/projects/pacmanager/),
+ * so i try to use PAC beacuse i should login to several board to debug my
+ * programe in job, and i should reboot frequently. But i also heop it can 
+ * provide a interface like gnome-terminal and it's shortkey. So i decided 
+ * to develop a graphic login tool like SecureCRT, i named <em>lcrt</em>.
+ *
+ * <h2>What's in a name?</h2>
+ *
+ * The name <em>lcrt</em> means Linux SecureCRT, i want it can be help the 
+ * people want to use SecureCRT in linux.
+ *
+ * <h2>Features</h2>
+ * - auto save connection information so that can auto login remote server 
+ *   next time.
+ * - easy to clone a connected session.
+ * - support ssh, telnet, serial, the others(rlogin, raw and etc) will be 
+ *   support in future.
+ * - open many connections in tables and use useful shortkey to switch
+ *   from one to another.
+ */
+/**
+ * @file lcrt.c
+ * <h2>License</h2>
+ * Copyright (c) 2011 ~ Niu Tao
+ *
+ * This source code is released for free distribution under the terms of the
+ * GNU General Public License
+ *
+ * @author Niu Tao <niutao0602@gmail.com>
+ * @version $Id$
+ * @date Sat 15 Jan 2011 04:24:46 PM CST
+ *
+ * @brief The entry of lcrt
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>
