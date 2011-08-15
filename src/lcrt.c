@@ -1,3 +1,7 @@
+/**
+ * @mainpage What is lcrt?
+ * About December 2010, i visit to SLUG(shlug@googlegroups.com), someone 
+ */
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>

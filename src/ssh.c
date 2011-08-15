@@ -213,6 +213,8 @@ static int lcrt_ssh_connect(struct lcrt_terminal *lterminal)
 
     lterminal->private_data = tssh;
 
+    vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
+
     user = lterminal->user;
     argv[0] = dep_prog[LCRT_DEP_SSH];
     argv[1] = protocol == LCRT_PROTOCOL_SSH2 ? "-2" : "-1";
@@ -250,6 +252,7 @@ void lcrt_ssh_disconnect(struct lcrt_terminal *lterminal)
                             LCRT_TERMINAL_EXIT_CMD, 
                             strlen(LCRT_TERMINAL_EXIT_CMD));
         lcrt_terminal_set_status(lterminal, NULL, LCRT_TERMINAL_DISCONNECT);
+        vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
     }
     if (lterminal->private_data) {
         free(lterminal->private_data);

@@ -183,7 +183,6 @@ int lcrt_terminal_set_status(struct lcrt_terminal *lterminal, char *label_name, 
     case LCRT_TERMINAL_DISCONNECT:
     case LCRT_TERMINAL_CHILD_EXIT:
         sprintf(buf, "<span foreground=\"#CD0000\">%s</span>", title);
-        vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
         sensitive = TRUE;
         break;
     case LCRT_TERMINAL_CONNECTED:

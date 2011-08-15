@@ -694,7 +694,7 @@ doc:
 	@for i in $(DOC_TOOLS);\
 	do \
 		which $$i >/dev/null; \
-		if [ $? -ne 0 ]; then \
+		if [ $$? -ne 0 ]; then \
 			echo "Doc tool '$$i' isn't found,please install it and try again."; \
 			exit 1; \
 		fi \

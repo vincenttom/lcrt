@@ -149,29 +149,6 @@ int lcrt_serial_config(const char *port, int baud_rate, int databit,
     return fd;
 }
 
-void put_text(gchar *string, guint size, struct lcrt_terminal *lterminal)
-{
-	int pos;
-	GString *buffer_tmp;
-	gchar *in_buffer;
-
-	buffer_tmp =  g_string_new(string);
-	in_buffer=buffer_tmp->str;
-	in_buffer += size;
-	
-	for (pos = size; pos > 0; pos--) {
-		in_buffer--;
-		if(*in_buffer=='\r' && *(in_buffer+1) != '\n'){
-			g_string_insert_c(buffer_tmp, pos, '\n');
-			size += 1;
-		}
-		if(*in_buffer=='\n' && *(in_buffer-1) != '\r'){
-			g_string_insert_c(buffer_tmp, pos-1, '\r');
-			size += 1;
-		}
-	}
-	vte_terminal_feed(lterminal->terminal, buffer_tmp->str, size);
-}
 /**
  * @brief the callback to read data from serial port and put the data to terminal.
  * @param user_data we use it to point to struct lcrt_terminal.
@@ -191,7 +168,6 @@ static void lcrt_serial_read(gpointer user_data, gint fd, GdkInputCondition cond
         return ;
     }
     debug_print("read_uart frame:%s len: %d\n", frame, len);
-    //put_text(frame, len, lterminal);
     vte_terminal_feed(lterminal->terminal, frame, len);
 }
 /**
@@ -212,59 +188,6 @@ static void lcrt_serial_write(VteTerminal *widget, gchar *text, guint length, gp
     debug_where();
     if (tserial->fd)
         write(fd, text, length);
-#if 0
-	if (length == 0)
-		return;
-
-	buffer = text;
-
-	if (length == 1) {
-		if(*text == '\n' ) { //|| *string == '\r'){
-			bytes_written = write(fd, "\r\n", 2);
-		} else	{
-			bytes_written = write(fd, text, length);
-		}
-	} else {
-		start_buffer = buffer;
-		buf_length = 1;
-		for (i = 0; i < length; i++) {
-			if (*buffer == '\n' && *(buffer - 1) != '\r') {
-				size_written = write(fd, start_buffer, buf_length - 1);
-
-				if(size_written == -1)
-					return ;
-
-				size_written = write(fd, "\r\n", 2);
-				if(size_written == -1)
-					return ;
-
-				start_buffer = buffer + 1;
-				buf_length = 0;
-			} else if (*(buffer - 1) == '\r' && *buffer != '\n') {
-				if (buf_length > 2)
-					size_written = write(fd, start_buffer, buf_length - 2);
-				else
-					size_written =0;
-
-				if (size_written == -1)
-					return ;
-
-				size_written = write(fd, "\r\n", 2);
-				if (size_written == -1)
-					return ;
-
-				start_buffer = buffer;
-				buf_length = 1;
-			}
-			buffer++;
-			buf_length++;
-		}
-		if (buf_length>1)
-			bytes_written += write(fd, start_buffer, buf_length-1);
-		if (start_buffer[buf_length-2] == '\r')
-			bytes_written += write(fd, "\n", 1);
-	}
-#endif
 }
 static int lcrt_serial_connect(struct lcrt_terminal *lterminal)
 {
@@ -317,6 +240,7 @@ static void lcrt_serial_disconnect(struct lcrt_terminal *lterminal)
         if (tserial && tserial->fd > 0) {
             close(tserial->fd);
         }
+        lcrt_terminal_on_child_exited(NULL, lterminal);
         lcrt_terminal_set_status(lterminal, NULL, LCRT_TERMINAL_DISCONNECT);
         g_signal_handler_disconnect(lterminal->terminal, tserial->commit);
         gtk_input_remove(tserial->input);
