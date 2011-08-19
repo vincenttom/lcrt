@@ -28,4 +28,5 @@ gboolean lcrt_terminal_on_button_press_event(GtkWidget*widget,
             GdkEventButton  *event, gpointer user_data);
 void lcrt_terminal_on_button_close_clicked(GtkButton *button, gpointer user_data);
 gboolean lcrt_terminal_has_selection(struct lcrt_window *lwindow);
+void lcrt_terminal_set_connected_status(struct lcrt_terminal *lterminal);
 #endif

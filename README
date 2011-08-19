@@ -3,8 +3,8 @@ Description
 
 lcrt is a Linux remote login tool. Just like ssh or telnet, but it has
 a GUI and can manage many connections. User can use it to save connection
-information such as hostname, username and, optionally, password, and 
-auto login next time. lcrt also can clone a connected session, so
+information such as hostname, username and password(optionally), and 
+auto login at next time. lcrt also can clone a connected session, so
 user can open many connections quickly.
 
 Features
@@ -63,6 +63,13 @@ Then use command:
     sudo dpkg -i lcrt-x.x.x_i386.deb
 
 to install it.
+
+Make doc
+========
+From version 1.1.0, i add command:
+
+    make doc
+to Makefile, you can use this command to make the document of lcrt.
 
 Depend library
 ==================
