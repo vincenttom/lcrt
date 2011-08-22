@@ -10,7 +10,7 @@
  *
  * Description:  
  */
-
+#define __LCRT_DEBUG__
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,19 +33,24 @@ void lcrt_qconnect_on_button_connect_clicked(GtkButton *button, gpointer user_da
 {
     struct lcrt_qconnect *lqconnect = (struct lcrt_qconnect *)user_data;
     struct lcrt_window *lwindow = lqconnect->parent;
-    struct lcrtc_user *user;
+    struct lcrtc_user *user = NULL;
 
     debug_where();
     if (lqconnect->ops && lqconnect->ops->create) {
         debug_where();
         user = lqconnect->ops->create(lqconnect);
     }
-
-    lcrt_qconnect_on_button_cancel_clicked(NULL, lqconnect);
-    if (lcrt_window_get_auto_save(lwindow)) {
-        lcrt_user_save_one(&lwindow->u_config, user);
+    if (user) {
+        lcrt_qconnect_on_button_cancel_clicked(NULL, lqconnect);
+        if (lcrt_window_get_auto_save(lwindow)) {
+            lcrt_user_save_one(&lwindow->u_config, user);
+        }
+        debug_print("qconnecting...\n");
+        lqconnect->f_status = GTK_RESPONSE_OK;
+    } else {
+        fprintf(stderr, "connect faild...\n");
+        lqconnect->f_status = GTK_RESPONSE_CANCEL;
     }
-    debug_print("qconnecting...\n");
     return;
 }
 void lcrt_qconnect_on_entry_hostname_changed(GtkWidget *widget, gpointer user_data)

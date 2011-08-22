@@ -237,6 +237,7 @@ static struct lcrt_language_config iqconnect = {
          {"p_pcancel",                          "取消"},
          {"p_pok",                              "确定"},
          {"p_ppw_unmatch",                      "密码不匹配!"},
+         {"q_snot_found",                       "未找到可执行程序!\n"},
     }
 };
 

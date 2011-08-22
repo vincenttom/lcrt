@@ -13,6 +13,8 @@ Features
 - auto save connection information so that can auto login remote server 
   next time.
 - easy to clone a connected session.
+- support to connect local serial port.
+- support ssh2,ssh1,telnet auto login.
 
 General Information
 ===================

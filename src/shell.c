@@ -10,8 +10,10 @@
  *
  * Description:  
  */
-
+#define __LCRT_DEBUG__
 #include <stdio.h>
+#include <stdlib.h>
+#include <libgen.h>
 #include <string.h>
 #include "iterminal.h"
 #include "iqconnect.h"
@@ -33,6 +35,38 @@ static void lcrt_shell_receive(struct lcrt_terminal *lterminal)
 
 static int lcrt_shell_connect(struct lcrt_terminal *lterminal)
 {
+    lcrt_protocol_t protocol;
+    struct lcrtc_user *user;
+    char *argv[5], *work_dir;
+    char hostname[256], port[32];
+    char *dep_prog[] = {LCRT_DEP_PROG};
+    int dep = -1;
+    char tmp[32];
+
+    if (lterminal == NULL)
+       return EINVAL;
+
+    user = lterminal->user;
+    argv[0] = user->password;
+    debug_print("shell = %s\n", argv[0]);
+    if (access(argv[0], F_OK | X_OK) != 0)
+        argv[0] = "sh";
+
+    argv[1] = NULL;
+    work_dir = getenv("HOME");
+    if (lcrt_exec_check(protocol) != 0) {
+        lcrt_message_info(lterminal->parent->parent->window, 
+                          lterminal->parent->config.value[LCRT_TM_CONNECTION_PROG_NOT_FOUND],
+                          argv[0]);
+        return -LCRTE_NOT_FOUND;
+    }
+
+    lterminal->child_pid  = vte_terminal_fork_command(VTE_TERMINAL(lterminal->terminal), 
+                argv[0], argv, NULL , work_dir, FALSE, FALSE, FALSE);
+    debug_print("child_pid = %d\n", lterminal->child_pid);
+    lcrt_statusbar_set_user(lterminal->parent->parent->w_statusbar, lterminal->user);
+    debug_where();
+
 }
 
 static void lcrt_shell_disconnect(struct lcrt_terminal *lterminal)
@@ -49,7 +83,7 @@ static void lcrt_shell_show(struct lcrt_qconnect *lqconnect)
     GtkWidget *hbox3;
     struct lcrt_window *parent;
 	int i;
-    static const char *shells[LCRT_SHELL_SUPPORT_NUMBER] = {LCRT_SHELL_SUPPORT};
+    const char *shells[LCRT_SHELL_SUPPORT_NUMBER] = {LCRT_SHELL_SUPPORT};
     static struct lcrt_shell_if slshell, *lshell = &slshell;
 
     memset(lshell, 0, sizeof(struct lcrt_shell_if));
@@ -89,6 +123,7 @@ static void lcrt_shell_show(struct lcrt_qconnect *lqconnect)
     }
     debug_where();
     //gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(combobox_shell)->child), FALSE);
+    gtk_entry_set_max_length(GTK_ENTRY(GTK_BIN(combobox_shell)->child), PASSWORD_LEN);
 
 
     hbox3 = gtk_hbox_new (FALSE, 0);
@@ -99,18 +134,78 @@ static void lcrt_shell_show(struct lcrt_qconnect *lqconnect)
     if (lqconnect->flag == LCRT_QCONNECT_SESSION_OPTION) {
         struct lcrtc_user *user;
         if ((user = lcrt_user_find_by_name(&parent->u_config, lqconnect->uname)) != NULL) {
-            gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lshell->shell);
 			/* NOTE: there is very ugly, we use passwd field to store shell index */
             gtk_combo_box_set_active(GTK_COMBO_BOX(lshell->shell), atoi(user->password));
         }
     } else {
-        gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), lshell->shell);
     	gtk_widget_set_sensitive(lqconnect->q_bt_connect, TRUE);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(lshell->shell), 0); //default shell is 'bash'
     }
 }
 
 static struct lcrtc_user *lcrt_shell_create(struct lcrt_qconnect *lqconnect)
 {
+    struct lcrt_window *lwindow = lqconnect->parent;
+    struct lcrt_shell_if *lshell = (struct lcrt_shell_if *)lqconnect->private_data;
+    const char *shell = gtk_combo_box_get_active_text(GTK_COMBO_BOX(lshell->shell));
+    struct lcrtc_user *user;
+    lcrt_protocol_t protocol = lqconnect->nproto;
+    char hostname[HOSTNAME_LEN];
+    char name[USERNAME_LEN];
+    char password[PASSWORD_LEN];
+
+    if (access(shell, F_OK | X_OK) != 0) {
+        lcrt_message_error(lqconnect->parent->window, 
+                lqconnect->config.value[LCRT_Q_SNOT_FOUND]);
+        return NULL;
+    }
+    debug_where();
+    strcpy(hostname, basename((char *)shell));
+    if (lqconnect->flag != LCRT_QCONNECT_SESSION_OPTION) {
+        if ((user = lcrtc_user_create()) == NULL) {
+            /* 
+             * FIXME: There is no more memory, how can 
+             * we handle this exception ?
+             */
+            return NULL;
+        }
+
+        lcrt_user_find_unused_label(lwindow, hostname, name);
+
+        lcrtc_user_set_data(
+           user,
+           name,
+           hostname,
+           protocol,
+           NULL,
+           shell,
+           gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
+           0,
+           TRUE
+        );
+        lcrtc_user_ref(user);
+        lcrt_user_add(&lwindow->u_config, user);
+        lcrt_window_set_current_user(lwindow, user);
+        if (lqconnect->flag == LCRT_QCONNECT_IN_TAB) {
+            lcrt_create_terminal(lwindow->w_notebook);
+        }
+    } else {
+        if ((user = lcrt_user_find_by_name(&lwindow->u_config, lqconnect->uname)) != NULL) {
+            lcrtc_user_set_data(
+               user,
+               lqconnect->uname,
+               hostname,
+               protocol,
+               NULL,
+               shell,
+               gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
+               0,
+               TRUE
+            );
+        }
+    }
+    return user;
+
 }
 
 struct lcrt_protocol_callback lcrt_protocol_shell_callbacks = {

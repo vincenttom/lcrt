@@ -1,4 +1,4 @@
-//#define __LCRT_DEBUG__
+#define __LCRT_DEBUG__
 #include "debug.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -226,7 +226,10 @@ int lcrt_create_qconnect(
         /* by default, we select ssh2 protocol */
         gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_protocol), LCRT_PROTOCOL_SSH2);
     }
-    return gtk_dialog_run(GTK_DIALOG(quick_connect));
+    debug_where();
+    int ret = gtk_dialog_run(GTK_DIALOG(quick_connect));
+    debug_where();
+    return lqconnect->f_status ? lqconnect->f_status : ret;
 err:
     lcrt_message_error(parent->window, lqconnect->config.value[LCRT_Q_ERR_MSG]);
     return GTK_RESPONSE_DELETE_EVENT;

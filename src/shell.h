@@ -6,10 +6,10 @@
 
 #define LCRT_SHELL_SUPPORT_NUMBER 4
 #define LCRT_SHELL_SUPPORT \
-	"bash", \
-	"sh", \
-	"dash", \
-	"zsh"
+	"/bin/bash", \
+	"/bin/sh", \
+	"/bin/dash", \
+	"/bin/zsh"
 
 extern struct lcrt_protocol_callback lcrt_protocol_shell_callbacks;
 

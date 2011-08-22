@@ -407,9 +407,12 @@ int lcrt_exec_check(lcrt_protocol_t prot)
     }
     return rv;
 }
-/*
- * find a new label like keyword.
- * note: label is a pointer to store new label.
+/**
+ * @brief find a new label like keyword.
+ * @param lwindow main window structure
+ * @param [in] keyword the keyword for search
+ * @param [out] label return the new unused label we found
+ * @return 0 ok, otherwise is error
  */
 int lcrt_user_find_unused_label(struct lcrt_window *lwindow, 
     const char *keyword /* in */, char *label /* out */)

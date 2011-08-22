@@ -86,7 +86,7 @@ void lcrt_toolbar_on_terminal_activate(GtkWidget *toolitem, gpointer user_data)
                name,
                LCRT_PROTOCOL_SHELL,
                NULL,
-               NULL,
+               "/bin/bash",
                NULL,
                0,
                TRUE);

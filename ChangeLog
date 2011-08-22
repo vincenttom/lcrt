@@ -1,239 +1,360 @@
+commit a0f413438b1e650529c2f3e0afea757dfaeb6cbe
+Merge: c37b59f 15dbc22
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Mon Aug 22 09:33:38 2011 +0800
 
-2011-04-18 20:37:22
-===================================================================
-Index: Makefile.in
-===================================================================
---- Makefile.in	(revision 70)
-+++ Makefile.in	(working copy)
-@@ -603,7 +603,7 @@
- 	rm -rf $(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE) 
- 
- # Build ChangeLog from SVN  history
--ChangeLog:
-+changelog:
- 	@if test -f $(top_srcdir)/.svn/entries; then \
- 		echo "" >.$$.ChangeLog; \
- 		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
-@@ -613,8 +613,6 @@
- 		rm -f .$$.ChangeLog; \
- 	fi
- 
--dist: ChangeLog
--
- .PHONY: ChangeLog	
- # Tell versions [3.59,3.63) of GNU make to not export all variables.
- # Otherwise a system limit (for SysV at least) may be exceeded.
-Index: Makefile.am
-===================================================================
---- Makefile.am	(revision 70)
-+++ Makefile.am	(working copy)
-@@ -7,7 +7,7 @@
- 	rm -rf $(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE) 
- 	
- # Build ChangeLog from SVN  history
--ChangeLog:
-+changelog:
- 	@if test -f $(top_srcdir)/.svn/entries; then \
- 		echo "" >.$$.ChangeLog; \
- 		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
-@@ -17,6 +17,4 @@
- 		rm -f .$$.ChangeLog; \
- 	fi
- 	
--dist: ChangeLog
--	
- .PHONY: ChangeLog	
+    Merge branch 'develop' of https://code.google.com/p/lcrt into develop
 
-2011-04-16 12:08:23
-===================================================================
-Index: Makefile.in
-===================================================================
---- Makefile.in	(revision 67)
-+++ Makefile.in	(working copy)
-@@ -682,7 +682,12 @@
- # Build ChangeLog from SVN  history
- ChangeLog:
- 	@if test -f $(top_srcdir)/.svn/entries; then \
--		svn diff | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
-+		echo "" >.$$.ChangeLog; \
-+		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
-+		echo "===================================================================" >> .$$.ChangeLog; \
-+		svn diff >>.$$.ChangeLog; \
-+		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
-+		rm -f .$$.ChangeLog; \
- 	fi
- 
- dist: ChangeLog
-Index: ChangeLog
-===================================================================
---- ChangeLog	(revision 67)
-+++ ChangeLog	(working copy)
-@@ -1,4 +1,24 @@
- 
-+2011-04-16 12:06:51
-+===================================================================
-+Index: Makefile.in
-+===================================================================
-+--- Makefile.in	(revision 67)
-++++ Makefile.in	(working copy)
-+@@ -682,7 +682,11 @@
-+ # Build ChangeLog from SVN  history
-+ ChangeLog:
-+ 	@if test -f $(top_srcdir)/.svn/entries; then \
-+-		svn diff | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
-++		echo "" >.$$.ChangeLog; \
-++		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
-++		echo "===================================================================" >> .$$.ChangeLog; \
-++		svn diff >>.$$.ChangeLog; \
-++		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
-+ 	fi
-+ 
-+ dist: ChangeLog
-+
- 2011-04-16 12:04:50
- ===================================================================
- Index: pixmaps/Makefile.am
-Index: Makefile.am
-===================================================================
---- Makefile.am	(revision 67)
-+++ Makefile.am	(working copy)
-@@ -14,6 +14,7 @@
- 		echo "===================================================================" >> .$$.ChangeLog; \
- 		svn diff >>.$$.ChangeLog; \
- 		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
-+		rm -f .$$.ChangeLog; \
- 	fi
- 	
- dist: ChangeLog
+commit c37b59f87a952f9cc44fd7260c98983955ebbb75
+Merge: b97fbe1 dfb8d1c
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Fri Aug 19 21:24:09 2011 +0800
 
-2011-04-16 12:06:51
-===================================================================
-Index: Makefile.in
-===================================================================
---- Makefile.in	(revision 67)
-+++ Makefile.in	(working copy)
-@@ -682,7 +682,11 @@
- # Build ChangeLog from SVN  history
- ChangeLog:
- 	@if test -f $(top_srcdir)/.svn/entries; then \
--		svn diff | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
-+		echo "" >.$$.ChangeLog; \
-+		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
-+		echo "===================================================================" >> .$$.ChangeLog; \
-+		svn diff >>.$$.ChangeLog; \
-+		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
- 	fi
- 
- dist: ChangeLog
+    fix some bug for serial
 
-2011-04-16 12:04:50
-===================================================================
-Index: pixmaps/Makefile.am
-===================================================================
---- pixmaps/Makefile.am	(revision 66)
-+++ pixmaps/Makefile.am	(working copy)
-@@ -23,8 +23,8 @@
- pkgdatadir = ${datadir}/${PACKAGE}/pixmaps
- 
- install-data-local:
--	test -z ${datadir}/pixmaps || $(MKDIR_P) ${datadir}/pixmaps
--	$(INSTALL_DATA) lcrt-logo.png ${datadir}/pixmaps
-+	test -z $(DESTDIR)/${datadir}/pixmaps || $(MKDIR_P) $(DESTDIR)/${datadir}/pixmaps
-+	$(INSTALL_DATA) lcrt-logo.png $(DESTDIR)/${datadir}/pixmaps
- 
- uninstall-local:
--	rm -f ${datadir}/pixmaps/lcrt-logo.png
-+	rm -f $(DESTDIR)/${datadir}/pixmaps/lcrt-logo.png
-Index: gnome/Makefile.am
-===================================================================
---- gnome/Makefile.am	(revision 66)
-+++ gnome/Makefile.am	(working copy)
-@@ -1,8 +1,8 @@
- EXTRA_DIST = lcrt.desktop lcrt
- 
- define install-menuitem
--	test -z ${datadir}/$(1) || $(MKDIR_P) ${datadir}/$(1)
--	$(INSTALL_DATA) $(2) ${datadir}/$(1)
-+	test -z $(DESTDIR)/${datadir}/$(1) || $(MKDIR_P) $(DESTDIR)/${datadir}/$(1)
-+	$(INSTALL_DATA) $(2) $(DESTDIR)/${datadir}/$(1)
- endef
- 
- install-data-local:
-@@ -10,5 +10,5 @@
- 	$(call install-menuitem,menu,lcrt)
- 
- uninstall-local:
--	rm -f ${datadir}/applications/lcrt.desktop
--	rm -f $(datadir)/menu/lcrt
-+	rm -f $(DESTDIR)/${datadir}/applications/lcrt.desktop
-+	rm -f $(DESTDIR)/$(datadir)/menu/lcrt
-Index: language/Makefile.am
-===================================================================
---- language/Makefile.am	(revision 66)
-+++ language/Makefile.am	(working copy)
-@@ -42,14 +42,14 @@
- lcrt_DATABASES = $(addprefix $(LANGUAGE_CONFIG_PATH), $(lcrt_LANGUAGES))
- 
- install-data-local:
--	echo "$(MKDIR_P) ${datadir}/${PACKAGE}/etc/language"
--	$(MKDIR_P) ${datadir}/${PACKAGE}/etc/language
--	echo "$(INSTALL_DATA) $(lcrt_DATABASES) '${datadir}/${PACKAGE}/etc/language'"
--	$(INSTALL_DATA) $(lcrt_DATABASES) ${datadir}/${PACKAGE}/etc/language
-+	echo "$(MKDIR_P) $(DESTDIR)/${datadir}/${PACKAGE}/etc/language"
-+	$(MKDIR_P) $(DESTDIR)/${datadir}/${PACKAGE}/etc/language
-+	echo "$(INSTALL_DATA) $(lcrt_DATABASES) '$(DESTDIR)/${datadir}/${PACKAGE}/etc/language'"
-+	$(INSTALL_DATA) $(lcrt_DATABASES) $(DESTDIR)/${datadir}/${PACKAGE}/etc/language
- 
- uninstall-local:
--	echo " (cd '${datadir}/${PACKAGE}/etc/language' && rm -f $(lcrt_LANGUAGES))"
--	(cd ${datadir}/${PACKAGE}/etc/language && rm -f $(lcrt_LANGUAGES))
-+	echo " (cd '$(DESTDIR)/${datadir}/${PACKAGE}/etc/language' && rm -f $(lcrt_LANGUAGES))"
-+	(cd $(DESTDIR)/${datadir}/${PACKAGE}/etc/language && rm -f $(lcrt_LANGUAGES))
- 
- clean-local:
- 	@if test -d $(LANGUAGE_CONFIG_PATH) ;then \
-Index: help/Makefile.am
-===================================================================
---- help/Makefile.am	(revision 66)
-+++ help/Makefile.am	(working copy)
-@@ -29,11 +29,11 @@
- 	$(call doc-data-hook,$(distdir))
- 
- install-data-local:
--	$(call doc-data-hook,$(datadir)/gnome/help/$(PACKAGE))
-+	$(call doc-data-hook,$(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE))
- 
- uninstall-local:
- 	@for d in $(DOC_LANGUAGES); do \
--		echo " (cd '$(datadir)/gnome/help/$(PACKAGE)/$$d' && rm -f $(DOC_ENTITIES) $(DOC_FIGURES))"; \
--		(cd "$(datadir)/gnome/help/$(PACKAGE)/$$d" && rm -f $(DOC_ENTITIES) $(DOC_FIGURES)); \
-+		echo " (cd '$(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE)/$$d' && rm -f $(DOC_ENTITIES) $(DOC_FIGURES))"; \
-+		(cd "$(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE)/$$d" && rm -f $(DOC_ENTITIES) $(DOC_FIGURES)); \
- 	done
- 
-Index: Makefile.am
-===================================================================
---- Makefile.am	(revision 66)
-+++ Makefile.am	(working copy)
-@@ -3,13 +3,17 @@
- EXTRA_DIST = AUTHORS NEWS ChangeLog COPYING README
- 
- uninstall-local:
--	rm -rf $(datadir)/$(PACKAGE)
--	rm -rf $(datadir)/gnome/help/$(PACKAGE) 
-+	rm -rf $(DESTDIR)/$(datadir)/$(PACKAGE)
-+	rm -rf $(DESTDIR)/$(datadir)/gnome/help/$(PACKAGE) 
- 	
- # Build ChangeLog from SVN  history
- ChangeLog:
- 	@if test -f $(top_srcdir)/.svn/entries; then \
--		svn diff | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
-+		echo "" >.$$.ChangeLog; \
-+		date +"%Y-%m-%d %T" >>.$$.ChangeLog; \
-+		echo "===================================================================" >> .$$.ChangeLog; \
-+		svn diff >>.$$.ChangeLog; \
-+		cat .$$.ChangeLog | cat - ChangeLog > .ChangeLog && mv .ChangeLog ChangeLog; \
- 	fi
- 	
- dist: ChangeLog
+commit 15dbc220b4a58ecb11a1afc36c9c74326c74cf0f
+Merge: b97fbe1 dfb8d1c
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Fri Aug 19 21:24:09 2011 +0800
 
+    fix some bug for serial
+
+commit dfb8d1c9e0176a120b5574d1a4208922f70fee47
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Mon Aug 15 19:48:54 2011 +0800
+
+    add key press signal 'Return' to protocol serial
+
+ Makefile.am     |    2 +-
+ Makefile.in     |    2 +-
+ README          |   11 ++++++-
+ src/cterminal.c |    5 ---
+ src/iterminal.c |    1 -
+ src/iterminal.h |   62 +++++++++++++++++++++++++------------------
+ src/lcrt.c      |   64 +++++++++++++++++++++++++++++++++++++++++++++
+ src/serial.c    |   78 +------------------------------------------------------
+ src/ssh.c       |    3 ++
+ src/telnet.c    |    4 +++
+ 10 files changed, 119 insertions(+), 113 deletions(-)
+
+commit b97fbe16ff23f8e7b827c40d16b805d5b6668ff5
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Mon Aug 15 19:48:54 2011 +0800
+
+    add key press signal 'Return' to protocol serial
+
+ Makefile.am     |    2 +-
+ Makefile.in     |    2 +-
+ src/cterminal.c |    5 ---
+ src/iterminal.c |    1 -
+ src/iterminal.h |   62 +++++++++++++++++++++++++------------------
+ src/lcrt.c      |    4 +++
+ src/serial.c    |   78 +------------------------------------------------------
+ src/ssh.c       |    3 ++
+ src/telnet.c    |    4 +++
+ 9 files changed, 50 insertions(+), 111 deletions(-)
+
+commit aabd465166e63cee9f9c3b88f2538644be995e27
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Mon Aug 15 02:02:29 2011 +0800
+
+    add make command:'make doc' to create document
+
+ Makefile.am          |    2 +-
+ Makefile.in          |   19 ++--
+ aclocal.m4           |   10 +-
+ config.h.in          |    2 +-
+ configure            |  258 +++++++++++++++++++++++++++++++-------------------
+ gnome/Makefile.in    |    2 +-
+ help/Makefile.in     |    6 +-
+ help/man/Makefile.in |    2 +-
+ language/Makefile.in |    2 +-
+ pixmaps/Makefile.in  |    2 +-
+ src/Makefile.in      |    2 +-
+ 11 files changed, 185 insertions(+), 122 deletions(-)
+
+commit f588a88e3ef52ed6a5cdd844717a6f3335cbb8a4
+Author: niutao <niutao@niutao-laptop.(none)>
+Date:   Sat Aug 13 19:08:25 2011 +0800
+
+    1. support serial protocl.
+    2. we can modify password from quick connect dialog
+
+ .gitignore           |    4 +
+ Doxyfile             | 1514 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ Makefile.am          |   22 +-
+ Makefile.in          |   35 +-
+ aclocal.m4           |   10 +-
+ config.h.in          |    2 +-
+ configure            |  258 ++++------
+ gnome/Makefile.in    |    2 +-
+ help/Makefile.in     |    6 +-
+ help/man/Makefile.in |    2 +-
+ language/Makefile.in |    2 +-
+ language/de_DE.c     |   12 +-
+ language/en_US.c     |   13 +-
+ language/zh_CN.c     |   10 +-
+ pixmaps/Makefile.in  |    2 +-
+ src/Makefile.in      |    2 +-
+ src/cfile.c          |   27 +-
+ src/clogin.c         |    4 +-
+ src/cqconnect.c      |   13 +-
+ src/cterminal.c      |    7 +-
+ src/foperate.c       |    2 +-
+ src/iconnect.c       |    6 +-
+ src/ilogin.c         |    4 +-
+ src/inotebook.h      |    7 +-
+ src/iqconnect.c      |    2 +-
+ src/iqconnect.h      |   95 ++--
+ src/iterminal.c      |   93 +---
+ src/iterminal.h      |   11 +-
+ src/iwindow.h        |   37 +-
+ src/protocol.c       |   13 +-
+ src/protocol.h       |   87 ++--
+ src/raw.c            |   15 +
+ src/raw.h            |   15 +
+ src/rlogin.c         |   47 ++-
+ src/rlogin.h         |    1 +
+ src/serial.c         |  502 +++++++++++++++--
+ src/serial.h         |   94 ++--
+ src/shell.c          |   45 +-
+ src/shell.h          |    1 +
+ src/ssh.c            |  371 +++++++++++--
+ src/ssh.h            |   12 +-
+ src/telnet.c         |  128 +++--
+ src/telnet.h         |    2 +-
+ 43 files changed, 2854 insertions(+), 683 deletions(-)
+
+commit b1744c6baab1faa7bb9a8f44632bf7f7785182a8
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Thu Aug 11 13:37:27 2011 +0800
+
+    change our architecture to support more protocol, and add interface of
+    Properties button in quick connect dialog.
+
+ .gitignore           |   28 +++
+ Makefile.am          |   10 +-
+ Makefile.in          |   27 +--
+ aclocal.m4           |   10 +-
+ config.h.in          |    2 +-
+ configure            |  280 ++++++++++++++---------
+ configure.ac         |    8 +-
+ gnome/Makefile.in    |    2 +-
+ help/Makefile.in     |    6 +-
+ help/man/Makefile.in |    2 +-
+ language/Makefile.in |    2 +-
+ language/de_DE.c     |    1 +
+ language/en_US.c     |    1 +
+ language/zh_CN.c     |    1 +
+ pixmaps/Makefile.in  |    2 +-
+ src/Makefile.am      |    1 +
+ src/Makefile.in      |   24 ++-
+ src/cqconnect.c      |   57 +----
+ src/debug.h          |    1 +
+ src/iqconnect.c      |    1 -
+ src/iqconnect.h      |   22 ++-
+ src/iterminal.c      |   17 +-
+ src/iterminal.h      |    4 +-
+ src/protocol.c       |   55 +++++
+ src/protocol.h       |  127 ++++++++++
+ src/rlogin.c         |   99 ++++++++-
+ src/rlogin.h         |    8 +-
+ src/serial.c         |   35 +++-
+ src/serial.h         |    8 +-
+ src/shell.c          |   89 +++++++-
+ src/shell.h          |   15 +-
+ src/ssh.c            |  637 ++++++++++++++++++++++++++++++++------------------
+ src/ssh.h            |   19 +-
+ src/telnet.c         |  262 ++++++++++++++++++++-
+ src/telnet.h         |    9 +-
+ src/user.c           |   24 ++
+ src/user.h           |   98 +-------
+ 37 files changed, 1405 insertions(+), 589 deletions(-)
+
+commit e93d901e62529b9119b58df097b71293da850e2a
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Thu Aug 11 13:10:11 2011 +0800
+
+    We switch project version control system to Git,first version is from
+    svn r83. But also you can checkout svn version use command:
+    svn checkout http://lcrt.googlecode.com/svn/trunk/ lcrt
+
+ .gitignore                                  |    2 +
+ AUTHORS                                     |    8 +
+ COPYING                                     |   14 +
+ ChangeLog                                   |  239 +
+ Makefile.am                                 |   20 +
+ Makefile.in                                 |  697 +++
+ NEWS                                        |   28 +
+ README                                      |  103 +
+ aclocal.m4                                  | 1109 +++++
+ config.h.in                                 |  202 +
+ configure                                   | 6924 +++++++++++++++++++++++++++
+ configure.ac                                |   91 +
+ depcomp                                     |  630 +++
+ gnome/Makefile.am                           |   12 +
+ gnome/Makefile.in                           |  330 ++
+ gnome/lcrt.desktop                          |   21 +
+ help/Makefile.am                            |   40 +
+ help/Makefile.in                            |  562 +++
+ help/en_US/figures/lcrt-connect.png         |  Bin 0 -> 13840 bytes
+ help/en_US/figures/lcrt-global-options.png  |  Bin 0 -> 33672 bytes
+ help/en_US/figures/lcrt-quick-connect.png   |  Bin 0 -> 28554 bytes
+ help/en_US/figures/lcrt-session-options.png |  Bin 0 -> 31215 bytes
+ help/en_US/lcrt.xml                         |  532 ++
+ help/en_US/legal.xml                        |   76 +
+ help/man/Makefile.am                        |    4 +
+ help/man/Makefile.in                        |  406 ++
+ help/man/lcrt.1.in                          |   29 +
+ help/zh_CN/figures/lcrt-connect.png         |  Bin 0 -> 12633 bytes
+ help/zh_CN/figures/lcrt-global-options.png  |  Bin 0 -> 22504 bytes
+ help/zh_CN/figures/lcrt-quick-connect.png   |  Bin 0 -> 18792 bytes
+ help/zh_CN/figures/lcrt-session-options.png |  Bin 0 -> 24485 bytes
+ help/zh_CN/lcrt.xml                         |  530 ++
+ help/zh_CN/legal.xml                        |   76 +
+ install-sh                                  |  520 ++
+ language/Makefile.am                        |   55 +
+ language/Makefile.in                        |  562 +++
+ language/de_DE.c                            |  363 ++
+ language/de_DE.h                            |    8 +
+ language/en_US.c                            |  363 ++
+ language/en_US.h                            |    8 +
+ language/language.c                         |   95 +
+ language/language.h                         |   27 +
+ language/zh_CN.c                            |  363 ++
+ language/zh_CN.h                            |    8 +
+ missing                                     |  376 ++
+ pixmaps/Makefile.am                         |   31 +
+ pixmaps/Makefile.in                         |  395 ++
+ pixmaps/lcrt-connect-in-tab.png             |  Bin 0 -> 981 bytes
+ pixmaps/lcrt-connect.png                    |  Bin 0 -> 1109 bytes
+ pixmaps/lcrt-copy.png                       |  Bin 0 -> 737 bytes
+ pixmaps/lcrt-cut.png                        |  Bin 0 -> 1017 bytes
+ pixmaps/lcrt-delete.png                     |  Bin 0 -> 903 bytes
+ pixmaps/lcrt-disconnect.png                 |  Bin 0 -> 780 bytes
+ pixmaps/lcrt-find.png                       |  Bin 0 -> 1006 bytes
+ pixmaps/lcrt-help.png                       |  Bin 0 -> 1185 bytes
+ pixmaps/lcrt-home.png                       |  Bin 0 -> 1137 bytes
+ pixmaps/lcrt-info.png                       |  Bin 0 -> 1095 bytes
+ pixmaps/lcrt-logo.xpm                       |  362 ++
+ pixmaps/lcrt-new-session.png                |  Bin 0 -> 1071 bytes
+ pixmaps/lcrt-paste.png                      |  Bin 0 -> 947 bytes
+ pixmaps/lcrt-quick-connect.png              |  Bin 0 -> 1146 bytes
+ pixmaps/lcrt-reconnect.png                  |  Bin 0 -> 812 bytes
+ pixmaps/lcrt-rename.png                     |  Bin 0 -> 867 bytes
+ pixmaps/lcrt-settings.png                   |  Bin 0 -> 1193 bytes
+ pixmaps/lcrt-terminal.png                   |  Bin 0 -> 758 bytes
+ src/Makefile.am                             |   74 +
+ src/Makefile.in                             | 1392 ++++++
+ src/cabout.c                                |   29 +
+ src/cabout.h                                |    6 +
+ src/caccels.c                               |   88 +
+ src/caccels.h                               |   15 +
+ src/cconnect.c                              |  270 ++
+ src/cconnect.h                              |   15 +
+ src/cedit.c                                 |  160 +
+ src/cedit.h                                 |   16 +
+ src/cfile.c                                 |  181 +
+ src/cfile.h                                 |   21 +
+ src/cfind.c                                 |   49 +
+ src/cfind.h                                 |   10 +
+ src/chelp.c                                 |  141 +
+ src/chelp.h                                 |    9 +
+ src/clock.c                                 |   58 +
+ src/clock.h                                 |    9 +
+ src/clogin.c                                |   74 +
+ src/clogin.h                                |   24 +
+ src/cmenubar.c                              |   15 +
+ src/cmenubar.h                              |   19 +
+ src/cnotebook.c                             |  163 +
+ src/cnotebook.h                             |   26 +
+ src/coptions.c                              |   54 +
+ src/coptions.h                              |    9 +
+ src/cpopup.c                                |   68 +
+ src/cpopup.h                                |   12 +
+ src/cqconnect.c                             |  132 +
+ src/cqconnect.h                             |   25 +
+ src/crename.c                               |   65 +
+ src/crename.h                               |   10 +
+ src/csettings.c                             |  287 ++
+ src/csettings.h                             |   15 +
+ src/cstatus.c                               |   61 +
+ src/cstatus.h                               |   25 +
+ src/cstatusbar.c                            |   31 +
+ src/cstatusbar.h                            |    8 +
+ src/cterminal.c                             |  198 +
+ src/cterminal.h                             |   31 +
+ src/ctoolbar.c                              |  104 +
+ src/ctoolbar.h                              |   25 +
+ src/cview.c                                 |   94 +
+ src/cview.h                                 |   12 +
+ src/cwindow.c                               |  108 +
+ src/cwindow.h                               |   11 +
+ src/debug.h                                 |   33 +
+ src/foperate.c                              |  224 +
+ src/foperate.h                              |   12 +
+ src/iabout.c                                |   69 +
+ src/iabout.h                                |    5 +
+ src/iaccels.c                               |  314 ++
+ src/iaccels.h                               |  138 +
+ src/iconnect.c                              |  376 ++
+ src/iconnect.h                              |  118 +
+ src/iedit.c                                 |  280 ++
+ src/iedit.h                                 |   77 +
+ src/ifile.c                                 |  360 ++
+ src/ifile.h                                 |   98 +
+ src/ifind.c                                 |  247 +
+ src/ifind.h                                 |   54 +
+ src/ihelp.c                                 |  179 +
+ src/ihelp.h                                 |   72 +
+ src/ilock.c                                 |  292 ++
+ src/ilock.h                                 |   65 +
+ src/ilogin.c                                |  287 ++
+ src/ilogin.h                                |   82 +
+ src/imenubar.c                              |   81 +
+ src/imenubar.h                              |   29 +
+ src/inotebook.c                             |  143 +
+ src/inotebook.h                             |   75 +
+ src/ioptions.c                              |  184 +
+ src/ioptions.h                              |   62 +
+ src/ipopup.c                                |  235 +
+ src/ipopup.h                                |   71 +
+ src/iqconnect.c                             |  326 ++
+ src/iqconnect.h                             |  215 +
+ src/irename.c                               |  261 +
+ src/irename.h                               |   55 +
+ src/isettings.c                             | 1032 ++++
+ src/isettings.h                             |  280 ++
+ src/istatus.c                               |  165 +
+ src/istatus.h                               |   56 +
+ src/istatusbar.c                            |   33 +
+ src/istatusbar.h                            |   30 +
+ src/iterminal.c                             |  310 ++
+ src/iterminal.h                             |   69 +
+ src/itoolbar.c                              |  166 +
+ src/itoolbar.h                              |   83 +
+ src/iview.c                                 |  183 +
+ src/iview.h                                 |   65 +
+ src/iwindow.c                               |  264 +
+ src/iwindow.h                               |   80 +
+ src/lcrt.c                                  |  100 +
+ src/list.h                                  |  242 +
+ src/message.c                               |   67 +
+ src/message.h                               |   10 +
+ src/mkconfig.c                              |  238 +
+ src/mkconfig.h                              |   37 +
+ src/rlogin.c                                |   29 +
+ src/rlogin.h                                |   12 +
+ src/serial.c                                |  233 +
+ src/serial.h                                |   73 +
+ src/shell.c                                 |   33 +
+ src/shell.h                                 |   12 +
+ src/ssh.c                                   |  500 ++
+ src/ssh.h                                   |   12 +
+ src/support.c                               |  122 +
+ src/support.h                               |   61 +
+ src/telnet.c                                |  150 +
+ src/telnet.h                                |   12 +
+ src/user.c                                  |  408 ++
+ src/user.h                                  |  182 +
+ 178 files changed, 30938 insertions(+), 0 deletions(-)

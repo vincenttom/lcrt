@@ -238,6 +238,7 @@ static struct lcrt_language_config iqconnect = {
          {"q_pcancel",                          "Cancel"},
          {"q_pok",                              "OK"},
          {"q_ppw_unmatch",                      "Password can not match!"},
+         {"q_snot_found",                       "Shell is not found!\n"},
 
     }
 };

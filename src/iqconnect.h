@@ -65,6 +65,8 @@ enum {
     LCRT_Q_PCANCEL,
     LCRT_Q_POK,
     LCRT_Q_PPW_UNMATCH, /* password can not match */
+    /** for shell  */
+    LCRT_Q_SNOT_FOUND,
     LCRT_Q_NUMBER
 };
 #define LCRT_Q_NAME \
@@ -105,6 +107,7 @@ enum {
     "q_pcancel", \
     "q_pok", \
     "q_ppw_unmatch", \
+    "q_snot_found", \
 
 #define LCRT_Q_VALUE \
     "Quick connect", \
@@ -146,6 +149,7 @@ enum {
     "Cancel", \
     "OK", \
     "Password can not match!", \
+    "Shell is not found!\n",
 
 #define LCRT_Q_SHORTCUT \
     {0, 0}
@@ -166,6 +170,9 @@ typedef enum {
 struct lcrt_qconnect {
     struct lcrt_window *parent;
     lcrt_qconnect_flag_t flag;
+    int f_status; /**< flag to mark which button user have clicked.
+                        GTK_RESPONSE_OK mean connect button, 
+                        GTK_RESPONSE_CANCEL mean cancel button */
     const char *uname;
 
     GtkWidget *q_connect;
