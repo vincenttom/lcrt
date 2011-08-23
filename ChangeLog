@@ -1,3 +1,36 @@
+commit 6f0c3cf504f80a57b77929fc98035c655d54ee3c
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Tue Aug 23 21:34:40 2011 +0800
+
+    fix error when create a new session
+
+ ChangeLog       |   32 ++++++++++++++++++++++++++++++++
+ src/iqconnect.c |    9 ++++++---
+ src/user.c      |    2 +-
+ 3 files changed, 39 insertions(+), 4 deletions(-)
+
+commit d389557981c44ce6ca3a170d89afb889d1f866d8
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Tue Aug 23 01:36:56 2011 +0800
+
+    fix the bug on protocol of shell
+
+ ChangeLog        |  595 ++++++++++++++++++++++++++++++++----------------------
+ Makefile.am      |    2 +-
+ Makefile.in      |    2 +-
+ README           |    2 +
+ language/de_DE.c |    1 +
+ language/en_US.c |    1 +
+ language/zh_CN.c |    1 +
+ src/cqconnect.c  |   19 +-
+ src/ctoolbar.c   |    2 +-
+ src/iqconnect.c  |    7 +-
+ src/iqconnect.h  |    7 +
+ src/shell.c      |  103 +++++++++-
+ src/shell.h      |    8 +-
+ src/user.c       |    9 +-
+ 14 files changed, 499 insertions(+), 260 deletions(-)
+
 commit a0f413438b1e650529c2f3e0afea757dfaeb6cbe
 Merge: c37b59f 15dbc22
 Author: NiuTao <niutao0602@gmail.com>

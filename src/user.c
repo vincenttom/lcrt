@@ -426,7 +426,7 @@ int lcrt_user_find_unused_label(struct lcrt_window *lwindow,
 
     if (lcrt_user_find_by_name(&lwindow->u_config, keyword) != NULL) {
         for (i = 1; i <= LCRT_MAX_LABEL; i++) {
-            sprintf(label, "%s (%d)", keyword, i++);
+            sprintf(label, "%s (%d)", keyword, i);
             if (lcrt_user_find_by_name(&lwindow->u_config, label) == NULL)
                 return LCRTE_OK;
         };

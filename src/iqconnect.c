@@ -227,9 +227,12 @@ int lcrt_create_qconnect(
         gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_protocol), LCRT_PROTOCOL_SSH2);
     }
     debug_where();
-    int ret = gtk_dialog_run(GTK_DIALOG(quick_connect));
-    debug_where();
-    return lqconnect->f_status ? lqconnect->f_status : ret;
+    int ret;
+    do {
+        ret = gtk_dialog_run(GTK_DIALOG(quick_connect));
+        debug_where();
+    } while (lqconnect->f_status == GTK_RESPONSE_CANCEL);
+    return ret;
 err:
     lcrt_message_error(parent->window, lqconnect->config.value[LCRT_Q_ERR_MSG]);
     return GTK_RESPONSE_DELETE_EVENT;
