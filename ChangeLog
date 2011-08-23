@@ -1,13 +1,22 @@
-commit 6f0c3cf504f80a57b77929fc98035c655d54ee3c
+commit 3faf9d2ce6b260795eb65ede7a3c5bbe4ce4c1a6
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Tue Aug 23 21:41:16 2011 +0800
+
+    Release lcrt-1.1.0
+
+ ChangeLog |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 2652ee7266d7f1a4c6c40740480faea7af437b7d
 Author: Niu Tao <niutao0602@gmail.com>
 Date:   Tue Aug 23 21:34:40 2011 +0800
 
     fix error when create a new session
 
- ChangeLog       |   32 ++++++++++++++++++++++++++++++++
+ ChangeLog       |   33 +++++++++++++++++++++++++++++++++
  src/iqconnect.c |    9 ++++++---
  src/user.c      |    2 +-
- 3 files changed, 39 insertions(+), 4 deletions(-)
+ 3 files changed, 40 insertions(+), 4 deletions(-)
 
 commit d389557981c44ce6ca3a170d89afb889d1f866d8
 Author: Niu Tao <niutao0602@gmail.com>
