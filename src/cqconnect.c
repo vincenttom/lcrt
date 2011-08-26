@@ -41,15 +41,16 @@ void lcrt_qconnect_on_button_connect_clicked(GtkButton *button, gpointer user_da
         user = lqconnect->ops->create(lqconnect);
     }
     if (user) {
+        lwindow->q_status = GTK_RESPONSE_OK;
         lcrt_qconnect_on_button_cancel_clicked(NULL, lqconnect);
         if (lcrt_window_get_auto_save(lwindow)) {
             lcrt_user_save_one(&lwindow->u_config, user);
         }
         debug_print("qconnecting...\n");
-        lqconnect->f_status = GTK_RESPONSE_OK;
+        debug_where();
     } else {
         fprintf(stderr, "connect faild...\n");
-        lqconnect->f_status = GTK_RESPONSE_CANCEL;
+        lwindow->q_status = GTK_RESPONSE_CANCEL;
     }
     return;
 }

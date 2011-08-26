@@ -1,11 +1,11 @@
-commit 3faf9d2ce6b260795eb65ede7a3c5bbe4ce4c1a6
+commit 47399df27c1a082c1168f627b474d18fd2ade4a6
 Author: Niu Tao <niutao0602@gmail.com>
 Date:   Tue Aug 23 21:41:16 2011 +0800
 
-    Release lcrt-1.1.0
+    just change ChangeLog
 
- ChangeLog |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
+ ChangeLog |   15 ++++++++++++---
+ 1 files changed, 12 insertions(+), 3 deletions(-)
 
 commit 2652ee7266d7f1a4c6c40740480faea7af437b7d
 Author: Niu Tao <niutao0602@gmail.com>

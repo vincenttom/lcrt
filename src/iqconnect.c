@@ -231,7 +231,7 @@ int lcrt_create_qconnect(
     do {
         ret = gtk_dialog_run(GTK_DIALOG(quick_connect));
         debug_where();
-    } while (lqconnect->f_status == GTK_RESPONSE_CANCEL);
+    } while (parent->q_status == GTK_RESPONSE_CANCEL);
     return ret;
 err:
     lcrt_message_error(parent->window, lqconnect->config.value[LCRT_Q_ERR_MSG]);

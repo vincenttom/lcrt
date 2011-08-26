@@ -52,8 +52,11 @@ struct lcrt_accels;
  */
 struct lcrt_window {
     GtkWidget *window; /**< main window component */
-    int full_screen; /**<  flag to mark wethere is run in full screen */
-    gboolean hide; /**<  flag to mark wethere is hidden from desktop status bar */
+    int full_screen; /**<  the flag to mark wethere is run in full screen */
+    gboolean hide; /**<  the flag to mark wethere is hidden from desktop status bar */
+    int q_status; /**< the flag to mark which button user has clicked in quick connect dialog.
+                        GTK_RESPONSE_OK mean connect button, 
+                        GTK_RESPONSE_CANCEL mean cancel button */
 
     GtkWidget *w_vbox;
     GtkAccelGroup *w_accel; /**< keyboard shortkey group */

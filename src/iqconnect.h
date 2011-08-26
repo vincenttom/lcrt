@@ -170,9 +170,6 @@ typedef enum {
 struct lcrt_qconnect {
     struct lcrt_window *parent;
     lcrt_qconnect_flag_t flag;
-    int f_status; /**< flag to mark which button user have clicked.
-                        GTK_RESPONSE_OK mean connect button, 
-                        GTK_RESPONSE_CANCEL mean cancel button */
     const char *uname;
 
     GtkWidget *q_connect;
