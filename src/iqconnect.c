@@ -1,4 +1,4 @@
-#define __LCRT_DEBUG__
+//#define __LCRT_DEBUG__
 #include "debug.h"
 #include <sys/types.h>
 #include <sys/stat.h>

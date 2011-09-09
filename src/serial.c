@@ -97,9 +97,10 @@ int lcrt_serial_config(const char *port, int baud_rate, int databit,
     }
     //tcgetattr(fd, &ltermios);
 	memset(&ltermios, 0, sizeof(struct termios));
+#if 0
     ltermios.c_cflag |= (baud_rate & CBAUD);
     ltermios.c_cflag |= (databit & CSIZE);
-
+#endif
     switch (stopbit) {
     case 0:
         ltermios.c_cflag &= ~CSTOPB; 
@@ -227,7 +228,7 @@ static int lcrt_serial_connect(struct lcrt_terminal *lterminal)
                             s_parity,s_stopbit,s_software,s_hardware);
     if (fd <= 0) {
         lcrt_message_error(lterminal->parent->parent->window, 
-                lterminal->parent->config.value[LCRT_TM_SERIAL_ERROR], s_port, strerror(fd));
+                lterminal->parent->config.value[LCRT_TM_SERIAL_ERROR], s_port, strerror(-fd));
         free(tserial);
         return fd;
     }
