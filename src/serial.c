@@ -30,6 +30,15 @@
 #include "debug.h"
 #include "message.h"
 #include "cstatusbar.h"
+
+/**
+ * fix compile error in hurd-i386, kfreebsd-amd64,
+ * kfreebsd-i386, mips, mipsel
+ */
+#ifndef CMSPAR
+#define CMSPAR 010000000000
+#endif
+
 struct lcrt_serial_map {
     int index;
     char *name;
@@ -97,7 +106,7 @@ int lcrt_serial_config(const char *port, int baud_rate, int databit,
     }
     //tcgetattr(fd, &ltermios);
 	memset(&ltermios, 0, sizeof(struct termios));
-#if 0
+#if 1
     ltermios.c_cflag |= (baud_rate & CBAUD);
     ltermios.c_cflag |= (databit & CSIZE);
 #endif

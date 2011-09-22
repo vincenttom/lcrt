@@ -1,3 +1,40 @@
+commit df72e914230931d80aadf340f4e43bb881689124
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Thu Sep 22 20:02:53 2011 +0800
+
+    fix comlipe error: 'CMSPAR' undeclared
+
+ ChangeLog    |   25 +++++++++++++++++++++++++
+ configure    |   20 ++++++++++----------
+ configure.ac |    2 +-
+ src/serial.c |   11 ++++++++++-
+ 4 files changed, 46 insertions(+), 12 deletions(-)
+
+commit 7a71ebab28ba31aaed19f6631571c63b52f5903f
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Fri Sep 9 17:54:36 2011 +0800
+
+    fix error of can not open serial port at first time
+
+ src/cqconnect.c |    2 +-
+ src/iqconnect.c |    2 +-
+ src/serial.c    |    5 +++--
+ src/shell.c     |    2 +-
+ 4 files changed, 6 insertions(+), 5 deletions(-)
+
+commit b61af72d316f6303b81ffb694d4a48e488cccb1e
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Sat Aug 27 01:02:29 2011 +0800
+
+    Release lcrt-1.1.0
+
+ ChangeLog       |    8 ++++----
+ src/cqconnect.c |    5 +++--
+ src/iqconnect.c |    2 +-
+ src/iqconnect.h |    3 ---
+ src/iwindow.h   |    7 +++++--
+ 5 files changed, 13 insertions(+), 12 deletions(-)
+
 commit 47399df27c1a082c1168f627b474d18fd2ade4a6
 Author: Niu Tao <niutao0602@gmail.com>
 Date:   Tue Aug 23 21:41:16 2011 +0800
