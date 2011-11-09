@@ -31,12 +31,17 @@
 #include "message.h"
 #include "cstatusbar.h"
 
+#if 0
 /**
  * fix compile error in hurd-i386, kfreebsd-amd64,
  * kfreebsd-i386, mips, mipsel
  */
 #ifndef CMSPAR
 #define CMSPAR 010000000000
+#endif
+#ifndef CBAUD
+#define CBAUD  0010017
+#endif
 #endif
 
 struct lcrt_serial_map {
@@ -106,10 +111,10 @@ int lcrt_serial_config(const char *port, int baud_rate, int databit,
     }
     //tcgetattr(fd, &ltermios);
 	memset(&ltermios, 0, sizeof(struct termios));
-#if 1
+#ifdef __USE_MISC
     ltermios.c_cflag |= (baud_rate & CBAUD);
-    ltermios.c_cflag |= (databit & CSIZE);
 #endif
+    ltermios.c_cflag |= (databit & CSIZE);
     switch (stopbit) {
     case 0:
         ltermios.c_cflag &= ~CSTOPB; 
@@ -135,12 +140,14 @@ int lcrt_serial_config(const char *port, int baud_rate, int databit,
     case 2:
         ltermios.c_cflag |= PARENB; /* Enable parity */
         break;
+#ifdef __USE_MISC
     case 3:
         ltermios.c_cflag &= ~CMSPAR;
         break;
     case 4:
         ltermios.c_cflag |= CMSPAR;
         break;
+#endif
     default:
         return -EINVAL;
     }
@@ -185,8 +192,6 @@ static void lcrt_serial_read(gpointer user_data, gint fd, GdkInputCondition cond
 			lcrt_serial_disconnect(lterminal);
 			return;
 		}
-		printf("ERRNO = %d\n", errno);
-        perror(__func__);
         return ;
     }
     vte_terminal_feed(VTE_TERMINAL(lterminal->terminal), (const char *)buffer, len);

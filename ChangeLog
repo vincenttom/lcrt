@@ -1,14 +1,14 @@
-commit df72e914230931d80aadf340f4e43bb881689124
+commit 541606a37dc2419a76fd088fa76e112f8858186c
 Author: NiuTao <niutao0602@gmail.com>
 Date:   Thu Sep 22 20:02:53 2011 +0800
 
     fix comlipe error: 'CMSPAR' undeclared
 
- ChangeLog    |   25 +++++++++++++++++++++++++
+ ChangeLog    |   37 +++++++++++++++++++++++++++++++++++++
  configure    |   20 ++++++++++----------
  configure.ac |    2 +-
  src/serial.c |   11 ++++++++++-
- 4 files changed, 46 insertions(+), 12 deletions(-)
+ 4 files changed, 58 insertions(+), 12 deletions(-)
 
 commit 7a71ebab28ba31aaed19f6631571c63b52f5903f
 Author: NiuTao <niutao0602@gmail.com>
