@@ -17,5 +17,4 @@ X-GNOME-Bugzilla-Component=BugBuddyBugs
 X-GNOME-Bugzilla-Version=0.0.1
 Categories=GNOME;GTK;Utility;
 StartupNotify=true
-OnlyShowIn=GNOME;
 X-Ubuntu-Gettext-Domain=lcrt
