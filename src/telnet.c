@@ -48,7 +48,7 @@ static void lcrt_telnet_receive(struct lcrt_terminal *lterminal)
         debug_print("text null\n");
         return;
     }
-#if 1
+#if 0
     debug_print("++++++++++++++++++++++++CONTENTS++++++++++++++++++++++++\n");
     debug_print("%s", text);
     debug_print("++++++++++++++++++++++++CONTENTS++++++++++++++++++++++++\n");
@@ -97,7 +97,7 @@ static void lcrt_telnet_receive(struct lcrt_terminal *lterminal)
         vte_terminal_reset(VTE_TERMINAL(lterminal->terminal), TRUE, TRUE);
         return;
     }
-    if (lterminal->connected == (LCRT_TERMINAL_SEND_USERNAME | LCRT_TERMINAL_SEND_PASSWORD))
+    if (lterminal->connected == (LCRT_TERMINAL_SEND_USERNAME | LCRT_TERMINAL_SEND_PASSWORD) || strlen(user->username) == 0)
         lcrt_terminal_set_connected_status(lterminal);
 }
 
@@ -297,7 +297,7 @@ static void lcrt_telnet_show(struct lcrt_qconnect *lqconnect)
     	gtk_widget_set_sensitive(lqconnect->q_bt_connect, FALSE);
     }
     gtk_entry_set_text(GTK_ENTRY(ltelnet->port), str_port[lqconnect->nproto]);
-    gtk_entry_set_editable(GTK_ENTRY(ltelnet->port), FALSE);
+    //gtk_entry_set_editable(GTK_ENTRY(ltelnet->port), FALSE);
 }
 
 static struct lcrtc_user *lcrt_telnet_create(struct lcrt_qconnect *lqconnect)
