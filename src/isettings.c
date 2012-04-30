@@ -829,7 +829,7 @@ int lcrt_settings_init_local_config(struct lcrt_settings *lsettings)
     static char *config[LCRT_LT_NUMBER] = {LCRT_LT_CONFIG};
 
     snprintf(db_name, sizeof(db_name), "%s/%s/", lcrt_config_get_local_dir(), LCRT_SETTINGS_CONFIG_DIR);
-    lcrt_mkdir(db_name);
+    lcrt_fmkdir(db_name);
     strcat(db_name, LCRT_SETTINGS_DB);
     lcrt_config_init(&lsettings->config.ldb, db_name, LCRT_ISETTINGS_TABLE);
 

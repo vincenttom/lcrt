@@ -99,7 +99,7 @@ gboolean lcrt_help_check_update(gpointer user_data)
     memset(command, '\0', 256);
     read(fd, command, 32);
     close(fd);
-    lcrt_remove("/tmp/version.h");
+    lcrt_fremove("/tmp/version.h");
     if (sscanf(command, "%d.%d.%d", &m, &n, &t) != 3) {
         lcrt_message_error(lhelp->parent->parent->window,
                            lhelp->config.value[LCRT_H_CHECK_UPDATE_ERR]);

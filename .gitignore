@@ -32,3 +32,6 @@ autom4te.cache
 tmp
 *.swp
 cscope.out
+
+# document directory create by doxygen
+doc

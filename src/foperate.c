@@ -1,9 +1,16 @@
 /**
  * @file    foperate.c
- * @brief   file operate functions
- * @author  niu.tao
+ * <h2>License</h2>
+ * Copyright (c) 2012 ~ Niu Tao
+ *
+ * This source code is released for free distribution under the terms of the
+ * GNU General Public License
+ *
+ * @author  Niu Tao <niutao0602@gmail.com>
  * @version v1.0
  * @date    2010-11-16
+ *
+ * @brief  The functions below are written for file operation.
  */
 #include <stdio.h>
 #include <sys/types.h>
@@ -15,7 +22,14 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-int lcrt_mkdir(const char *dir)
+/**
+ * @brief  Create directory from root, if the parent directory is not exist,
+ *         then make it until last one.
+ * @param dir path or directory which want to create
+ * @return = 0, success\n
+ *         < 0, error code
+ */
+int lcrt_fmkdir(const char *dir)
 {
     int len;
     struct stat st;
@@ -24,12 +38,15 @@ int lcrt_mkdir(const char *dir)
 
     if (dir == NULL)
         return -EINVAL;
+    /** the directory has exist, so ship  */
     if (access(dir, F_OK | R_OK | W_OK) == 0)
         return 0;
+
     strncpy(logdir,dir ,512);
     len = strlen(logdir);
+
     if (len == 0)
-        return -1;
+        return -EINVAL;
 
     p = logdir + len - 1;
     while (*p == '/')
@@ -61,7 +78,14 @@ int lcrt_mkdir(const char *dir)
     return 0;
 }
 
-int lcrt_copy(const char *fsrc, const char *fdst)
+/**
+ * @brief  copy a file from fsrc to fdst
+ * @param fsrc the source file name which will be copy
+ * @param fdst the target file name which will be generate
+ * @return = 0, success\n
+ *         < 0, error code
+ */
+int lcrt_fcopy(const char *fsrc, const char *fdst)
 {
     unsigned char buffer[4096];
     FILE *fps, *fpd;
@@ -96,7 +120,14 @@ out:
     return rv;
 }
 
-int lcrt_dircopy(const char *dsrc, const char *ddst)
+/**
+ * @brief  copy a directory from another
+ * @parem dsrc the source directory name
+ * @parem ddst the target directory name
+ * @return = 0, success\n
+ *         < 0, error code
+ */
+int lcrt_fdircopy(const char *dsrc, const char *ddst)
 {
     DIR *dir;
     struct dirent *direntp;
@@ -116,35 +147,35 @@ int lcrt_dircopy(const char *dsrc, const char *ddst)
         rv = -errno;
         goto out;
     }
-    lcrt_mkdir(ddst);
+    lcrt_fmkdir(ddst);
     while ((direntp = readdir(dir)) != NULL) {
         if (strcmp(direntp->d_name, ".") == 0 || strcmp(direntp->d_name, "..") == 0)
             continue;
         if (direntp->d_type == DT_DIR) {
             snprintf(fsrc, sizeof(fsrc), "%s/%s", dsrc, direntp->d_name);
             snprintf(fdst, sizeof(fdst), "%s/%s", ddst, direntp->d_name);
-            lcrt_mkdir(fdst);
-            lcrt_dircopy(fsrc, fdst);
+            lcrt_fmkdir(fdst);
+            lcrt_fdircopy(fsrc, fdst);
             continue;
         }
         snprintf(fsrc, sizeof(fsrc), "%s/%s", dsrc, direntp->d_name);
         snprintf(fdst, sizeof(fdst), "%s/%s", ddst, direntp->d_name);
-        lcrt_copy(fsrc, fdst);
+        lcrt_fcopy(fsrc, fdst);
     }
     closedir(dir);
 out:
     return rv;
 }
-int lcrt_move(const char *fsrc, const char *fdst)
+int lcrt_fmove(const char *fsrc, const char *fdst)
 {
     int rv;
 
-    if ((rv = lcrt_copy(fsrc, fdst)) == 0) {
+    if ((rv = lcrt_fcopy(fsrc, fdst)) == 0) {
         unlink(fsrc);
     }
     return rv;
 }
-int lcrt_remove(const char *fname)
+int lcrt_fremove(const char *fname)
 {
     if (fname == NULL)
         return -EINVAL;

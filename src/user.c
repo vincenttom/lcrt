@@ -42,7 +42,7 @@ int lcrt_user_init_config(struct lcrt_user *luser)
 
     memset(luser, 0, sizeof(struct lcrt_user));
     snprintf(db_name, sizeof(db_name), "%s/%s/", lcrt_config_get_local_dir(), LCRT_USER_CONFIG_DIR);
-    lcrt_mkdir(db_name);
+    lcrt_fmkdir(db_name);
     strcat(db_name, LCRT_USER_DB);
     lcrt_config_init(&luser->db, db_name, LCRT_USER_TABLE);
     INIT_LIST_HEAD(&luser->child);

@@ -133,7 +133,7 @@ static int lcrt_config_load_language()
     int i;
 
     snprintf(buf, sizeof(buf), "%s/"LANGUAGE_DIR, local_config_dir);
-    lcrt_mkdir(buf);
+    lcrt_fmkdir(buf);
     snprintf(buf, sizeof(buf), "%s/%s/"LANGUAGE_DB_NAME, local_config_dir, LANGUAGE_DIR);
 
     lcrt_config_init(&config, buf, LANGUAGE_DB_TABLE);
@@ -172,7 +172,7 @@ int lcrt_config_save_language(char *language_name)
     int rv;
     struct lcrt_config config;
     snprintf(buf, sizeof(buf), "%s/"LANGUAGE_DIR, local_config_dir);
-    lcrt_mkdir(buf);
+    lcrt_fmkdir(buf);
     snprintf(buf, sizeof(buf), "%s/%s/"LANGUAGE_DB_NAME, local_config_dir, LANGUAGE_DIR);
 
     lcrt_config_init(&config, buf, LANGUAGE_DB_TABLE);
@@ -198,7 +198,7 @@ int lcrt_config_load()
         home = ".";
     }
     snprintf(local_config_dir, sizeof(local_config_dir), "%s/.lcrt", home);
-    lcrt_mkdir(local_config_dir);
+    lcrt_fmkdir(local_config_dir);
     lcrt_config_load_language();
     return 0;
 }

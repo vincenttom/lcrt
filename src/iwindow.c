@@ -176,7 +176,7 @@ int lcrt_window_init_config(struct lcrt_window *lwindow)
     memset(&lwindow->w_config, 0, sizeof(struct lcrtc_window));
     lwindow->full_screen = FALSE;
     snprintf(db_name, sizeof(db_name), "%s/%s/", lcrt_config_get_local_dir(), LCRT_WINDOW_CONFIG_DIR);
-    lcrt_mkdir(db_name);
+    lcrt_fmkdir(db_name);
     strcat(db_name, LCRT_WINDOW_DB);
     lcrt_config_init(&lwindow->w_config.db, db_name, LCRT_IWINDOW_TABLE);
     for (i = 0; i < LCRT_W_NUMBER; i++) {
