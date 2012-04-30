@@ -1,3 +1,92 @@
+commit fd4e2441e78bde8a51e15526f5e905c9a641b527
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Tue May 1 00:34:05 2012 +0800
+
+    change file operation functions with prefix lcrt_f
+
+ .gitignore      |    3 ++
+ src/cconnect.c  |    2 +-
+ src/chelp.c     |    2 +-
+ src/foperate.c  |   57 ++++++++++++++++++++++++++++++++++++++++++------------
+ src/foperate.h  |    8 +++---
+ src/iaccels.c   |    2 +-
+ src/isettings.c |    2 +-
+ src/iwindow.c   |    2 +-
+ src/mkconfig.c  |    6 ++--
+ src/protocol.c  |   53 +++++++++++++++++++++++++++++++-------------------
+ src/user.c      |    2 +-
+ 11 files changed, 93 insertions(+), 46 deletions(-)
+
+commit 6b4188f04e06d28bcfc505c27981dfb810268dc7
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Mon Apr 30 19:30:19 2012 +0800
+
+    1.update version to 1.1.2
+    2.support to create session folder
+
+ configure              |   20 ++--
+ configure.ac           |    2 +-
+ language/de_DE.c       |   16 +++
+ language/en_US.c       |   16 +++
+ language/language.h    |    2 +-
+ language/zh_CN.c       |   16 +++
+ pixmaps/lcrt-mkdir.png |  Bin 0 -> 696 bytes
+ src/Makefile.am        |    2 +
+ src/Makefile.in        |   33 ++++++
+ src/cconnect.c         |   84 ++++++++++++----
+ src/cconnect.h         |    1 +
+ src/cfile.c            |    2 +-
+ src/clogin.c           |   22 +++--
+ src/cmkdir.c           |  112 +++++++++++++++++++++
+ src/cmkdir.h           |   10 ++
+ src/coptions.c         |    3 +-
+ src/crename.c          |    2 +-
+ src/cstatusbar.c       |    7 +-
+ src/ctoolbar.c         |    6 +-
+ src/iconnect.c         |  100 +++++++++++++++----
+ src/iconnect.h         |   11 ++-
+ src/imkdir.c           |  253 ++++++++++++++++++++++++++++++++++++++++++++++++
+ src/imkdir.h           |   55 +++++++++++
+ src/inotebook.c        |   28 +++---
+ src/iqconnect.c        |    5 +-
+ src/iqconnect.h        |    5 +-
+ src/serial.c           |   29 ++++--
+ src/shell.c            |    8 +-
+ src/ssh.c              |   35 ++-----
+ src/telnet.c           |   68 ++------------
+ src/user.c             |  164 ++++++++++++++++++++++++++------
+ src/user.h             |   14 ++-
+ 32 files changed, 917 insertions(+), 214 deletions(-)
+
+commit e5fd022a53ecd22b9004d06fd47ef864700369ed
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Sat Apr 28 23:17:58 2012 +0800
+
+    Support to create a session without username and can edit port for telnet protocol
+
+ src/telnet.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 28030c6c045ce0799a6cac1812999a1902d327a9
+Author: niutao0602 <niutao0602@gmail.com>
+Date:   Wed Dec 7 01:52:36 2011 +0000
+
+    修正Issue 8 中所反应的问题
+
+ gnome/lcrt.desktop |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 8e33dea515f5b64d4cb142178778533064f85258
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Wed Nov 9 11:53:37 2011 +0800
+
+    修正多平台编译错误
+
+ ChangeLog    |    6 +++---
+ Doxyfile     |    2 +-
+ src/serial.c |   13 +++++++++----
+ 3 files changed, 13 insertions(+), 8 deletions(-)
+
 commit 541606a37dc2419a76fd088fa76e112f8858186c
 Author: NiuTao <niutao0602@gmail.com>
 Date:   Thu Sep 22 20:02:53 2011 +0800

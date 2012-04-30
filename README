@@ -26,7 +26,12 @@ The official web site is:
 
     http://code.google.com/p/lcrt
 
-You can download the latest lcrt tarball and deb packet from:
+Since I can't connect to googlecode to commit code, i use github as 
+repositorie, URL is:
+
+    https://github.com/niutao/lcrt
+
+You can download the latest tarball and deb packet from:
 
     http://code.google.com/p/lcrt/downloads/list
 
@@ -36,9 +41,11 @@ Also you can get the latest source code from:
 
 use command:
 
-    svn checkout http://lcrt.googlecode.com/svn/trunk/ lcrt-read-only
+    svn checkout http://lcrt.googlecode.com/svn/trunk/ lcrt
+or
+    git clone git://github.com/niutao/lcrt.git
 
-to get it, but make sure you had install subversion first.
+Make sure you had install subversion or git first.
 
 Installation
 ============
@@ -47,14 +54,13 @@ lcrt is a desktop application based on gnome, so make sure the environment
 of your desktop is gnome. To run the application, you need GTK and vte-terminal
 library, and some others.
 
-If you download source code from http://code.google.com/p/lcrt ,you can install
-programe with follow command:
+If you download the source code, you can install programe with follow command:
 
     ./configure
     make
     make install
 
-Here you should known you have super permit to install the programe.
+Here you should known you have super permission to install the programe.
 
 If your oprating system is Ubuntu, you can get deb packet from:
 
@@ -68,9 +74,11 @@ to install it.
 
 Make doc
 ========
+
 From version 1.1.0, i add command:
 
     make doc
+
 to Makefile, you can use this command to make the document of lcrt.
 
 Depend library
@@ -100,6 +108,14 @@ install some toolchain:
     make
     pkg-config
     gcc
+
+When you have install lcrt, you may install the follow programes:
+
+    open-ssh
+    telnet
+
+Because lcrt will call command line programe 'ssh' when you connect with ssh, and
+call command line program 'telnet' when you connect with telnet, and so on.
 
 Bug report
 ==================
