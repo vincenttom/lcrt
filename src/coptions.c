@@ -27,7 +27,8 @@ void lcrt_options_on_session_options_activate(GtkMenuItem *menuitem, gpointer us
     lcrt_create_qconnect(loptions->parent->parent, 
                          NULL, 
                          LCRT_QCONNECT_SESSION_OPTION, 
-                         loptions->parent->parent->current_user->name);
+                         loptions->parent->parent->current_user->name,
+                         NULL);
 
 #endif
 }

@@ -55,7 +55,7 @@ void lcrt_rename_on_name_changed(GtkEditable *editable, gpointer user_data)
         gtk_widget_set_sensitive(lrename->okbutton, FALSE);
 
 }
-gboolean lcrt_rename_on_delete_event(GtkWidget *widget, GdkEvent *event, gpointer         user_data)
+gboolean lcrt_rename_on_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     lcrt_rename_on_cancelbutton_clicked(NULL, user_data);
 

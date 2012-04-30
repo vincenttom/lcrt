@@ -29,16 +29,18 @@ void lcrt_login_on_okbutton_clicked(GtkButton *button, gpointer user_data)
 
     user = llogin->parent->user;
     lcrtc_user_set_data(
-       user,
-       NULL,
-       NULL,
-       LCRT_PROTOCOL_UNKNOWN,
-       gtk_entry_get_text(GTK_ENTRY(llogin->l_username)),
-       gtk_entry_get_text(GTK_ENTRY(llogin->l_password)),
-       NULL,
-       -1,
-       gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(llogin->l_remember))
-       );
+        user,
+        NULL,
+        NULL,
+        LCRT_PROTOCOL_UNKNOWN,
+        gtk_entry_get_text(GTK_ENTRY(llogin->l_username)),
+        gtk_entry_get_text(GTK_ENTRY(llogin->l_password)),
+        NULL,
+        -1,
+        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(llogin->l_remember)),
+        NULL,
+        -1
+        );
     //lcrt_on_terminal_contents_changed(llogin->parent->terminal, llogin->parent);
     lcrt_login_on_cancelbutton_clicked(NULL, llogin);
     debug_where();

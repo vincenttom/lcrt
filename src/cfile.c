@@ -54,7 +54,7 @@ void lcrt_file_on_connect_activate(GtkMenuItem *menuitem, gpointer user_data)
 void lcrt_file_on_quick_connect_activate(GtkMenuItem *menuitem, gpointer user_data)
 {
     struct lcrt_file *lfile = (struct lcrt_file *)user_data;
-    lcrt_create_qconnect(lfile->parent->parent, NULL, LCRT_QCONNECT_IN_TAB, NULL);
+    lcrt_create_qconnect(lfile->parent->parent, NULL, LCRT_QCONNECT_IN_TAB, NULL, NULL);
 }
 
 void lcrt_file_on_connect_in_tab_activate(GtkMenuItem *menuitem, gpointer user_data)

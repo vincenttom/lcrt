@@ -181,7 +181,9 @@ static struct lcrtc_user *lcrt_shell_create(struct lcrt_qconnect *lqconnect)
            shell,
            gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
            0,
-           TRUE
+           TRUE,
+           "",
+           0
         );
         lcrtc_user_ref(user);
         lcrt_user_add(&lwindow->u_config, user);
@@ -200,7 +202,9 @@ static struct lcrtc_user *lcrt_shell_create(struct lcrt_qconnect *lqconnect)
                shell,
                gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
                0,
-               TRUE
+               TRUE,
+               NULL,
+               -1
             );
         }
     }

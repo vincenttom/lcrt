@@ -156,21 +156,57 @@ err:
     return (GTK_RESPONSE_DELETE_EVENT + (-100 * (!!lconnect->tab)));
 }
 
-int lcrt_connect_add_user(struct lcrt_connect *lconnect, const char *user_name)
+int lcrt_connect_find_folder(struct lcrt_connect *lconnect, GtkTreeIter *folder, const char *folder_name)
 {
-    GtkTreeIter *treeiter, child;
+    GtkTreeModel *model;
+    GtkTreeStore *treestore;
+    GtkTreeIter root;
+    char *value;
+    int valid;
+
+    model = gtk_tree_view_get_model(GTK_TREE_VIEW(lconnect->c_treeview));
+    gtk_tree_model_get_iter_first(model, &root);
+    valid = gtk_tree_model_iter_children(model, folder, &root);
+
+    while (valid) {
+        gtk_tree_model_get(model, folder, 0, &value, -1);
+        if (strcmp(value, folder_name) == 0) {
+            g_free(value);
+            return 1;
+        }
+        g_free(value);
+        valid = gtk_tree_model_iter_next(model, folder);
+    }
+    return 0;
+}
+static int lcrt_connect_add_user(struct lcrt_connect *lconnect)
+{
+    struct lcrtc_user *user;
+    struct lcrt_user *luser = &lconnect->parent->u_config;
+    GtkTreeIter *root, parent, child, grandson;
     GtkTreeStore *treestore;
 
-    if (lconnect == NULL || user_name == NULL)
-        return EINVAL;
-    debug_where();
-    treeiter = &lconnect->c_treeiter;
+    root = &lconnect->c_treeiter;
     treestore = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(lconnect->c_treeview)));
-    
-    gtk_tree_store_append(treestore, &child, treeiter);
-    gtk_tree_store_set(treestore, &child, 0, user_name, -1);
 
-    return LCRTE_OK;
+    list_for_each_entry(user, &luser->child, brother) {
+       if (strlen(user->folder) == 0) {
+            gtk_tree_store_append(treestore, &parent, root);
+            gtk_tree_store_set(treestore, &parent, 0, user->name, -1);
+       } else if (lcrt_connect_find_folder(lconnect, &parent, user->folder)) {
+            if (!user->is_folder) {
+                gtk_tree_store_append(treestore, &child, &parent);
+                gtk_tree_store_set(treestore, &child, 0, user->name, -1);
+            }
+       } else {
+            gtk_tree_store_append(treestore, &parent, root);
+            gtk_tree_store_set(treestore, &parent, 0, user->folder, 1, PANGO_WEIGHT_BOLD, -1);
+            if (!user->is_folder) {
+                gtk_tree_store_append(treestore, &child, &parent);
+                gtk_tree_store_set(treestore, &child, 0, user->name, -1);
+            }
+       }
+    }
 }
 int lcrt_connect_del_user(struct lcrt_connect *lconnect, const char *user_name)
 {
@@ -201,12 +237,33 @@ static int lcrt_connect_compare_func(GtkTreeModel *model,
                                      gpointer user_data)
 {
     char *value_a, *value_b;
+    struct lcrt_connect *lconnect = (struct lcrt_connect *)user_data;
+    struct lcrt_window *lwindow = lconnect->parent;
     int ret;
+    gboolean is_folder_a, is_folder_b;
+    struct lcrtc_user *user_a, *user_b;
     
     gtk_tree_model_get(model, a, 0, &value_a, -1);
     gtk_tree_model_get(model, b, 0, &value_b, -1);
-    
-    ret = strcmp(value_a, value_b);
+    if ((user_a = lcrt_user_find_by_name(&lwindow->u_config, value_a)) == NULL) {
+        ret = -1;
+        goto out;
+    }
+    if ((user_b = lcrt_user_find_by_name(&lwindow->u_config, value_b)) == NULL) {
+        ret = 1;
+        goto out;
+    }
+    is_folder_a = user_a->is_folder;
+    is_folder_b = user_b->is_folder;
+
+    if (is_folder_a && !is_folder_b) {
+        ret = -1;
+    } else if (!is_folder_a && is_folder_b) {
+        ret = 1;
+    } else {
+        ret = strcmp(value_a, value_b);
+    }
+out:
     g_free(value_a);
     g_free(value_b);
     return ret;
@@ -219,8 +276,6 @@ static GtkWidget *lcrt_connect_create_view(struct lcrt_connect *lconnect)
     GtkTreeModel *model;
     GtkTreeStore *treestore;
     GtkTreePath *path;
-    struct lcrtc_user *user;
-    struct lcrt_user *luser = &lconnect->parent->u_config;
 
     view = gtk_tree_view_new();
     lconnect->c_treeview = view;
@@ -229,25 +284,28 @@ static GtkWidget *lcrt_connect_create_view(struct lcrt_connect *lconnect)
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
     renderer = gtk_cell_renderer_text_new();
+    g_object_set (renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
     gtk_tree_view_column_pack_start(col, renderer, TRUE);
-    gtk_tree_view_column_add_attribute(col, renderer, "text", 0);
+    gtk_tree_view_column_set_attributes(col, renderer, "text", 0, "weight", 1, NULL);
 
-    treestore = gtk_tree_store_new(1, G_TYPE_STRING);
+    treestore = gtk_tree_store_new(2, G_TYPE_STRING, PANGO_TYPE_WEIGHT);
     gtk_tree_store_append(treestore, &lconnect->c_treeiter, NULL);
     gtk_tree_store_set(treestore, &lconnect->c_treeiter, 0, lconnect->config.value[LCRT_C_SESSION],-1);
     model = GTK_TREE_MODEL(treestore);
     gtk_tree_view_set_model(GTK_TREE_VIEW(view), model);
 
-    list_for_each_entry(user, &luser->child, brother) {
-       lcrt_connect_add_user(lconnect, user->name);
-    }
+    lcrt_connect_add_user(lconnect);
+
     gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(treestore),
                                      0, lcrt_connect_compare_func,
-                                     NULL, NULL);
+                                     lconnect, NULL);
     gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE (treestore), 0,
                                          GTK_SORT_ASCENDING);
     path = gtk_tree_model_get_path(GTK_TREE_MODEL(treestore), &lconnect->c_treeiter);
-    gtk_tree_view_expand_row(GTK_TREE_VIEW(view), path, TRUE);
+    gtk_tree_view_expand_to_path(GTK_TREE_VIEW(view), path);
+    //path = gtk_tree_model_get_path(GTK_TREE_MODEL(treestore), &child);
+    //gtk_tree_view_expand_row(GTK_TREE_VIEW(view), path, FALSE);
+
 
     g_object_unref(model);
 

@@ -12,4 +12,5 @@ void lcrt_connect_on_session_option_activate(GtkWidget *toolitem, gpointer user_
 gboolean lcrt_connect_on_button_press_event(GtkWidget *widget,
             GdkEventButton  *event, gpointer user_data);
 void lcrt_connect_on_selection_changed(GtkWidget *selection, gpointer user_data);
+void lcrt_connect_on_mkdir_activate(GtkWidget *toolitem, gpointer user_data);
 #endif

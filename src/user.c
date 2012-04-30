@@ -71,6 +71,7 @@ int lcrt_user_load_config(struct lcrt_user *luser)
     int rv;
     struct lcrtc_user *user;
     const char *default_command;
+    const char *default_folder;
 
     const char *proto[LCRT_PROTOCOL_NUMBER] = {LCRT_PROTOCOL_NAME};
 
@@ -113,13 +114,20 @@ int lcrt_user_load_config(struct lcrt_user *luser)
         } else {
             strcpy(user->command, "");
         }
+        default_folder = luser->db.get_text_col(&luser->db, LCRT_USER_FOLDER);
+        if (default_folder != NULL) {
+            strncpy(user->folder , default_folder, DIRNAME_LEN);
+        } else {
+            strcpy(user->folder, "");
+        }
+        user->is_folder = luser->db.get_int_col(&luser->db, LCRT_USER_IS_FOLDER);
 
         lcrtc_user_refresh(user);
         lcrt_user_add(luser, user);
 
         rv = luser->db.get_row(&luser->db);
 
-        debug_print("[%-10s|%-10s]:%s %s %s@%s -p %d && %s\n",
+        debug_print("[%-10s|%-10s]:%s %s %s@%s -p %d && %s [%s]\n",
                 luser->get_db(luser),
                 luser->get_tb(luser),
                 user->name,
@@ -127,23 +135,74 @@ int lcrt_user_load_config(struct lcrt_user *luser)
                 user->username,
                 user->hostname,
                 user->port,
-                user->command);
+                user->command,
+                user->folder);
     }
 
     return rv;
 }
-int lcrt_user_rename(struct lcrt_user *luser, struct lcrtc_user *user, char *new_name)
+int lcrt_user_rename(struct lcrt_user *luser, struct lcrtc_user *user, char *new_name, int update_to_db)
 {
-    int rv;
-    rv = luser->db.exec(&luser->db, 
-        "UPDATE %s SET name='%s' WHERE name='%s'",
-        luser->get_tb(luser),
-        new_name,
-        user->name);
-    if (luser->db.changes(&luser->db) == 1) {
-        strcpy(user->name, new_name);
-        return LCRTE_OK;
+    int rv = LCRTE_OK;
+    struct lcrtc_user *child;
+    char name[DIRNAME_LEN + 1];
+
+    /* if we are not a folder */
+    if (!user->is_folder) {
+        /* only update structure in memory */
+        if (!update_to_db) {
+            strcpy(user->name, new_name);
+            return LCRTE_OK;
+        }
+        /* update new name to database */
+        rv = luser->db.exec(&luser->db, 
+            "UPDATE %s SET name='%s' WHERE name='%s'",
+            luser->get_tb(luser),
+            new_name,
+            user->name);
+        if (luser->db.changes(&luser->db) == 1) {
+            strcpy(user->name, new_name);
+            return LCRTE_OK;
+        }
+    } else {
+        strcpy(name, user->folder);
+        /* If we want update the name of a folder, we should update all it's
+         * children. so search in user list, if user->folder match with new_name,
+         * update user too.
+         */
+        list_for_each_entry(child, &luser->child, brother) {
+            if (strcmp(name, child->folder) != 0)
+                continue;
+            if (!update_to_db) {
+                if (child->is_folder) {
+                    strcpy(child->name, new_name);
+                }
+                strcpy(child->folder, new_name);
+                continue;
+            }
+            if (!child->is_folder) {
+                rv = luser->db.exec(&luser->db, 
+                        "UPDATE %s SET folder='%s' WHERE name='%s'",
+                        luser->get_tb(luser),
+                        new_name,
+                        child->name);
+            } else {
+                rv = luser->db.exec(&luser->db, 
+                        "UPDATE %s SET name='%s', folder='%s' WHERE name='%s'",
+                        luser->get_tb(luser),
+                        new_name,
+                        new_name,
+                        child->name);
+            }
+            if (luser->db.changes(&luser->db) == 1) {
+                if (child->is_folder) {
+                    strcpy(child->name, new_name);
+                }
+                strcpy(child->folder, new_name);
+            }
+        }
     }
+    luser->db.close(&luser->db);
     return rv;
 
 }
@@ -153,7 +212,13 @@ int lcrt_user_save_one(struct lcrt_user *luser, struct lcrtc_user *user)
         "ALTER TABLE %s ADD COLUMN command VARCHAR(512) DEFAULT NULL",
         luser->get_tb(luser));
     luser->db.exec(&luser->db, 
-        "UPDATE %s SET protocol=%d, hostname='%s', username='%s', password='%s', port=%d, command='%s' WHERE name='%s'",
+        "ALTER TABLE %s ADD COLUMN folder VARCHAR(64) DEFAULT NULL",
+        luser->get_tb(luser));
+    luser->db.exec(&luser->db, 
+        "ALTER TABLE %s ADD COLUMN is_folder INTERGER DEFAULT 0",
+        luser->get_tb(luser));
+    luser->db.exec(&luser->db, 
+        "UPDATE %s SET protocol=%d, hostname='%s', username='%s', password='%s', port=%d, command='%s', folder='%s', is_folder='%d' WHERE name='%s'",
         luser->get_tb(luser),
         user->protocol,
         user->hostname,
@@ -161,11 +226,13 @@ int lcrt_user_save_one(struct lcrt_user *luser, struct lcrtc_user *user)
         user->password,
         user->port,
         user->command,
+        user->folder,
+        user->is_folder,
         user->name);
 
     if (luser->db.changes(&luser->db) == 0) {
         luser->db.exec(&luser->db,
-                       "INSERT INTO %s VALUES('%s', '%s', %d, '%s', '%s', %d, '%s')",
+                       "INSERT INTO %s VALUES('%s', '%s', %d, '%s', '%s', %d, '%s', '%s', %d)",
                        luser->get_tb(luser),
                        user->name,
                        user->hostname,
@@ -173,19 +240,48 @@ int lcrt_user_save_one(struct lcrt_user *luser, struct lcrtc_user *user)
                        user->username,
                        user->password,
                        user->port,
-                       user->command);
+                       user->command,
+                       user->folder,
+                       user->is_folder);
     }
     return LCRTE_OK;
 }
-int lcrt_user_del_one(struct lcrt_user *luser, struct lcrtc_user *user)
+int lcrt_user_del_one(struct lcrt_user *luser, struct lcrtc_user *user, int del_from_db)
 {
-    luser->db.exec(&luser->db, 
+    if (del_from_db) {
+        luser->db.exec(&luser->db, 
                    "DELETE FROM %s WHERE name='%s'",
                    luser->get_tb(luser),
                    user->name);
+    }
+    lcrtc_user_destroy(user);
     luser->db.close(&luser->db);
     return LCRTE_OK;
 }
+int lcrt_user_del_folder(struct lcrt_user *luser, struct lcrtc_user *folder, int del_from_db)
+{
+    struct lcrtc_user *user;
+    struct list_head *pos, *tmp;
+    char name[DIRNAME_LEN + 1];
+
+    strcpy(name, folder->folder);
+
+    list_for_each_safe(pos, tmp, &luser->child) {
+        user = list_entry(pos, struct lcrtc_user, brother);
+        if (strcmp(user->folder, name) == 0) {
+            if (del_from_db) {
+                luser->db.exec(&luser->db, 
+                            "DELETE FROM %s WHERE folder='%s'",
+                            luser->get_tb(luser),
+                            name);
+            }
+            lcrtc_user_destroy(user);
+        }
+    }
+    luser->db.close(&luser->db);
+    return LCRTE_OK;
+}
+
 int lcrt_user_save_config(struct lcrt_user *luser)
 {
     struct lcrtc_user *user;
@@ -204,18 +300,20 @@ int lcrt_user_create_config(struct lcrt_user *luser)
 
     luser->db.exec(&luser->db, 
                          "CREATE TABLE %s( \
-                          name VARCHAR(128) PRIMARY KEY, \
-                          hostname VARCHAR(128) NOT NULL, \
-                          protocol INTEGER DEFAULT 0, \
-                          username VARCHAR(64) DEFAULT NULL, \
-                          password VARCHAR(64) DEFAULT NULL, \
-                          port     INTERGER DEFAULT 0, \
-                          command  VARCHAR(512) DEFAULT NULL)",
+                          name V    ARCHAR(128) PRIMARY KEY, \
+                          hostname  VARCHAR(128) NOT NULL, \
+                          protocol  INTEGER DEFAULT 0, \
+                          username  VARCHAR(64) DEFAULT NULL, \
+                          password  VARCHAR(64) DEFAULT NULL, \
+                          port      INTERGER DEFAULT 0, \
+                          command   VARCHAR(512) DEFAULT NULL, \
+                          folder    VARCHAR(64) DEFAULT NULL, \
+                          is_folder INTERGER DEFAULT 0)",
                          luser->get_tb(luser));
     debug_where();
     list_for_each_entry(user, &luser->child, brother) {
         luser->db.exec(&luser->db,
-                             "INSERT INTO %s VALUES('%s', '%s', %d, '%s', '%s', %d, '%s')",
+                             "INSERT INTO %s VALUES('%s', '%s', %d, '%s', '%s', %d, '%s', '%s', '%d')",
                              luser->get_tb(luser),
                              user->name,
                              user->hostname,
@@ -223,7 +321,9 @@ int lcrt_user_create_config(struct lcrt_user *luser)
                              user->username,
                              user->password,
                              user->port,
-                             user->command);
+                             user->command,
+                             user->folder,
+                             user->is_folder);
 
     }
     debug_where();
@@ -299,7 +399,6 @@ void lcrtc_user_destroy(struct lcrtc_user *user)
 struct lcrtc_user *lcrt_user_find_by_name(struct lcrt_user *luser, const char *name)
 {
     struct lcrtc_user *user;
-
     list_for_each_entry(user, &luser->child, brother) {
         if (strcmp(user->name, name) == 0)
             return user;
@@ -315,7 +414,9 @@ int lcrtc_user_set_data(
     const char *password,
     const char *command,
     int port,
-    int dirty)
+    int dirty,
+    const char *folder,
+    int is_folder)
 {
     if (user == NULL)
         return EINVAL;
@@ -343,6 +444,13 @@ int lcrtc_user_set_data(
     if (command != NULL) {
         strncpy(user->command, command, DEFAULT_COMMAND_LEN);
     }
+
+    if (is_folder != -1)
+        user->is_folder = is_folder;
+
+    if (folder != NULL)
+        strncpy(user->folder, folder, DIRNAME_LEN);
+
     user->dirty = dirty;
     return LCRTE_OK;
 }

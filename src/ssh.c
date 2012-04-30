@@ -389,7 +389,9 @@ void lcrt_ssh_password_on_okbutton_clicked(GtkButton *button, gpointer user_data
        gtk_entry_get_text(GTK_ENTRY(lssh->ext[1])),
        NULL,
        -1,
-       1
+       1,
+       NULL,
+       -1
        );
     lcrt_ssh_password_on_cancelbutton_clicked(NULL, lqconnect);
     if (lcrt_window_get_auto_save(lqconnect->parent)) {
@@ -574,29 +576,6 @@ static void lcrt_ssh_on_button_properties_clicked(GtkButton *button, gpointer us
         if (lcrt_ssh_auth->auth == TRUE && 
             lqconnect->flag == LCRT_QCONNECT_SESSION_OPTION)
             lcrt_ssh_auth->callback(lcrt_ssh_auth->user_data);
-#if 0
-        printf("selected = %d\n", *selected);
-        gtk_tree_model_get(model, &iter, 1, &value, -1);
-        printf("text = %s\n", value);
-        g_free(value);
-#endif
-#if 0
-        lcrt_create_dialog_rename(lwindow, GTK_WINDOW(lterminal->c_connect), value, FALSE);
-        if (strcmp(lwindow->current_uname, "") != 0) {
-            if ((user = lcrt_user_find_by_name(&lwindow->u_config, value)) != NULL) {
-                if (lcrt_window_get_auto_save(lwindow)) {
-                    rv = lcrt_user_rename(&lwindow->u_config, user, lwindow->current_uname);
-                    if (rv == LCRTE_OK) {
-                        g_value_set_string(&gvalue, lwindow->current_uname);
-                        gtk_tree_store_set_value(
-                                GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (treeview))),
-                                &iter, 0, &gvalue);
-                    }
-                }
-            }
-            memset(lwindow->current_uname, 0, HOSTNAME_LEN);
-        }
-#endif
     } 
 
 }
@@ -891,7 +870,9 @@ static struct lcrtc_user *lcrt_ssh_create(struct lcrt_qconnect *lqconnect)
            NULL,
            gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
            atoi(gtk_entry_get_text(GTK_ENTRY(lssh->port))),
-           TRUE
+           TRUE,
+           lqconnect->folder,
+           0
         );
         lcrtc_user_ref(user);
         lcrt_user_add(&lwindow->u_config, user);
@@ -910,7 +891,9 @@ static struct lcrtc_user *lcrt_ssh_create(struct lcrt_qconnect *lqconnect)
                NULL,
                gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
                atoi(gtk_entry_get_text(GTK_ENTRY(lssh->port))),
-               TRUE
+               TRUE,
+               NULL,
+               -1
             );
         }
     }

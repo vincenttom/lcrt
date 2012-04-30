@@ -10,7 +10,7 @@
  *
  * Description:  
  */
-//#define __LCRT_DEBUG__
+#define __LCRT_DEBUG__
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -294,7 +294,7 @@ static void lcrt_telnet_show(struct lcrt_qconnect *lqconnect)
         }
     } else {
         gtk_window_set_focus(GTK_WINDOW(lqconnect->q_connect), ltelnet->hostname);
-    	gtk_widget_set_sensitive(lqconnect->q_bt_connect, FALSE);
+        gtk_widget_set_sensitive(lqconnect->q_bt_connect, FALSE);
     }
     gtk_entry_set_text(GTK_ENTRY(ltelnet->port), str_port[lqconnect->nproto]);
     //gtk_entry_set_editable(GTK_ENTRY(ltelnet->port), FALSE);
@@ -335,7 +335,9 @@ static struct lcrtc_user *lcrt_telnet_create(struct lcrt_qconnect *lqconnect)
            NULL,
            gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
            atoi(gtk_entry_get_text(GTK_ENTRY(ltelnet->port))),
-           TRUE
+           TRUE,
+           lqconnect->folder,
+           0
         );
         lcrtc_user_ref(user);
         lcrt_user_add(&lwindow->u_config, user);
@@ -354,7 +356,9 @@ static struct lcrtc_user *lcrt_telnet_create(struct lcrt_qconnect *lqconnect)
                NULL,
                gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
                atoi(gtk_entry_get_text(GTK_ENTRY(ltelnet->port))),
-               TRUE
+               TRUE,
+               NULL,
+               -1
             );
         }
     }
@@ -383,60 +387,4 @@ struct lcrt_protocol_callback lcrt_protocol_telnet_ssl_callbacks = {
     .changed    = NULL
 };
 
-#if 0
-        hostname = "shell";
-    else
-        hostname = gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_hostname));
-    
-    strcpy(name, hostname);
-    if (lqconnect->flag != LCRT_QCONNECT_SESSION_OPTION) {
-        if (protocol != LCRT_PROTOCOL_SHELL ||
-            (protocol == LCRT_PROTOCOL_SHELL && 
-            (user = lcrt_user_find_by_name(&lwindow->u_config, name)) == NULL)) {
-    
-            user = lcrtc_user_create();
-            if (user == NULL)
-                return;
-            if (lcrt_user_find_by_name(&lwindow->u_config, name) != NULL) {
-                do {
-                    sprintf(name, "%s (%d)", hostname, i++);
-                    if (lcrt_user_find_by_name(&lwindow->u_config, name) == NULL)
-                        break;
-                } while (i < 100);
-            }
-            lcrtc_user_set_data(
-               user,
-               name,
-               hostname,
-               protocol,
-               gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_username)),
-               NULL,
-               gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
-               atoi(gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_port))),
-               TRUE
-            );
-            lcrtc_user_ref(user);
-            lcrt_user_add(&lwindow->u_config, user);
-        }
-        lcrt_window_set_current_user(lwindow, user);
-        if (lqconnect->flag == LCRT_QCONNECT_IN_TAB) {
-            lcrt_create_terminal(lwindow->w_notebook);
-        }
-    } else {
-        if ((user = lcrt_user_find_by_name(&lwindow->u_config, lqconnect->uname)) != NULL) {
-            lcrtc_user_set_data(
-               user,
-               lqconnect->uname,
-               hostname,
-               protocol,
-               gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_username)),
-               NULL,
-               gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
-               atoi(gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_port))),
-               TRUE
-            );
-        }
-    }
 
-}
-#endif

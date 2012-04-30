@@ -29,6 +29,7 @@
 #include "isettings.h"
 #include "iaccels.h"
 #include "inotebook.h"
+#include "imkdir.h"
 
 #include "language.h"
 
@@ -139,6 +140,7 @@ static struct lcrt_language_config iconnect = {
          {"c_delete",                        "删除会话"},
          {"c_find",                          "查找会话"},
          {"c_session_option",                "会话选项"},
+         {"c_mkdir",                         "新建目录"},
          {"c_session",                       "会话"},
          {"c_show_dialog_on_startup",        "启动时显示(_S)"},
          {"c_connect_button",                "连接(_C)"},
@@ -254,6 +256,19 @@ static struct lcrt_language_config irename = {
     }
 };
 
+static struct lcrt_language_config imkdir = {
+    .table_name = LCRT_IMKDIR_TABLE,
+    .members = LCRT_M_NUMBER,
+    .config = {
+         {"m_title",                            "新建目录"},
+         {"m_tip",                              "输入新目录名:"},
+         {"r_cancel",                           "关闭"},
+         {"m_ok",                               "确定"},
+         {"m_error",                            "已经有相同名称的会话，请重新输入!"},
+         {"m_err_msg",                          "无法创建窗口!"},
+    }
+};
+
 static struct lcrt_language_config istatus = {
     .table_name = LCRT_ISTATUS_TABLE,
     .members = LCRT_S_NUMBER,
@@ -364,6 +379,7 @@ struct lcrt_language zh_CN = {
         &ipopup,
         &iqconnect,
         &irename,
+        &imkdir,
         &istatus,
         &isettings,
         &iaccels,

@@ -35,6 +35,7 @@
 #define USERNAME_LEN 64
 #define PASSWORD_LEN 64
 #define DEFAULT_COMMAND_LEN 512
+#define DIRNAME_LEN 64
 enum {
     LCRT_USER_NAME,
     LCRT_USER_HOSTNAME,
@@ -43,6 +44,8 @@ enum {
     LCRT_USER_PASSWORD,
     LCRT_USER_PORT,
     LCRT_USER_DEFAULT_COMMAND,
+    LCRT_USER_FOLDER,
+    LCRT_USER_IS_FOLDER,
     LCRT_USER_CONFIG_NUMBER
 };
 struct lcrtc_user {
@@ -53,6 +56,8 @@ struct lcrtc_user {
     char password[PASSWORD_LEN + 1];
     unsigned int port;
     char command[DEFAULT_COMMAND_LEN + 1];
+    char folder[DIRNAME_LEN + 1];
+    int is_folder;
     int used;
     int dirty;
     struct list_head brother;
@@ -87,13 +92,16 @@ int lcrtc_user_set_data(
     const char *password,
     const char *command,
     int port,
-    int dirty);
+    int dirty,
+    const char *folder,
+    int is_folder);
 void lcrtc_user_dump(struct lcrtc_user *user, const char *func_name);
 int lcrt_user_save_one(struct lcrt_user *luser, struct lcrtc_user *user);
 int lcrt_user_destroy_config(struct lcrt_user *luser);
 struct lcrtc_user *lcrt_user_find_by_name(struct lcrt_user *luser, const char *name);
-int lcrt_user_del_one(struct lcrt_user *luser, struct lcrtc_user *user);
-int lcrt_user_rename(struct lcrt_user *luser, struct lcrtc_user *user, char *new_name);
+int lcrt_user_del_one(struct lcrt_user *luser, struct lcrtc_user *user, int del_from_db);
+int lcrt_user_del_folder(struct lcrt_user *luser, struct lcrtc_user *user, int del_from_db);
+int lcrt_user_rename(struct lcrt_user *luser, struct lcrtc_user *user, char *new_name, int update_to_db);
 int lcrt_exec_check(lcrt_protocol_t prot);
 
 struct lcrt_window;

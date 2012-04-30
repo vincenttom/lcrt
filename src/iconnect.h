@@ -29,6 +29,7 @@ enum {
     LCRT_C_DELETE,
     LCRT_C_FIND,
     LCRT_C_SESSION_OPTION,
+    LCRT_C_MKDIR,
     LCRT_C_SESSION,
     LCRT_C_SHOW_DIALOG_ON_STARTUP,
     LCRT_C_CONNECT_BUTTON,
@@ -45,6 +46,7 @@ enum {
     "c_delete", \
     "c_find", \
     "c_session_option", \
+    "c_mkdir", \
     "c_session", \
     "c_show_dialog_on_startup", \
     "c_connect_button", \
@@ -60,6 +62,7 @@ enum {
     "Delete a session", \
     "Find a session", \
     "Session option", \
+    "Create new folder", \
     "Sessions", \
     "Show dialog on startup", \
     "Connect", \
@@ -73,7 +76,8 @@ enum {
     "lcrt-rename.png", \
     "lcrt-delete.png", \
     "lcrt-find.png", \
-    "lcrt-settings.png"
+    "lcrt-settings.png", \
+    "lcrt-mkdir.png",
 
 #define LCRT_C_CALLBACK \
     NULL, \
@@ -82,7 +86,8 @@ enum {
     lcrt_connect_on_rename_activate, \
     lcrt_connect_on_delete_activate, \
     lcrt_connect_on_find_activate, \
-    lcrt_connect_on_session_option_activate
+    lcrt_connect_on_session_option_activate, \
+    lcrt_connect_on_mkdir_activate, \
 
 #define LCRT_C_SHORTCUT \
     {0, 0}
@@ -114,5 +119,7 @@ struct lcrt_connect {
 int lcrt_create_connect(struct lcrt_window *parent, gboolean tab);
 void lcrt_destroy_connect(struct lcrt_connect *lconnect);
 int lcrt_connect_del_user(struct lcrt_connect *lconnect, const char *user_name);
+int lcrt_connect_find_folder(struct lcrt_connect *lconnect, 
+        GtkTreeIter *folder, const char *folder_name);
 
 #endif

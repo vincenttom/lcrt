@@ -1,3 +1,4 @@
+//#define __LCRT_DEBUG__
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <stdio.h>
@@ -41,7 +42,8 @@ struct lcrt_notebook *lcrt_create_notebook(struct lcrt_window *parent)
     for (nb = 0; nb < LCRT_NB_NUMBER; nb++) {
         if (nb == LCRT_NB_NONE)
             continue;
-        closure = g_cclosure_new(G_CALLBACK(lcrt_notebook_control_terminal), lnotebook , NULL); 
+        closure = g_cclosure_new(G_CALLBACK(lcrt_notebook_control_terminal), lnotebook , NULL);
+        debug_print("Attach shortcut %d\n", nb);
         gtk_accel_group_connect(accel_group, lnotebook->config.shortcut[nb][0], 
                             (GdkModifierType)lnotebook->config.shortcut[nb][1],
                             GTK_ACCEL_VISIBLE, closure);
@@ -87,20 +89,27 @@ static const char *lcrt_notebook_get_tb_name(struct lcrt_notebook *lnotebook)
 }
 int lcrt_notebook_init_config(struct lcrt_notebook *lnotebook)
 {
+    struct lcrt_accels *laccels;
     char db_name[256];
     int i;
     static char *name[LCRT_TM_NUMBER] = {LCRT_TM_NAME};
     static char *value[LCRT_TM_NUMBER] = {LCRT_TM_VALUE};
 
-    if (lnotebook == NULL)
-        return EINVAL;
-
+    assert(lnotebook);
+    laccels = lnotebook->parent->w_accels;
     memset(&lnotebook->config, 0, sizeof(struct lcrtc_notebook));
     snprintf(db_name, sizeof(db_name), "%s", lcrt_config_get_language());
     lcrt_config_init(&lnotebook->config.db, db_name, LCRT_ITERMINAL_TABLE);
     for (i = 0; i < LCRT_TM_NUMBER; i++) {
         lnotebook->config.name[i] = name[i];
         strncpy(lnotebook->config.value[i], value[i], sizeof(lnotebook->config.value[i]));
+    }
+    debug_where();
+
+    for (i = 0; i < LCRT_NB_NUMBER; i++) {
+        memcpy(lnotebook->config.shortcut[i], 
+               laccels->config.key[LCRT_KB_E_COPY + i], 
+                sizeof(int) * 2);
     }
     lnotebook->get_db = lcrt_notebook_get_db_name;
     lnotebook->get_tb = lcrt_notebook_get_tb_name;
@@ -109,12 +118,10 @@ int lcrt_notebook_init_config(struct lcrt_notebook *lnotebook)
 }
 int lcrt_notebook_load_config(struct lcrt_notebook *lnotebook)
 {
-    struct lcrt_accels *laccels = lnotebook->parent->w_accels;
     int rv, i;
+
     debug_where();
-    if (lnotebook == NULL)
-        return EINVAL;
-    debug_where();
+    assert(lnotebook);
     rv = lnotebook->config.db.select(&lnotebook->config.db, "SELECT * FROM %s", lnotebook->get_tb(lnotebook));
     if (rv == LCRTE_NO_TABLE) {
         return LCRTE_NO_CONFIG;
@@ -131,11 +138,6 @@ int lcrt_notebook_load_config(struct lcrt_notebook *lnotebook)
                 lnotebook->get_tb(lnotebook),
                 lnotebook->config.name[i],
                 lnotebook->config.value[i]);
-    }
-    for (i = 0; i < LCRT_NB_NUMBER; i++) {
-        memcpy(lnotebook->config.shortcut[i], 
-               laccels->config.key[LCRT_KB_E_COPY + i], 
-                sizeof(int) * 2);
     }
 
     return rv;

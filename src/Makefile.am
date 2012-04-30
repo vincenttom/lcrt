@@ -37,6 +37,8 @@ lcrt_SOURCES = lcrt.c \
 	clock.c clock.h \
 	irename.c irename.h \
 	crename.c crename.h \
+	imkdir.c imkdir.h \
+	cmkdir.c cmkdir.h \
 	ifind.c ifind.h \
 	cfind.c cfind.h \
 	isettings.c isettings.h \

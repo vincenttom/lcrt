@@ -63,6 +63,7 @@ am_lcrt_OBJECTS = lcrt-lcrt.$(OBJEXT) lcrt-iwindow.$(OBJEXT) \
 	lcrt-iconnect.$(OBJEXT) lcrt-cconnect.$(OBJEXT) \
 	lcrt-ilock.$(OBJEXT) lcrt-clock.$(OBJEXT) \
 	lcrt-irename.$(OBJEXT) lcrt-crename.$(OBJEXT) \
+	lcrt-imkdir.$(OBJEXT) lcrt-cmkdir.$(OBJEXT) \
 	lcrt-ifind.$(OBJEXT) lcrt-cfind.$(OBJEXT) \
 	lcrt-isettings.$(OBJEXT) lcrt-csettings.$(OBJEXT) \
 	lcrt-iabout.$(OBJEXT) lcrt-cabout.$(OBJEXT) \
@@ -217,6 +218,8 @@ lcrt_SOURCES = lcrt.c \
 	clock.c clock.h \
 	irename.c irename.h \
 	crename.c crename.h \
+	imkdir.c imkdir.h \
+	cmkdir.c cmkdir.h \
 	ifind.c ifind.h \
 	cfind.c cfind.h \
 	isettings.c isettings.h \
@@ -344,6 +347,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-clock.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-clogin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-cmenubar.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-cmkdir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-cnotebook.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-coptions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-cpopup.Po@am__quote@
@@ -367,6 +371,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-ilock.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-ilogin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-imenubar.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-imkdir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-inotebook.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-ioptions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcrt-ipopup.Po@am__quote@
@@ -923,6 +928,34 @@ lcrt-crename.obj: crename.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='crename.c' object='lcrt-crename.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lcrt_CFLAGS) $(CFLAGS) -c -o lcrt-crename.obj `if test -f 'crename.c'; then $(CYGPATH_W) 'crename.c'; else $(CYGPATH_W) '$(srcdir)/crename.c'; fi`
+
+lcrt-imkdir.o: imkdir.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lcrt_CFLAGS) $(CFLAGS) -MT lcrt-imkdir.o -MD -MP -MF $(DEPDIR)/lcrt-imkdir.Tpo -c -o lcrt-imkdir.o `test -f 'imkdir.c' || echo '$(srcdir)/'`imkdir.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/lcrt-imkdir.Tpo $(DEPDIR)/lcrt-imkdir.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='imkdir.c' object='lcrt-imkdir.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lcrt_CFLAGS) $(CFLAGS) -c -o lcrt-imkdir.o `test -f 'imkdir.c' || echo '$(srcdir)/'`imkdir.c
+
+lcrt-imkdir.obj: imkdir.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lcrt_CFLAGS) $(CFLAGS) -MT lcrt-imkdir.obj -MD -MP -MF $(DEPDIR)/lcrt-imkdir.Tpo -c -o lcrt-imkdir.obj `if test -f 'imkdir.c'; then $(CYGPATH_W) 'imkdir.c'; else $(CYGPATH_W) '$(srcdir)/imkdir.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/lcrt-imkdir.Tpo $(DEPDIR)/lcrt-imkdir.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='imkdir.c' object='lcrt-imkdir.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lcrt_CFLAGS) $(CFLAGS) -c -o lcrt-imkdir.obj `if test -f 'imkdir.c'; then $(CYGPATH_W) 'imkdir.c'; else $(CYGPATH_W) '$(srcdir)/imkdir.c'; fi`
+
+lcrt-cmkdir.o: cmkdir.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lcrt_CFLAGS) $(CFLAGS) -MT lcrt-cmkdir.o -MD -MP -MF $(DEPDIR)/lcrt-cmkdir.Tpo -c -o lcrt-cmkdir.o `test -f 'cmkdir.c' || echo '$(srcdir)/'`cmkdir.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/lcrt-cmkdir.Tpo $(DEPDIR)/lcrt-cmkdir.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cmkdir.c' object='lcrt-cmkdir.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lcrt_CFLAGS) $(CFLAGS) -c -o lcrt-cmkdir.o `test -f 'cmkdir.c' || echo '$(srcdir)/'`cmkdir.c
+
+lcrt-cmkdir.obj: cmkdir.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lcrt_CFLAGS) $(CFLAGS) -MT lcrt-cmkdir.obj -MD -MP -MF $(DEPDIR)/lcrt-cmkdir.Tpo -c -o lcrt-cmkdir.obj `if test -f 'cmkdir.c'; then $(CYGPATH_W) 'cmkdir.c'; else $(CYGPATH_W) '$(srcdir)/cmkdir.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/lcrt-cmkdir.Tpo $(DEPDIR)/lcrt-cmkdir.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cmkdir.c' object='lcrt-cmkdir.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lcrt_CFLAGS) $(CFLAGS) -c -o lcrt-cmkdir.obj `if test -f 'cmkdir.c'; then $(CYGPATH_W) 'cmkdir.c'; else $(CYGPATH_W) '$(srcdir)/cmkdir.c'; fi`
 
 lcrt-ifind.o: ifind.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lcrt_CFLAGS) $(CFLAGS) -MT lcrt-ifind.o -MD -MP -MF $(DEPDIR)/lcrt-ifind.Tpo -c -o lcrt-ifind.o `test -f 'ifind.c' || echo '$(srcdir)/'`ifind.c

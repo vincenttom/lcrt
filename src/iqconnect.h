@@ -18,6 +18,7 @@
 #include <gdk/gdkkeysyms.h>
 #include "mkconfig.h"
 #include "imenubar.h"
+#include "user.h"
 
 #define LCRT_IQCONNECT_TABLE "iqconnect"
 
@@ -171,6 +172,7 @@ struct lcrt_qconnect {
     struct lcrt_window *parent;
     lcrt_qconnect_flag_t flag;
     const char *uname;
+    char folder[DIRNAME_LEN + 1];
 
     GtkWidget *q_connect;
     GtkWidget *q_vbox_spec;
@@ -197,6 +199,7 @@ int lcrt_create_qconnect(
     struct lcrt_window *parent, 
     GtkWindow *window, 
     lcrt_qconnect_flag_t flag, 
-    const char *uname);
+    const char *uname,
+    const char *folder);
 void lcrt_destroy_qconnect(struct lcrt_qconnect *lqconnect);
 #endif

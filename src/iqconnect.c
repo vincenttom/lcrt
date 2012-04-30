@@ -27,7 +27,8 @@ int lcrt_create_qconnect(
     struct lcrt_window *parent, 
     GtkWindow *window, 
     lcrt_qconnect_flag_t flag, 
-    const char *uname)
+    const char *uname,
+    const char *folder)
 {
     struct lcrt_qconnect *lqconnect;
 
@@ -63,6 +64,8 @@ int lcrt_create_qconnect(
     lqconnect->parent = parent;
     lqconnect->flag = flag;
     lqconnect->uname = uname;
+    if (folder)
+        strncpy(lqconnect->folder, folder, DIRNAME_LEN);
     debug_where();
 
     lcrt_qconnect_init_config(lqconnect);

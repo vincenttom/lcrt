@@ -1,15 +1,18 @@
-/*
- * Copyright (c) 2010-1011 ~ Niu Tao
+/**
+ * @file serial.c
+ * <h2>License</h2>
+ * Copyright (c) 2010-2011 ~ Niu Tao
  *
  * This source code is released for free distribution under the terms of the
  * GNU General Public License
  *
- * Author      : NiuTao<niutao0602@gmail.com>
- * Created Time: Sat 06 Aug 2011 10:55:20 PM CST
- * File Name   : serial.c
+ * @author Niu Tao <niutao0602@gmail.com>
+ * @version $Id
+ * @date Sat 06 Aug 2011 10:55:20 PM CST
  *
- * Description:  
+ * @brief  
  */
+
 //#define __LCRT_DEBUG__
 #include <stdio.h>
 #include <string.h>
@@ -111,10 +114,12 @@ int lcrt_serial_config(const char *port, int baud_rate, int databit,
     }
     //tcgetattr(fd, &ltermios);
 	memset(&ltermios, 0, sizeof(struct termios));
-#ifdef __USE_MISC
+#ifdef CBAUD
     ltermios.c_cflag |= (baud_rate & CBAUD);
 #endif
+#ifdef CSIZE
     ltermios.c_cflag |= (databit & CSIZE);
+#endif
     switch (stopbit) {
     case 0:
         ltermios.c_cflag &= ~CSTOPB; 
@@ -140,7 +145,7 @@ int lcrt_serial_config(const char *port, int baud_rate, int databit,
     case 2:
         ltermios.c_cflag |= PARENB; /* Enable parity */
         break;
-#ifdef __USE_MISC
+#ifdef CMSPAR
     case 3:
         ltermios.c_cflag &= ~CMSPAR;
         break;
@@ -604,7 +609,9 @@ static struct lcrtc_user *lcrt_serial_create(struct lcrt_qconnect *lqconnect)
            password,
            gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
            0,
-           TRUE
+           TRUE,
+           lqconnect->folder,
+           0
         );
         lcrtc_user_ref(user);
         lcrt_user_add(&lwindow->u_config, user);
@@ -623,7 +630,9 @@ static struct lcrtc_user *lcrt_serial_create(struct lcrt_qconnect *lqconnect)
                password,
                gtk_entry_get_text(GTK_ENTRY(lqconnect->q_et_default_command)),
                0,
-               TRUE
+               TRUE,
+               NULL,
+               -1
             );
         }
     }

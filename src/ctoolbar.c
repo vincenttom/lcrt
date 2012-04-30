@@ -36,7 +36,7 @@ void lcrt_toolbar_on_quick_connect_activate(GtkWidget *toolitem, gpointer user_d
 {
     struct lcrt_toolbar *ltoolbar = (struct lcrt_toolbar *)user_data;
 
-    lcrt_create_qconnect(ltoolbar->parent, NULL, LCRT_QCONNECT_IN_TAB, NULL);
+    lcrt_create_qconnect(ltoolbar->parent, NULL, LCRT_QCONNECT_IN_TAB, NULL, NULL);
 }
 
 
@@ -89,7 +89,9 @@ void lcrt_toolbar_on_terminal_activate(GtkWidget *toolitem, gpointer user_data)
                "/bin/bash",
                NULL,
                0,
-               TRUE);
+               TRUE,
+               NULL,
+               0);
         lcrtc_user_ref(user);
         lcrt_user_add(&lwindow->u_config, user);
     }

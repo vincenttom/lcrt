@@ -30,6 +30,7 @@
 #include "isettings.h"
 #include "iaccels.h"
 #include "inotebook.h"
+#include "imkdir.h"
 
 #include "language.h"
 
@@ -140,6 +141,7 @@ static struct lcrt_language_config iconnect = {
          {"c_delete",                        "Eine Sitzung löschen"},
          {"c_find",                          "Eine Sitzung finden"},
          {"c_session_option",                "Sitzungs-_Optionen"},
+         {"c_mkdir",                         "Neuen Ordner erstellen"},
          {"c_session",                       "Sitzungen"},
          {"c_show_dialog_on_startup",        "_Startdialog anzeigen"},
          {"c_connect_button",                "Verbinden"},
@@ -255,6 +257,19 @@ static struct lcrt_language_config irename = {
     }
 };
 
+static struct lcrt_language_config imkdir = {
+    .table_name = LCRT_IMKDIR_TABLE,
+    .members = LCRT_M_NUMBER,
+    .config = {
+         {"m_title",                            "Neuer Ordner"},
+         {"m_tip",                              "Geben Sie den neuen Ordnernamen:"},
+         {"m_cancel",                           "Abbrechen"},
+         {"m_ok",                               "OK"},
+         {"m_error",                            "Angegebener Name bereits vorhanden!"},
+         {"m_err_msg",                          "Keine Daten zum Speichern vorhanden"},
+    }
+};
+
 static struct lcrt_language_config istatus = {
     .table_name = LCRT_ISTATUS_TABLE,
     .members = LCRT_S_NUMBER,
@@ -365,6 +380,7 @@ struct lcrt_language de_DE = {
         &ipopup,
         &iqconnect,
         &irename,
+        &imkdir,
         &istatus,
         &isettings,
         &iaccels,
