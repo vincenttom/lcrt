@@ -122,8 +122,8 @@ out:
 
 /**
  * @brief  copy a directory from another
- * @parem dsrc the source directory name
- * @parem ddst the target directory name
+ * @param dsrc the source directory name
+ * @param ddst the target directory name
  * @return = 0, success\n
  *         < 0, error code
  */
@@ -166,6 +166,14 @@ int lcrt_fdircopy(const char *dsrc, const char *ddst)
 out:
     return rv;
 }
+
+/**
+ * @brief  move a file to another path
+ * @param fsrc the source file name
+ * @param fdst the target file name
+ * @return = 0, success\n
+ *         < 0, error code
+ */
 int lcrt_fmove(const char *fsrc, const char *fdst)
 {
     int rv;
@@ -175,6 +183,13 @@ int lcrt_fmove(const char *fsrc, const char *fdst)
     }
     return rv;
 }
+
+/**
+ * @brief  delete a file
+ * @param fname the file name which will be deleted
+ * @return = 0, success\n
+ *         < 0, error code
+ */
 int lcrt_fremove(const char *fname)
 {
     if (fname == NULL)
@@ -185,6 +200,15 @@ int lcrt_fremove(const char *fname)
 
     return 0;
 }
+
+/**
+ * @brief  print some content to the end of file
+ * @param fname the file name
+ * @param format the format of content
+ * @param ... the argument
+ * @return = 0, success\n
+ *         < 0, error code
+ */
 int lcrt_fappend(const char *fname, const char *format, ...)
 {
     va_list args;
@@ -208,6 +232,12 @@ int lcrt_fappend(const char *fname, const char *format, ...)
     return rv;
 }
 
+/**
+ * @brief  create a file
+ * @param fname the file name which will be created
+ * @return = 0, success\n
+ *         < 0, error code
+ */
 int lcrt_fcreate(const char *fname)
 {
     FILE *fp;
@@ -222,7 +252,12 @@ int lcrt_fcreate(const char *fname)
 
     return 0;
 }
-
+/**
+ * @brief  check whether the executive programe is exist in directory 'PATH'
+ * @param prog the executive programe name
+ * @return = 0, exist in directory 'PATH'
+ *         < 0, error code
+ */
 int lcrt_echeck(const char *prog)
 {
     char *env;

@@ -111,8 +111,9 @@ install some toolchain:
 
 When you have install lcrt, you may install the follow programes:
 
-    open-ssh
+    ssh
     telnet
+    rlogin
 
 Because lcrt will call command line programe 'ssh' when you connect with ssh, and
 call command line program 'telnet' when you connect with telnet, and so on.

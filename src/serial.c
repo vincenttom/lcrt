@@ -113,7 +113,7 @@ int lcrt_serial_config(const char *port, int baud_rate, int databit,
         return -errno;
     }
     //tcgetattr(fd, &ltermios);
-	memset(&ltermios, 0, sizeof(struct termios));
+    memset(&ltermios, 0, sizeof(struct termios));
 #ifdef CBAUD
     ltermios.c_cflag |= (baud_rate & CBAUD);
 #endif
@@ -192,11 +192,11 @@ static void lcrt_serial_read(gpointer user_data, gint fd, GdkInputCondition cond
     debug_where();
     len = read(fd, buffer, 1024);
     if (len <= 0) {
-		/** serial device may be pull out  */
-		if (errno == EAGAIN) {
-			lcrt_serial_disconnect(lterminal);
-			return;
-		}
+        /** serial device may be pull out  */
+        if (errno == EAGAIN) {
+            lcrt_serial_disconnect(lterminal);
+            return;
+        }
         return ;
     }
     vte_terminal_feed(VTE_TERMINAL(lterminal->terminal), (const char *)buffer, len);
@@ -259,7 +259,7 @@ static int lcrt_serial_connect(struct lcrt_terminal *lterminal)
                      G_CALLBACK(lcrt_serial_write), lterminal);
     lcrt_statusbar_set_user(lterminal->parent->parent->w_statusbar, lterminal->user);
     lcrt_terminal_set_connected_status(lterminal);
-	return LCRTE_OK;
+    return LCRTE_OK;
 }
 
 static void lcrt_serial_disconnect(struct lcrt_terminal *lterminal)
@@ -312,10 +312,10 @@ static void lcrt_serial_show(struct lcrt_qconnect *lqconnect)
     static struct lcrt_serial_if slserial, *lserial = &slserial;
     struct lcrtc_user *user = NULL;
     char s_port[USERNAME_LEN];
-	boolean f_option = FALSE;
+    boolean f_option = FALSE;
     int s_baud_rate,s_databit,s_parity,s_stopbit,s_software,s_hardware;
-	if (lqconnect->flag == LCRT_QCONNECT_SESSION_OPTION &&
-    	(user = lcrt_user_find_by_name(&lqconnect->parent->u_config, lqconnect->uname)) != NULL) {
+    if (lqconnect->flag == LCRT_QCONNECT_SESSION_OPTION &&
+        (user = lcrt_user_find_by_name(&lqconnect->parent->u_config, lqconnect->uname)) != NULL) {
         sscanf(user->password, "%s %d %d %d %d %d %d", 
                 s_port,
                 &s_baud_rate,
@@ -333,8 +333,8 @@ static void lcrt_serial_show(struct lcrt_qconnect *lqconnect)
                 s_software,
                 s_hardware);
 
-		f_option = TRUE;
-	}
+        f_option = TRUE;
+    }
 
     memset(lserial, 0, sizeof(struct lcrt_serial_if));
     lqconnect->private_data = lserial;
@@ -367,8 +367,8 @@ static void lcrt_serial_show(struct lcrt_qconnect *lqconnect)
     
     for (i = 0; i < LCRT_SERIAL_PORT_NUMBER; i++) {
         gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_port), sport[i]);
-		if (f_option && strcmp(s_port, sport[i]) == 0)
-			gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_port), i);
+        if (f_option && strcmp(s_port, sport[i]) == 0)
+            gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_port), i);
 
     }
     debug_where();
@@ -393,8 +393,8 @@ static void lcrt_serial_show(struct lcrt_qconnect *lqconnect)
     
     for (i = 0; i < LCRT_SERIAL_BAUD_RATE_NUMBER; i++) {
         gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_baud_rate), sbaud_rate[i].name);
-		if (f_option && s_baud_rate == sbaud_rate[i].data)
-			gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_baud_rate), i);
+        if (f_option && s_baud_rate == sbaud_rate[i].data)
+            gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_baud_rate), i);
     }
     debug_where();
     gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(combobox_baud_rate)->child), FALSE);
@@ -418,8 +418,8 @@ static void lcrt_serial_show(struct lcrt_qconnect *lqconnect)
     
     for (i = 0; i < LCRT_SERIAL_DATA_BITS_NUMBER; i++) {
         gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_data_bits), sdata_bits[i].name);
-		if (f_option && s_databit == sdata_bits[i].data)
-			gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_data_bits), i);
+        if (f_option && s_databit == sdata_bits[i].data)
+            gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_data_bits), i);
     }
     debug_where();
     gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(combobox_data_bits)->child), FALSE);
@@ -444,8 +444,8 @@ static void lcrt_serial_show(struct lcrt_qconnect *lqconnect)
     for (i = 0; i < LCRT_SERIAL_PARITY_NUMBER; i++) {
         gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_parity), sparity[i].name);
     }
-	if (f_option)
-		gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_parity), s_parity);
+    if (f_option)
+        gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_parity), s_parity);
     debug_where();
     gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(combobox_parity)->child), FALSE);
 
@@ -469,8 +469,8 @@ static void lcrt_serial_show(struct lcrt_qconnect *lqconnect)
     for (i = 0; i < LCRT_SERIAL_STOP_BITS_NUMBER; i++) {
         gtk_combo_box_append_text (GTK_COMBO_BOX (combobox_stop_bits), sstop_bits[i].name);
     }
-	if (f_option)
-		gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_stop_bits), s_stopbit);
+    if (f_option)
+        gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_stop_bits), s_stopbit);
     debug_where();
     gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(combobox_stop_bits)->child), FALSE);
 
@@ -495,8 +495,8 @@ static void lcrt_serial_show(struct lcrt_qconnect *lqconnect)
     gtk_box_pack_start (GTK_BOX (hbox_frame), checkbutton_software, FALSE, FALSE, 0);
     gtk_widget_set_size_request (checkbutton_software, 150, -1);
 
-	if (f_option)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_software), s_software);
+    if (f_option)
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_software), s_software);
 
     checkbutton_hardware = gtk_check_button_new_with_mnemonic (flow_control[1].name);
     lserial->hardware = checkbutton_hardware;
@@ -504,8 +504,8 @@ static void lcrt_serial_show(struct lcrt_qconnect *lqconnect)
     gtk_box_pack_start (GTK_BOX (hbox_frame), checkbutton_hardware, FALSE, FALSE, 0);
     gtk_widget_set_size_request (checkbutton_hardware, 150, -1);
 
-	if (f_option)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_hardware), s_hardware);
+    if (f_option)
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_hardware), s_hardware);
 
     label_flow_control = gtk_label_new (lqconnect->config.value[LCRT_Q_SFLOW_CONTROL]);
     gtk_widget_show (label_flow_control);
@@ -530,7 +530,7 @@ static struct lcrtc_user *lcrt_serial_create(struct lcrt_qconnect *lqconnect)
     struct lcrt_window *lwindow = lqconnect->parent;
     struct lcrt_serial_if *lserial = (struct lcrt_serial_if *)lqconnect->private_data;
     struct lcrt_serial_map serial_buad_rate[] = {LCRT_SERIAL_BAUD_RATE_TABLE};
-	struct lcrt_serial_map serial_databit[] = {LCRT_SERIAL_DATA_BITS_TABLE};
+    struct lcrt_serial_map serial_databit[] = {LCRT_SERIAL_DATA_BITS_TABLE};
     struct lcrtc_user *user;
     char password[PASSWORD_LEN];
     char s_port[USERNAME_LEN];

@@ -37,6 +37,7 @@ void lcrt_settings_on_applybutton_clicked(GtkButton *button, gpointer user_data)
     func_t gtk_widget_show_func;
     gboolean show_toolbar, show_statusbar;
     struct lcrt_terminal *lterminal;
+    int scrolllines;
 
     debug_where();
 
@@ -47,7 +48,7 @@ void lcrt_settings_on_applybutton_clicked(GtkButton *button, gpointer user_data)
                     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lsettings->t_cb_bell)));
         return;
     }
-
+    /* genral settings, language support */
     index = gtk_combo_box_get_active(GTK_COMBO_BOX(lsettings->g_cb_language));
     languages = lcrt_get_languages();
     if (strstr(lcrt_config_get_language(), languages[index].db_name) == NULL) {
@@ -81,12 +82,19 @@ void lcrt_settings_on_applybutton_clicked(GtkButton *button, gpointer user_data)
 
     gtk_widget_show_func(lsettings->parent->w_statusbar->statusbar);
     lsettings->lt_g_show_statusbar = show_statusbar;
-
+    /* Keybindings, Keyboard sortcuts */
     lsettings->enable_f10_key = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lsettings->k_cb_enable_f10));
-
+    /* Terminal, Terminal bell */
     list_for_each_entry(lterminal, &lsettings->parent->w_notebook->child, brother) {
         vte_terminal_set_audible_bell(VTE_TERMINAL(lterminal->terminal), lsettings->lt_t_bell);
     }
+
+    scrolllines = gtk_adjustment_get_value(GTK_ADJUSTMENT(lsettings->t_sb_scrollback_lines_adj));
+    
+    debug_print("scrolllines = %d\n", scrolllines);
+    if (scrolllines > 0)
+        lsettings->lt_t_scrolllines = scrolllines;
+
 }
 
 void lcrt_settings_on_cancelbutton_clicked(GtkButton *button, gpointer user_data)

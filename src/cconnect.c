@@ -199,17 +199,19 @@ gboolean lcrt_connect_on_button_press_event(GtkWidget *widget,
     struct lcrt_connect *lconnect = (struct lcrt_connect *)user_data;
     struct lcrt_window *lwindow = lconnect->parent;
     struct lcrtc_user *user;
-
-    debug_where();
-    if (!(lconnect->connect_button_clicked == TRUE || 
-        (event->type == GDK_2BUTTON_PRESS && event->button == BUTTON_LEFT)))
-        goto out;
-
+    int expand;
+    char *value;
+    GtkTreePath *path;
     GtkTreeIter iter;
     GtkTreeModel *model;
     GtkTreeView *treeview = GTK_TREE_VIEW (lconnect->c_treeview);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);;
-    char *value;
+
+    debug_where();
+    /** only handle double click event */
+    if (!(lconnect->connect_button_clicked == TRUE || 
+        (event->type == GDK_2BUTTON_PRESS && event->button == BUTTON_LEFT)))
+        goto out;
 
     debug_print("double clicked\n");
     lconnect->connect_button_clicked = FALSE;
@@ -220,11 +222,24 @@ gboolean lcrt_connect_on_button_press_event(GtkWidget *widget,
             debug_print("first\n");
         } else {
             debug_print("select: %s\n", value);
-            if ((user = lcrt_user_find_by_name(&lwindow->u_config, value)) != NULL && !user->is_folder) {
-                lcrt_window_set_current_user(lwindow, user);
-                if (lconnect->tab == TRUE)
-                    lcrt_create_terminal(lwindow->w_notebook);
-                lcrt_connect_on_cancelbutton_clicked(NULL, user_data);
+            if ((user = lcrt_user_find_by_name(&lwindow->u_config, value)) != NULL) {
+                /** double click a entry, then i will create a connection label, 
+                 * and destory current dialog.
+                 */
+                if (!user->is_folder) {
+                    lcrt_window_set_current_user(lwindow, user);
+                    if (lconnect->tab == TRUE)
+                        lcrt_create_terminal(lwindow->w_notebook);
+                    lcrt_connect_on_cancelbutton_clicked(NULL, user_data);
+                } else {
+                    /** double click a directory, then i will close or open this directory */
+                    path = gtk_tree_model_get_path(model, &iter);
+                    expand = gtk_tree_view_row_expanded(treeview, path);
+                    if (expand)
+                        gtk_tree_view_collapse_row(treeview, path);
+                    else
+                        gtk_tree_view_expand_to_path(treeview, path);
+                }
             }
         }
         g_free(value);
