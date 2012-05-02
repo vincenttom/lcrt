@@ -111,6 +111,8 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -161,22 +163,23 @@ top_srcdir = @top_srcdir@
 lcrt_LOGO = lcrt-logo.xpm
 pkgdata_DATA = \
 	lcrt-connect-in-tab.png \
-    lcrt-cut.png \
-    lcrt-find.png \
-    lcrt-info.png \
-    lcrt-paste.png \
-    lcrt-rename.png \
+	lcrt-cut.png \
+	lcrt-find.png \
+	lcrt-info.png \
+	lcrt-paste.png \
+	lcrt-rename.png \
 	lcrt-connect.png \
-    lcrt-delete.png \
-    lcrt-help.png \
-    lcrt-quick-connect.png \
-    lcrt-settings.png \
+	lcrt-delete.png \
+	lcrt-help.png \
+	lcrt-quick-connect.png \
+	lcrt-settings.png \
 	lcrt-copy.png \
-    lcrt-disconnect.png \
-    lcrt-home.png \
-    lcrt-new-session.png \
-    lcrt-reconnect.png \
-    lcrt-terminal.png \
+	lcrt-disconnect.png \
+	lcrt-home.png \
+	lcrt-new-session.png \
+	lcrt-reconnect.png \
+	lcrt-terminal.png \
+	lcrt-mkdir.png \
 	$(lcrt_LOGO)
 
 EXTRA_DIST = $(pkgdata_DATA)
