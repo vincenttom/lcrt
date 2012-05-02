@@ -50,13 +50,14 @@ struct lcrt_find *lcrt_create_dialog_find(void *parent, int flag)
     GtkWidget *hbox1;
     GtkWidget *image1;
     GtkWidget *label2;
-    GtkWidget *okbutton;
+    GtkWidget *prev_button;
+    GtkWidget *next_button;
     GtkWidget *alignment2;
     GtkWidget *hbox2;
     GtkWidget *image2;
     GtkWidget *label3;
     struct lcrt_connect *parent_connect;
-    struct lcrt_edit *parent_edit;
+    struct lcrt_window *parent_window;
 
     lfind =(struct lcrt_find *)calloc(1, sizeof(struct lcrt_find));
     if (lfind == NULL)
@@ -74,18 +75,18 @@ struct lcrt_find *lcrt_create_dialog_find(void *parent, int flag)
     switch (lfind->flag) {
     case LCRT_FIND_FCONNECT:
         parent_connect = (struct lcrt_connect *)lfind->parent;
-	lfind->parent_window = parent_connect->c_connect;
-	break;
+        lfind->parent_window = parent_connect->c_connect;
+        break;
     case LCRT_FIND_FEDIT:
-        parent_edit = (struct lcrt_edit *)lfind->parent;
-	lfind->parent_window = parent_connect->parent->window;
-	break;
+        parent_window = (struct lcrt_window *)lfind->parent;
+        lfind->parent_window = parent_window->window;
+        break;
     default:
-	printf("%s: unkown flag\n");
-	return;
+        printf("%s: unkown flag\n", __func__);
+        return;
     }
     gtk_window_set_transient_for(GTK_WINDOW(dialog_find), 
-			GTK_WINDOW(lfind->parent_window));
+            GTK_WINDOW(lfind->parent_window));
 
     gtk_window_set_modal (GTK_WINDOW (dialog_find), TRUE);
     gtk_window_set_title (GTK_WINDOW (dialog_find), lfind->config.value[LCRT_I_TITLE]);
@@ -96,13 +97,19 @@ struct lcrt_find *lcrt_create_dialog_find(void *parent, int flag)
 
     dialog_vbox = GTK_DIALOG(dialog_find)->vbox;
     gtk_widget_show(dialog_vbox);
-    gtk_widget_set_size_request(dialog_vbox, 190, 105);
+    gtk_widget_set_size_request(dialog_vbox, 200, 150);
   
     vbox = gtk_vbox_new(FALSE, 0);
     gtk_widget_show(vbox);
     gtk_box_pack_start(GTK_BOX(dialog_vbox), vbox, TRUE, TRUE, 0);
-  
-    label = gtk_label_new(lfind->config.value[LCRT_I_TIP]);
+    switch (lfind->flag) {
+    case LCRT_FIND_FCONNECT:
+        label = gtk_label_new(lfind->config.value[LCRT_I_TIP_CONNECT]);
+        break;
+    case LCRT_FIND_FEDIT:
+        label = gtk_label_new(lfind->config.value[LCRT_I_TIP_EDIT]);
+        break;
+    }
     gtk_widget_show(label);
     gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
     gtk_widget_set_size_request(label, -1, 30);
@@ -131,6 +138,7 @@ struct lcrt_find *lcrt_create_dialog_find(void *parent, int flag)
     hbox1 = gtk_hbox_new(FALSE, 2);
     gtk_widget_show(hbox1);
     gtk_container_add(GTK_CONTAINER(alignment1), hbox1);
+    gtk_widget_set_size_request(hbox1, 50, -1);
   
     image1 = gtk_image_new_from_stock("gtk-cancel", GTK_ICON_SIZE_BUTTON);
     gtk_widget_show(image1);
@@ -140,36 +148,63 @@ struct lcrt_find *lcrt_create_dialog_find(void *parent, int flag)
     gtk_widget_show(label2);
     gtk_box_pack_start(GTK_BOX(hbox1), label2, FALSE, FALSE, 0);
   
-    okbutton = gtk_button_new();
-    lfind->okbutton = okbutton;
-    gtk_widget_set_sensitive(okbutton, FALSE);
-    gtk_widget_show(okbutton);
-    gtk_dialog_add_action_widget(GTK_DIALOG(dialog_find), okbutton, GTK_RESPONSE_OK);
+    prev_button = gtk_button_new();
+    lfind->prev_button = prev_button;
+    gtk_widget_set_sensitive(prev_button, FALSE);
+    gtk_widget_show(prev_button);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dialog_find), prev_button, GTK_RESPONSE_OK);
   
-    alignment2 = gtk_alignment_new(0.5, 0.5, 0, 0);
+    alignment2 = gtk_alignment_new(0.1, 0.1, 0, 0);
     gtk_widget_show(alignment2);
-    gtk_container_add(GTK_CONTAINER(okbutton), alignment2);
+    gtk_container_add(GTK_CONTAINER(prev_button), alignment2);
   
     hbox2 = gtk_hbox_new(FALSE, 2);
     gtk_widget_show(hbox2);
     gtk_container_add(GTK_CONTAINER(alignment2), hbox2);
+    gtk_widget_set_size_request(hbox2, 50, -1);
   
-    image2 = gtk_image_new_from_stock("gtk-ok", GTK_ICON_SIZE_BUTTON);
+    image2 = gtk_image_new_from_stock("gtk-go-back", GTK_ICON_SIZE_BUTTON);
     gtk_widget_show(image2);
     gtk_box_pack_start(GTK_BOX(hbox2), image2, FALSE, FALSE, 0);
   
-    label3 = gtk_label_new_with_mnemonic(lfind->config.value[LCRT_I_OK]);
+    label3 = gtk_label_new_with_mnemonic(lfind->config.value[LCRT_I_PREV]);
     gtk_widget_show(label3);
     gtk_box_pack_start(GTK_BOX(hbox2), label3, FALSE, FALSE, 0);
+ 
+    next_button = gtk_button_new();
+    lfind->next_button = next_button;
+    gtk_widget_set_sensitive(next_button, FALSE);
+    gtk_widget_show(next_button);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dialog_find), next_button, GTK_RESPONSE_OK);
   
+    alignment2 = gtk_alignment_new(0.5, 0.5, 0, 0);
+    gtk_widget_show(alignment2);
+    gtk_container_add(GTK_CONTAINER(next_button), alignment2);
+  
+    hbox2 = gtk_hbox_new(FALSE, 2);
+    gtk_widget_show(hbox2);
+    gtk_container_add(GTK_CONTAINER(alignment2), hbox2);
+    gtk_widget_set_size_request(hbox2, 50, -1);
+  
+    image2 = gtk_image_new_from_stock("gtk-go-forward", GTK_ICON_SIZE_BUTTON);
+    gtk_widget_show(image2);
+    gtk_box_pack_start(GTK_BOX(hbox2), image2, FALSE, FALSE, 0);
+  
+    label3 = gtk_label_new_with_mnemonic(lfind->config.value[LCRT_I_NEXT]);
+    gtk_widget_show(label3);
+    gtk_box_pack_start(GTK_BOX(hbox2), label3, FALSE, FALSE, 0);
+
     g_signal_connect((gpointer)dialog_find, "delete_event",
                       G_CALLBACK(lcrt_find_on_delete_event),
                       lfind);
     g_signal_connect((gpointer)cancelbutton, "clicked",
                       G_CALLBACK(lcrt_find_on_cancelbutton_clicked),
                       lfind);
-    g_signal_connect((gpointer)okbutton, "clicked",
-                        G_CALLBACK(lcrt_find_on_okbutton_clicked),
+    g_signal_connect((gpointer)prev_button, "clicked",
+                        G_CALLBACK(lcrt_find_on_prev_button_clicked),
+                        lfind);
+    g_signal_connect((gpointer)next_button, "clicked",
+                        G_CALLBACK(lcrt_find_on_next_button_clicked),
                         lfind);
     g_signal_connect ((gpointer) entry, "changed",
                       G_CALLBACK (lcrt_find_on_name_changed),

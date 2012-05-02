@@ -10,27 +10,32 @@
 
 enum {
     LCRT_I_TITLE,
-    LCRT_I_TIP,
+    LCRT_I_TIP_CONNECT,
+    LCRT_I_TIP_EDIT,
     LCRT_I_CANCEL,
-    LCRT_I_OK,
+    LCRT_I_PREV,
+    LCRT_I_NEXT,
     LCRT_I_INFO,
-    LCRT_I_TIP_VTE,
     LCRT_I_ERR_MSG,
     LCRT_I_NUMBER
 };
 #define LCRT_I_NAME \
-    "f_title", \
-    "f_tip", \
-    "f_cancel", \
-    "f_ok", \
-    "f_info", \
-    "f_erf_msg"
+    "i_title", \
+    "i_tip_connect", \
+    "i_tip_edit", \
+    "i_cancel", \
+    "i_prev", \
+    "i_next", \
+    "i_info", \
+    "i_err_msg"
 
 #define LCRT_I_VALUE \
     "Find", \
     "Enter the name of session you want find:", \
+    "Enter the string you want find:", \
     "Cancel", \
-    "OK", \
+    "Previous", \
+    "Next", \
     "There is nothing find!", \
     "There is no memory to create dialog"
 
@@ -46,7 +51,8 @@ struct lcrt_find {
 #define LCRT_FIND_FEDIT    0x2
     GtkWidget *dialog;
     GtkWidget *entry_find;
-    GtkWidget *okbutton;
+    GtkWidget *prev_button;
+    GtkWidget *next_button;
     GtkTreeIter *iter;
     GtkWidget *parent_window;
 

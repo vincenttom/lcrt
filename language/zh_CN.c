@@ -363,6 +363,21 @@ static struct lcrt_language_config iterminal = {
     }
 };
 
+static struct lcrt_language_config ifind = {
+    .table_name = LCRT_IFIND_TABLE,
+    .members = LCRT_I_NUMBER,
+    .config = {
+        {"i_title",                              "查找"},
+        {"i_tip_connect",                        "输入你要查找的会话名:"},
+        {"i_tip_edit",                           "输入你要查找的字符串名:"},
+        {"i_cancel",                             "取消"},
+        {"i_prev",                               "上一个"},
+        {"i_next",                               "下一个"},
+        {"i_info",                               "未找到!"},
+        {"i_err_msg",                            "内存不足!"},
+    }
+};
+
 struct lcrt_language zh_CN = {
     .language_name = "简体中文",
     .db_name       = "zh_CN.db",
@@ -383,7 +398,8 @@ struct lcrt_language zh_CN = {
         &istatus,
         &isettings,
         &iaccels,
-        &iterminal
+        &iterminal,
+        &ifind,
     },
 };
 

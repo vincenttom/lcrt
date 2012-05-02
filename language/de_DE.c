@@ -364,6 +364,21 @@ static struct lcrt_language_config iterminal = {
         {"tm_serial_error",                     "Kann nicht geöffnet werden \"%s\",%s."},
     }
 };
+static struct lcrt_language_config ifind = {
+    .table_name = LCRT_IFIND_TABLE,
+    .members = LCRT_I_NUMBER,
+    .config = {
+        {"i_title",                              "Finden"},
+        {"i_tip_connect",                        "Geben Sie den Namen der Session finden Sie:"},
+        {"i_tip_edit",                           "Geben Sie die Zeichenfolge finden Sie:"},
+        {"i_cancel",                             "Abbrechen"},
+        {"i_prev",                               "Vorherige"},
+        {"i_next",                               "Nächste"},
+        {"i_info",                               "Es gibt nichts zu finden!"},
+        {"i_err_msg",                            "Keine Daten zum Speichern vorhanden"},
+    }
+};
+
 struct lcrt_language de_DE = {
     .language_name = "Deutsch",
     .db_name       = "de_DE.db",
@@ -385,5 +400,6 @@ struct lcrt_language de_DE = {
         &isettings,
         &iaccels,
         &iterminal,
+        &ifind,
     },
 };

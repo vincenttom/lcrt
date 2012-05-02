@@ -9,6 +9,7 @@
  *
  * Description:  
  */
+//#define __LCRT_DEBUG__
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>

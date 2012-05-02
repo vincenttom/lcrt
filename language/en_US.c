@@ -365,6 +365,21 @@ static struct lcrt_language_config iterminal = {
         {"tm_serial_error",                     "Can't open \"%s\",%s."},
     }
 };
+static struct lcrt_language_config ifind = {
+    .table_name = LCRT_IFIND_TABLE,
+    .members = LCRT_I_NUMBER,
+    .config = {
+        {"i_title",                              "Find"},
+        {"i_tip_connect",                        "Enter the name of session you want find:"},
+        {"i_tip_edit",                           "Enter the string you want find:"},
+        {"i_cancel",                             "Cancel"},
+        {"i_prev",                               "Previous"},
+        {"i_next",                               "Next"},
+        {"i_info",                               "There is nothing find!"},
+        {"i_err_msg",                            "There is no memory to create dialog"},
+    }
+};
+
 struct lcrt_language en_US = {
     .language_name = "English",
     .db_name       = "en_US.db",
@@ -386,5 +401,6 @@ struct lcrt_language en_US = {
         &isettings,
         &iaccels,
         &iterminal,
+        &ifind,
     },
 };

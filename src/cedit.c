@@ -11,6 +11,7 @@
 #include "iterminal.h"
 #include "cterminal.h"
 #include "iview.h"
+#include "ifind.h"
 
 void lcrt_edit_on_menuitem_activate(GtkMenuItem *menuitem, gpointer user_data)
 {
@@ -86,9 +87,10 @@ void lcrt_edit_on_select_all_activate(GtkMenuItem *menuitem, gpointer user_data)
 
 void lcrt_edit_on_find_activate(GtkMenuItem *menuitem, gpointer user_data)
 {
-    //struct lcrt_window *lwindow = (struct lcrt_window *)user_data;
-    //struct lcrt_terminal *lterminal = lwindow->w_notebook->current_terminal;
+    struct lcrt_window *lwindow = (struct lcrt_window *)user_data;
+    struct lcrt_terminal *lterminal = lwindow->w_notebook->current_terminal;
 
+    lcrt_create_dialog_find(lwindow, LCRT_FIND_FEDIT);
 }
 
 

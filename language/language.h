@@ -3,7 +3,7 @@
 
 #include "mkconfig.h"
 #define LCRT_SUPPORT_LANGUAGE 3
-#define LCRT_LANGUAGE_NUMBER 17
+#define LCRT_LANGUAGE_NUMBER 18
 
 struct __lcrt_language_config {
     char name[LCRT_CONFIG_NAME_LEN];

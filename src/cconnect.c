@@ -58,16 +58,28 @@ void lcrt_connect_on_quick_connect_activate(GtkWidget *toolitem, gpointer user_d
     char *value = NULL;
     GtkTreeIter iter;
     GtkTreeModel *model;
+    struct lcrtc_user *user;
     GtkTreeView *treeview = GTK_TREE_VIEW (lconnect->c_treeview);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);;
 
     debug_where();
     if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
         gtk_tree_model_get(model, &iter, 0, &value, -1);
+#if 0
         if (!lcrt_connect_find_folder(lconnect, &same, value)) {
             g_free(value);
             value = NULL;
         }
+#else
+        if ((user = lcrt_user_find_by_name(&lconnect->parent->u_config, value)) == NULL) {
+            g_free(value);
+            value = NULL;
+        } else if (!user->is_folder && strlen(user->folder) != 0) {
+            g_free(value);
+            value = g_malloc(strlen(user->folder) + 1);
+            strcpy(value, user->folder);
+        }
+#endif
     }
 
     debug_where();
@@ -172,18 +184,21 @@ void lcrt_connect_on_find_callback(struct lcrt_connect *lconnect)
 
     debug_where();
 
-    if (lconnect->find_index == LCRT_FIND_INDEX_INVALID)
+    gtk_tree_model_get_iter_root(model, &root);
+    n = gtk_tree_model_iter_n_children(model, &root);
+
+    if (lconnect->find_index == LCRT_FIND_INDEX_INVALID || 
+        lconnect->find_index == n)
         i = 0;
     else
         i = lconnect->find_index;
 
-    gtk_tree_model_get_iter_root(model, &root);
-    n = gtk_tree_model_iter_n_children(model, &root);
     for (;i < n; i++) {
         if (gtk_tree_model_iter_nth_child(model, &child, &root, i) == TRUE) {
             gtk_tree_model_get(model, &child, 0, &value, -1);
             if (strcmp(lconnect->parent->current_uname, value) == 0) {
                 gtk_tree_selection_select_iter(selection, &child);
+                lconnect->find_index = i;
                 g_free(value);
                 break;
             }
