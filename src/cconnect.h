@@ -1,6 +1,8 @@
 #ifndef __LCRT_CCONNECT_H__
 #define __LCRT_CCONNECT_H__
 #include <gtk/gtk.h>
+#include "iconnect.h"
+
 void lcrt_connect_on_connectbutton_clicked(GtkButton *button, gpointer user_data);
 void lcrt_connect_on_cancelbutton_clicked (GtkButton *button, gpointer user_data);
 gboolean lcrt_connect_on_window_delete(GtkWidget *widget, GdkEvent  *event, gpointer user_data);
@@ -13,4 +15,5 @@ gboolean lcrt_connect_on_button_press_event(GtkWidget *widget,
             GdkEventButton  *event, gpointer user_data);
 void lcrt_connect_on_selection_changed(GtkWidget *selection, gpointer user_data);
 void lcrt_connect_on_mkdir_activate(GtkWidget *toolitem, gpointer user_data);
+void lcrt_connect_on_find_callback(struct lcrt_connect *lconnect);
 #endif

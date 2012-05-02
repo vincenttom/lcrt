@@ -161,9 +161,8 @@ out:
     g_free(value);
 
 }
-void lcrt_connect_on_find_activate(GtkWidget *toolitem, gpointer user_data)
+void lcrt_connect_on_find_callback(struct lcrt_connect *lconnect)
 {
-    struct lcrt_connect *lconnect = (struct lcrt_connect *)user_data;
     GtkTreeIter root, child;
     GtkTreeView *treeview = GTK_TREE_VIEW (lconnect->c_treeview);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
@@ -171,16 +170,16 @@ void lcrt_connect_on_find_activate(GtkWidget *toolitem, gpointer user_data)
     char *value;
     int i, n;
 
-    debug_where();   
-    memset(lconnect->parent->current_uname, 0, HOSTNAME_LEN);
-    lcrt_create_dialog_find(lconnect);
+    debug_where();
 
-    if (strlen(lconnect->parent->current_uname) == 0)
-        return;
+    if (lconnect->find_index == LCRT_FIND_INDEX_INVALID)
+        i = 0;
+    else
+        i = lconnect->find_index;
 
     gtk_tree_model_get_iter_root(model, &root);
     n = gtk_tree_model_iter_n_children(model, &root);
-    for (i = 0; i < n; i++) {
+    for (;i < n; i++) {
         if (gtk_tree_model_iter_nth_child(model, &child, &root, i) == TRUE) {
             gtk_tree_model_get(model, &child, 0, &value, -1);
             if (strcmp(lconnect->parent->current_uname, value) == 0) {
@@ -191,6 +190,14 @@ void lcrt_connect_on_find_activate(GtkWidget *toolitem, gpointer user_data)
             g_free(value);
         }
     }
+}
+void lcrt_connect_on_find_activate(GtkWidget *toolitem, gpointer user_data)
+{
+    struct lcrt_connect *lconnect = (struct lcrt_connect *)user_data;
+
+    debug_where();   
+    memset(lconnect->parent->current_uname, 0, HOSTNAME_LEN);
+    lcrt_create_dialog_find(lconnect, LCRT_FIND_FCONNECT);
 }
 
 gboolean lcrt_connect_on_button_press_event(GtkWidget *widget,

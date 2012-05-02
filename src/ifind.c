@@ -27,6 +27,8 @@
 #include "debug.h"
 #include "message.h"
 #include "iterminal.h"
+#include "iedit.h"
+#include "imenubar.h"
 #include "ifind.h"
 #include "cfind.h"
 
@@ -34,7 +36,7 @@ int lcrt_find_create_config(struct lcrt_find *lfind);
 int lcrt_find_load_config(struct lcrt_find *lfind);
 int lcrt_find_init_config(struct lcrt_find *lfind);
 
-struct lcrt_find *lcrt_create_dialog_find(struct lcrt_connect *parent)
+struct lcrt_find *lcrt_create_dialog_find(void *parent, int flag)
 {
     struct lcrt_find *lfind;
     GtkWidget *dialog_find;
@@ -53,6 +55,8 @@ struct lcrt_find *lcrt_create_dialog_find(struct lcrt_connect *parent)
     GtkWidget *hbox2;
     GtkWidget *image2;
     GtkWidget *label3;
+    struct lcrt_connect *parent_connect;
+    struct lcrt_edit *parent_edit;
 
     lfind =(struct lcrt_find *)calloc(1, sizeof(struct lcrt_find));
     if (lfind == NULL)
@@ -61,12 +65,28 @@ struct lcrt_find *lcrt_create_dialog_find(struct lcrt_connect *parent)
     lcrt_find_init_config(lfind);
     lcrt_find_load_config(lfind);
     lfind->parent = parent;
+    lfind->flag = flag;
 
     dialog_find = gtk_dialog_new();
     lfind->dialog = dialog_find;
 
     gtk_widget_set_size_request(dialog_find, 280, 105);
-    gtk_window_set_transient_for(GTK_WINDOW(dialog_find),GTK_WINDOW(parent->c_connect));
+    switch (lfind->flag) {
+    case LCRT_FIND_FCONNECT:
+        parent_connect = (struct lcrt_connect *)lfind->parent;
+	lfind->parent_window = parent_connect->c_connect;
+	break;
+    case LCRT_FIND_FEDIT:
+        parent_edit = (struct lcrt_edit *)lfind->parent;
+	lfind->parent_window = parent_connect->parent->window;
+	break;
+    default:
+	printf("%s: unkown flag\n");
+	return;
+    }
+    gtk_window_set_transient_for(GTK_WINDOW(dialog_find), 
+			GTK_WINDOW(lfind->parent_window));
+
     gtk_window_set_modal (GTK_WINDOW (dialog_find), TRUE);
     gtk_window_set_title (GTK_WINDOW (dialog_find), lfind->config.value[LCRT_I_TITLE]);
     gtk_window_set_position (GTK_WINDOW (dialog_find), GTK_WIN_POS_CENTER_ON_PARENT);
@@ -158,7 +178,7 @@ struct lcrt_find *lcrt_create_dialog_find(struct lcrt_connect *parent)
 
     return lfind;
 err:
-    lcrt_message_error(parent->c_connect, lfind->config.value[LCRT_I_ERR_MSG]);
+    lcrt_message_error(lfind->parent_window, lfind->config.value[LCRT_I_ERR_MSG]);
     return NULL;
 
 }

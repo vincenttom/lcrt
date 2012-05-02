@@ -377,7 +377,8 @@ int lcrt_connect_init_config(struct lcrt_connect *lconnect)
     }
     lconnect->get_db = lcrt_connect_get_db_name;
     lconnect->get_tb = lcrt_connect_get_tb_name;
-
+	
+    lconnect->find_index = LCRT_FIND_INDEX_INVALID;
     return 0;
 }
 int lcrt_connect_load_config(struct lcrt_connect *lconnect)

@@ -110,6 +110,8 @@ struct lcrt_connect {
     GtkTreeIter c_treeiter;
     GtkWidget *c_treeview;
     gboolean tab;
+    int find_index;
+#define LCRT_FIND_INDEX_INVALID -1
 
     struct lcrtc_connect config;
     const char *(*get_db)(struct lcrt_connect *lconnect);

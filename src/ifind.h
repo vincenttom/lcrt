@@ -14,6 +14,7 @@ enum {
     LCRT_I_CANCEL,
     LCRT_I_OK,
     LCRT_I_INFO,
+    LCRT_I_TIP_VTE,
     LCRT_I_ERR_MSG,
     LCRT_I_NUMBER
 };
@@ -39,16 +40,20 @@ struct lcrtc_find {
     char value[LCRT_I_NUMBER][LCRT_CONFIG_VALUE_LEN];
 };
 struct lcrt_find {
-    struct lcrt_connect *parent;
+    void *parent;
+    int flag;
+#define LCRT_FIND_FCONNECT 0x1
+#define LCRT_FIND_FEDIT    0x2
     GtkWidget *dialog;
     GtkWidget *entry_find;
     GtkWidget *okbutton;
     GtkTreeIter *iter;
+    GtkWidget *parent_window;
 
     struct lcrtc_find config;
     const char *(*get_db)(struct lcrt_find *lfind);
     const char *(*get_tb)(struct lcrt_find *lfind);
 };
-struct lcrt_find *lcrt_create_dialog_find(struct lcrt_connect *parent);
+struct lcrt_find *lcrt_create_dialog_find(void *parent, int flag);
 void lcrt_destroy_find(struct lcrt_find *lfind);
 #endif
