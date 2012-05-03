@@ -328,7 +328,8 @@ void lcrt_connect_on_session_option_activate(GtkWidget *toolitem, gpointer user_
 
     if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
         gtk_tree_model_get(model, &iter, 0, &value, -1);
-        if (!lcrt_connect_find_folder(lconnect, &same, value)) {
+        if ((user = lcrt_user_find_by_name(&lconnect->parent->u_config, value)) != NULL &&
+             !user->is_folder) {
             lcrt_create_qconnect(lwindow, 
                              NULL, 
                              LCRT_QCONNECT_SESSION_OPTION, 
