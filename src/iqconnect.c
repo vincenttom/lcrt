@@ -74,7 +74,7 @@ int lcrt_create_qconnect(
     accel_group = gtk_accel_group_new ();
 
     quick_connect = gtk_dialog_new ();
-    gtk_widget_set_size_request (quick_connect, 320, 370);
+    gtk_widget_set_size_request (quick_connect, 320, 380);
     gtk_window_set_transient_for(GTK_WINDOW(quick_connect), 
             window != NULL ? window : GTK_WINDOW(lqconnect->parent->window));
     gtk_widget_show(quick_connect);
@@ -100,7 +100,7 @@ int lcrt_create_qconnect(
     gtk_widget_show (hbox1);
     gtk_box_pack_start (GTK_BOX (vbox), hbox1, TRUE, TRUE, 0);
     gtk_box_reorder_child (GTK_BOX (vbox), hbox1, 0);
-    gtk_widget_set_size_request (hbox1, -1, 25);
+    gtk_widget_set_size_request (hbox1, -1, 30);
 
     label_protocol = gtk_label_new (lqconnect->config.value[LCRT_Q_LB_PROTOCOL]);
     gtk_widget_show (label_protocol);

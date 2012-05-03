@@ -280,6 +280,7 @@ static GtkWidget *lcrt_connect_create_view(struct lcrt_connect *lconnect)
     view = gtk_tree_view_new();
     lconnect->c_treeview = view;
     col = gtk_tree_view_column_new();
+    //gtk_tree_view_set_reorderable(GTK_TREE_VIEW(view), TRUE);
 
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
