@@ -49,6 +49,8 @@ struct lcrt_find {
     int flag;
 #define LCRT_FIND_FCONNECT 0x1
 #define LCRT_FIND_FEDIT    0x2
+    int find_regex;
+    GRegex *regex;
     GtkWidget *dialog;
     GtkWidget *entry_find;
     GtkWidget *prev_button;

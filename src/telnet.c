@@ -10,7 +10,7 @@
  *
  * Description:  
  */
-#define __LCRT_DEBUG__
+//#define __LCRT_DEBUG__
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -111,6 +111,9 @@ static int lcrt_telnet_connect(struct lcrt_terminal *lterminal)
     int dep = -1;
     char tmp[32];
     struct lcrt_telnet_tm *ttelnet;
+#if VTE_CHECK_VERSION(0, 26, 0)
+    char path[512];
+#endif
 
     if (lterminal == NULL)
        return EINVAL;
@@ -138,9 +141,24 @@ static int lcrt_telnet_connect(struct lcrt_terminal *lterminal)
                           argv[0]);
         return LCRTE_NOT_FOUND;
     }
-
+#if VTE_CHECK_VERSION(0, 26, 0)
+    lcrt_echeck(argv[0], path);
+    argv[0] = path;
+    vte_terminal_fork_command_full(
+                            VTE_TERMINAL(lterminal->terminal), 
+                            VTE_PTY_DEFAULT,
+                            work_dir,
+                            argv, 
+                            NULL, 
+                            0, 
+                            NULL, 
+                            NULL,
+                            &lterminal->child_pid, 
+                            NULL);
+#else
     lterminal->child_pid  = vte_terminal_fork_command(VTE_TERMINAL(lterminal->terminal), 
                 argv[0], argv, NULL , work_dir, FALSE, FALSE, FALSE);
+#endif
     debug_print("child_pid = %d\n", lterminal->child_pid);
     lcrt_statusbar_set_user(lterminal->parent->parent->w_statusbar, lterminal->user);
     debug_where();

@@ -488,9 +488,11 @@ int lcrt_exec_check(lcrt_protocol_t prot)
     int rv, i;
     static int exist[LCRT_DEP_NUMBER] = {-1, -1, -1};
     char *dep_prog[] = {LCRT_DEP_PROG};
+    char path[512];
+
     if (exist[LCRT_DEP_SSH] == -1) {
         for (i = 0; i < LCRT_DEP_NUMBER; i++) {
-            exist[i] = lcrt_echeck(dep_prog[i]);
+            exist[i] = lcrt_echeck(dep_prog[i], path);
         }
     }
     switch (prot) {

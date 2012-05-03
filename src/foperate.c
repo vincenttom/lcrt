@@ -255,10 +255,11 @@ int lcrt_fcreate(const char *fname)
 /**
  * @brief  check whether the executive programe is exist in directory 'PATH'
  * @param prog the executive programe name
+ * @param p_path if found, store path to p_path
  * @return = 0, exist in directory 'PATH'
  *         < 0, error code
  */
-int lcrt_echeck(const char *prog)
+int lcrt_echeck(const char *prog, char *p_path)
 {
     char *env;
     char *vpath, *path;
@@ -280,6 +281,7 @@ int lcrt_echeck(const char *prog)
         snprintf(buff, sizeof(buff), "%s/%s", path, prog);
         if (access(buff, F_OK | X_OK) == 0) {
             rv = 0;
+	    strcpy(p_path, buff);
             break;
         }
         path = strtok(NULL, ":");

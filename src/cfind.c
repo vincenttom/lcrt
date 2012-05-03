@@ -1,4 +1,4 @@
-#define ___LCRT_DEBUG__
+//#define __LCRT_DEBUG__
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <string.h>
@@ -23,11 +23,30 @@ static void lcrt_find_connect_callback(struct lcrt_find *lfind)
     strncpy(lconnect->parent->current_uname, name, HOSTNAME_LEN);
     lcrt_connect_on_find_callback(lconnect);
 }
-static void lcrt_find_edit_callback(struct lcrt_find *lfind)
+static void lcrt_find_edit_callback(struct lcrt_find *lfind, int next)
 {
     struct lcrt_window *lwindow = (struct lcrt_window *)lfind->parent;
     struct lcrt_terminal *lterminal = lwindow->w_notebook->current_terminal;
 
+    const char *text, *pattern;
+
+#if VTE_CHECK_VERSION(0, 26, 0)
+    if (lfind->find_regex == 0) {
+        text = gtk_entry_get_text(GTK_ENTRY(lfind->entry_find));
+        pattern = g_regex_escape_string (text, -1);
+        if (lfind->regex)
+            g_regex_unref (lfind->regex);
+        lfind->regex = g_regex_new(pattern, G_REGEX_CASELESS, 0, NULL);
+        vte_terminal_search_set_gregex(VTE_TERMINAL(lterminal->terminal), lfind->regex);
+        lfind->find_regex = 1;
+    }
+    if (next)
+        vte_terminal_search_find_next(VTE_TERMINAL(lterminal->terminal));
+    else
+        vte_terminal_search_find_previous(VTE_TERMINAL(lterminal->terminal));
+#else
+    lcrt_message_info(lfind->parent_window, "Current VTE library is too old\n");
+#endif
 }
 void lcrt_find_on_prev_button_clicked(GtkButton *button,  gpointer user_data)
 {
@@ -38,7 +57,7 @@ void lcrt_find_on_prev_button_clicked(GtkButton *button,  gpointer user_data)
         lcrt_find_connect_callback(lfind);
         break;
     case LCRT_FIND_FEDIT:
-        lcrt_find_edit_callback(lfind);
+        lcrt_find_edit_callback(lfind, 0);
         break;
     }
 }
@@ -51,7 +70,7 @@ void lcrt_find_on_next_button_clicked(GtkButton *button,  gpointer user_data)
         lcrt_find_connect_callback(lfind);
         break;
     case LCRT_FIND_FEDIT:
-        lcrt_find_edit_callback(lfind);
+        lcrt_find_edit_callback(lfind, 1);
         break;
     }
 }
@@ -59,6 +78,11 @@ void lcrt_find_on_next_button_clicked(GtkButton *button,  gpointer user_data)
 void lcrt_find_on_cancelbutton_clicked(GtkButton *button, gpointer user_data)
 {
     struct lcrt_find *lfind = (struct lcrt_find *)user_data;
+
+    if (lfind->flag == LCRT_FIND_FEDIT) {
+            if (lfind->find_regex && lfind->regex)
+                g_regex_unref (lfind->regex);
+    }
     gtk_widget_destroy(lfind->dialog);
     lcrt_destroy_find(lfind);
 }
@@ -70,6 +94,7 @@ void lcrt_find_on_name_changed(GtkEditable *editable, gpointer user_data)
         switch (lfind->flag) {
         case LCRT_FIND_FCONNECT:
             gtk_widget_set_sensitive(lfind->prev_button, FALSE);
+            lfind->find_regex = 0;
             break;
         case LCRT_FIND_FEDIT:
             gtk_widget_set_sensitive(lfind->prev_button, TRUE);

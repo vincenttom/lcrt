@@ -80,9 +80,10 @@ int lcrt_fcreate(const char *fname);
 /**
  * @brief  check whether the executive programe is exist in directory 'PATH'
  * @param prog the executive programe name
+ * @param p_path if found, store path to p_path
  * @return = 0, exist in directory 'PATH'
  *         < 0, error code
  */
-int lcrt_echeck(const char *prog);
+int lcrt_echeck(const char *prog, char *p_path);
 
 #endif

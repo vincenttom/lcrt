@@ -25,10 +25,11 @@ void lcrt_statusbar_set_user(struct lcrt_statusbar *lstatusbar, struct lcrtc_use
 
     if (!user->is_folder)
          lcrt_statusbar_set_message(lstatusbar,
-                                "[%s] %s@%s", 
+                                "[%s] %s@%s %d", 
                                 proto[user->protocol],
                                 user->username,
-                                user->hostname);
+                                user->hostname,
+				user->port);
     else
          lcrt_statusbar_set_message(lstatusbar,
                                 "[FOLDER]: %s", 
