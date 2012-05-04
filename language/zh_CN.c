@@ -339,6 +339,7 @@ static struct lcrt_language_config iaccels = {
         {"kb_edit",                             "编辑"},
         {"kb_e_copy",                           "复制"},
         {"kb_e_paste",                          "粘贴"},
+        {"kb_e_find",                           "查找"},
         {"kb_session",                          "会话"},
         {"kb_s_clone",                          "克隆"},
         {"kb_s_close",                          "关闭"},

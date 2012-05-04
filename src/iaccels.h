@@ -32,6 +32,7 @@ enum {
     LCRT_KB_EDIT,
     LCRT_KB_E_COPY,
     LCRT_KB_E_PASTE,
+    LCRT_KB_E_FIND,
     LCRT_KB_SESSION,
     LCRT_KB_S_CLONE,
     LCRT_KB_S_CLOSE,
@@ -61,6 +62,7 @@ enum
     "kb_edit", \
     "kb_e_copy", \
     "kb_e_paste", \
+    "kb_e_find", \
     "kb_session", \
     "kb_s_clone", \
     "kb_s_close", \
@@ -82,6 +84,7 @@ enum
     "Edit", \
     "Copy", \
     "Paste", \
+    "Find", \
     "Session", \
     "Clone", \
     "Close", \
@@ -103,6 +106,7 @@ enum
     {0, 0}, \
     {GDK_c, GDK_CONTROL_MASK | GDK_SHIFT_MASK}, \
     {GDK_v, GDK_CONTROL_MASK | GDK_SHIFT_MASK}, \
+    {GDK_f, GDK_CONTROL_MASK}, \
     {0, 0}, \
     {GDK_t, GDK_CONTROL_MASK | GDK_SHIFT_MASK}, \
     {GDK_w, GDK_CONTROL_MASK | GDK_SHIFT_MASK}, \

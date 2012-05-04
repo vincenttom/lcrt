@@ -134,6 +134,10 @@ struct lcrt_edit *lcrt_edit_create_menuitem(struct lcrt_menubar *parent, gboolea
     g_signal_connect ((gpointer) e_find, "activate",
                     G_CALLBACK (lcrt_edit_on_find_activate),
                     lwindow);
+    gtk_widget_add_accelerator (e_find, "activate", accel_group,
+                                ledit->config.shortcut[LCRT_E_FIND][0],
+                               (GdkModifierType) ledit->config.shortcut[LCRT_E_FIND][1],
+                                GTK_ACCEL_VISIBLE);
 
     image237 = gtk_image_new_from_stock ("gtk-find", GTK_ICON_SIZE_MENU);
     gtk_widget_show (image237);
@@ -252,6 +256,9 @@ int lcrt_edit_load_config(struct lcrt_edit *ledit)
            sizeof(int) * 2);
     memcpy(ledit->config.shortcut[LCRT_E_PASTE], 
            laccels->config.key[LCRT_KB_E_PASTE], 
+           sizeof(int) * 2);
+    memcpy(ledit->config.shortcut[LCRT_E_FIND], 
+           laccels->config.key[LCRT_KB_E_FIND], 
            sizeof(int) * 2);
 
     debug_where();

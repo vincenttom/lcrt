@@ -11,7 +11,7 @@
  * Description:  
  */
 
-//#define __LCRT_DEBUG__
+#define __LCRT_DEBUG__
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -84,7 +84,7 @@ struct lcrt_accels *lcrt_create_accels(struct lcrt_window *parent)
                           &laccels->config.key[LCRT_KB_FILE], 4);
     lcrt_accels_add_entry(tree, 
                           &laccels->config.value[LCRT_KB_EDIT], 
-                          &laccels->config.key[LCRT_KB_EDIT], 2);
+                          &laccels->config.key[LCRT_KB_EDIT], 3);
     lcrt_accels_add_entry(tree, 
                           &laccels->config.value[LCRT_KB_SESSION], 
                           &laccels->config.key[LCRT_KB_SESSION], 6);
@@ -183,6 +183,11 @@ int lcrt_accels_init_local_config(struct lcrt_accels *laccels)
     for (i = 0; i < LCRT_KB_NUMBER; i++) {
         laccels->config.key[i][0] = key[i][0];
         laccels->config.key[i][1] = key[i][1];
+        debug_print("name = [%-20s] value = [%-20s] shortcut = {%-5d, %d}\n",
+                laccels->config.name[i],
+                laccels->config.value[i],
+                laccels->config.key[i][0],
+                laccels->config.key[i][1]);
     }
     laccels->get_ldb = lcrt_accels_get_ldb_name;
     laccels->get_ltb = lcrt_accels_get_ltb_name;

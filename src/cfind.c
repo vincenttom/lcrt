@@ -34,8 +34,10 @@ static void lcrt_find_edit_callback(struct lcrt_find *lfind, int next)
     if (lfind->find_regex == 0) {
         text = gtk_entry_get_text(GTK_ENTRY(lfind->entry_find));
         pattern = g_regex_escape_string (text, -1);
-        if (lfind->regex)
+        if (lfind->regex) {
             g_regex_unref (lfind->regex);
+            vte_terminal_search_set_gregex(VTE_TERMINAL(lterminal->terminal), NULL);
+	}
         lfind->regex = g_regex_new(pattern, G_REGEX_CASELESS, 0, NULL);
         vte_terminal_search_set_gregex(VTE_TERMINAL(lterminal->terminal), lfind->regex);
         lfind->find_regex = 1;
@@ -80,8 +82,12 @@ void lcrt_find_on_cancelbutton_clicked(GtkButton *button, gpointer user_data)
     struct lcrt_find *lfind = (struct lcrt_find *)user_data;
 
     if (lfind->flag == LCRT_FIND_FEDIT) {
-            if (lfind->find_regex && lfind->regex)
+            if (lfind->find_regex && lfind->regex) {
+                struct lcrt_window *lwindow = (struct lcrt_window *)lfind->parent;
+                struct lcrt_terminal *lterminal = lwindow->w_notebook->current_terminal;
                 g_regex_unref (lfind->regex);
+                vte_terminal_search_set_gregex(VTE_TERMINAL(lterminal->terminal), NULL);
+            }
     }
     gtk_widget_destroy(lfind->dialog);
     lcrt_destroy_find(lfind);
@@ -94,9 +100,9 @@ void lcrt_find_on_name_changed(GtkEditable *editable, gpointer user_data)
         switch (lfind->flag) {
         case LCRT_FIND_FCONNECT:
             gtk_widget_set_sensitive(lfind->prev_button, FALSE);
-            lfind->find_regex = 0;
             break;
         case LCRT_FIND_FEDIT:
+            lfind->find_regex = 0;
             gtk_widget_set_sensitive(lfind->prev_button, TRUE);
             break;
         }

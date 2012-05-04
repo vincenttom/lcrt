@@ -341,6 +341,7 @@ static struct lcrt_language_config iaccels = {
         {"kb_edit",                             "Bearbeiten"},
         {"kb_e_copy",                           "Kopieren"},
         {"kb_e_paste",                          "Einfügen"},
+        {"kb_e_find",                           "Finden"},
         {"kb_session",                          "Sitzung"},
         {"kb_s_clone",                          "Kopieren"},
         {"kb_s_close",                          "Schliessen"},
