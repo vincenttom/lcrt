@@ -86,7 +86,9 @@ void lcrt_find_on_cancelbutton_clicked(GtkButton *button, gpointer user_data)
                 struct lcrt_window *lwindow = (struct lcrt_window *)lfind->parent;
                 struct lcrt_terminal *lterminal = lwindow->w_notebook->current_terminal;
                 g_regex_unref (lfind->regex);
+#if VTE_CHECK_VERSION(0, 26, 0)
                 vte_terminal_search_set_gregex(VTE_TERMINAL(lterminal->terminal), NULL);
+#endif
             }
     }
     gtk_widget_destroy(lfind->dialog);

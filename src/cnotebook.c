@@ -109,7 +109,7 @@ int lcrt_notebook_control_terminal(GtkAccelGroup *accelgroup,
             lnotebook->config.shortcut[nb][1] == key_mask)
             break;
     }
-    if (nb == LCRT_NB_NUMBER || nb == LCRT_NB_NONE)
+    if (nb == LCRT_NB_NUMBER || (LCRT_NB_NONES <= nb && nb <= LCRT_NB_NONEE))
         return TRUE;
     
     switch (nb) {
@@ -153,7 +153,6 @@ int lcrt_notebook_control_terminal(GtkAccelGroup *accelgroup,
         else
             gtk_notebook_prev_page(notebook);
         break;
-    case LCRT_NB_NONE:
     default:
         break;
     }

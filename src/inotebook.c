@@ -40,7 +40,7 @@ struct lcrt_notebook *lcrt_create_notebook(struct lcrt_window *parent)
     gtk_notebook_set_show_border(GTK_NOTEBOOK (notebook), FALSE);
     lcrt_nb_t nb;
     for (nb = 0; nb < LCRT_NB_NUMBER; nb++) {
-        if (nb == LCRT_NB_NONE)
+        if (LCRT_NB_NONES <= nb && nb <= LCRT_NB_NONEE)
             continue;
         closure = g_cclosure_new(G_CALLBACK(lcrt_notebook_control_terminal), lnotebook , NULL);
         debug_print("Attach shortcut %d\n", nb);

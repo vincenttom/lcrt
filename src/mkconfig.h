@@ -27,6 +27,7 @@ struct lcrt_config {
 
     int (*close)(struct lcrt_config *config);
     int (*changes)(struct lcrt_config *config);
+    int (*finalize)(struct lcrt_config *config);
 };
 int lcrt_config_load();
 int lcrt_config_init(struct lcrt_config *config, const char *db_name, const char *db_table);

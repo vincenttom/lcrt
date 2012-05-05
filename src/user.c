@@ -313,7 +313,7 @@ int lcrt_user_create_config(struct lcrt_user *luser)
     debug_where();
     list_for_each_entry(user, &luser->child, brother) {
         luser->db.exec(&luser->db,
-                             "INSERT INTO %s VALUES('%s', '%s', %d, '%s', '%s', %d, '%s', '%s', '%d')",
+                             "INSERT INTO %s VALUES('%s', '%s', %d, '%s', '%s', %d, '%s', '%s', %d)",
                              luser->get_tb(luser),
                              user->name,
                              user->hostname,

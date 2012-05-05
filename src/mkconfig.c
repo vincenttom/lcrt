@@ -98,6 +98,16 @@ static int lcrt_config_select(struct lcrt_config *config, const char *format, ..
     return LCRTE_OK;
 
 }
+static int lcrt_config_finalize(struct lcrt_config *config)
+{
+    if (config == NULL || config->db_res == NULL)
+        return EINVAL;
+
+    sqlite3_finalize(config->db_res);
+    config->db_res = NULL;
+
+    return LCRTE_OK;
+}
 static int lcrt_config_get_row(struct lcrt_config *config)
 {
     if (config == NULL)
@@ -110,6 +120,7 @@ static int lcrt_config_get_row(struct lcrt_config *config)
     else
         return LCRTE_NOT_FOUND;
 }
+
 static const char *lcrt_config_get_text_column(struct lcrt_config *config, int column)
 {
     if (config == NULL || column < 0) {
@@ -228,6 +239,7 @@ int lcrt_config_init(struct lcrt_config *config, const char *db_name, const char
     config->get_text_col = lcrt_config_get_text_column;
     config->get_int_col = lcrt_config_get_int_column;
     config->changes = lcrt_config_changes;
+    config->finalize = lcrt_config_finalize;
     return 0;
 }
 #if 0

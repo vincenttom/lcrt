@@ -11,7 +11,7 @@
  * Description:  
  */
 
-#define __LCRT_DEBUG__
+//#define __LCRT_DEBUG__
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -225,6 +225,7 @@ int lcrt_accels_load_language_config(struct lcrt_accels *laccels)
                 laccels->config.name[i],
                 laccels->config.value[i]);
     }
+    laccels->config.ldb.close(&laccels->config.ldb);
 
     return rv;
 }
@@ -241,11 +242,26 @@ int lcrt_accels_load_local_config(struct lcrt_accels *laccels)
         lcrt_accels_create_local_config(laccels);
         return LCRTE_NO_CONFIG;
     }
+    laccels->config.ldb.finalize(&laccels->config.ldb);
+
     debug_where();
-    for (i = 0; i < LCRT_KB_NUMBER && rv == LCRTE_OK; i++) {
+    for (i = 0; i < LCRT_KB_NUMBER; i++) {
+        rv = laccels->config.ldb.select(&laccels->config.ldb, 
+                "SELECT * FROM %s WHERE name='%s'", 
+                laccels->get_ltb(laccels), laccels->config.name[i]);
+        if (rv == LCRTE_NOT_FOUND) {
+            /* maybe this is the new entry which i added */
+            laccels->config.ldb.finalize(&laccels->config.ldb);
+            continue;
+        } else if (rv != LCRTE_OK) {
+            /* We found an error, but we also can use the defualt configuration */
+            fprintf(stderr, "Fail to select data from database.\n");
+            laccels->config.ldb.finalize(&laccels->config.ldb);
+            continue;
+        }
         laccels->config.key[i][0] = laccels->config.ldb.get_int_col(&laccels->config.ldb, 1);
         laccels->config.key[i][1] = laccels->config.ldb.get_int_col(&laccels->config.ldb, 2);
-        rv = laccels->config.ldb.get_row(&laccels->config.ldb);
+        laccels->config.ldb.finalize(&laccels->config.ldb);
         debug_print("[%-10s|%-10s]: name = [%-20s] shortcut = {%-5d, %d}\n",
                 basename((char *)laccels->get_ldb(laccels)),
                 laccels->get_ltb(laccels),
@@ -253,6 +269,7 @@ int lcrt_accels_load_local_config(struct lcrt_accels *laccels)
                 laccels->config.key[i][0],
                 laccels->config.key[i][1]);
     }
+    laccels->config.ldb.close(&laccels->config.ldb);
 
     return rv;
 }
@@ -295,7 +312,7 @@ int lcrt_accels_save_local_config(struct lcrt_accels *laccels)
 
     if(laccels == NULL)
         return EINVAL;
-
+    debug_where();
     for (i = 0; i < LCRT_KB_NUMBER; i++) {
         laccels->config.ldb.exec(&laccels->config.ldb, 
             "UPDATE %s SET key=%d, mask=%d WHERE name='%s'",
@@ -303,7 +320,6 @@ int lcrt_accels_save_local_config(struct lcrt_accels *laccels)
             laccels->config.key[i][0],
             laccels->config.key[i][1],
             name[i]);
-    
         if (laccels->config.ldb.changes(&laccels->config.ldb) == 0) {
             laccels->config.ldb.exec(&laccels->config.ldb,
                            "INSERT INTO %s VALUES('%s', %d, %d)",
@@ -311,7 +327,14 @@ int lcrt_accels_save_local_config(struct lcrt_accels *laccels)
                            name[i],
                            laccels->config.key[i][0],
                            laccels->config.key[i][1]);
+            debug_where();
         }
+        debug_print("[%-10s|%-10s]: name = [%-20s] shortcut = {%-5d, %d}\n",
+                basename((char *)laccels->get_ldb(laccels)),
+                laccels->get_ltb(laccels),
+                name[i],
+                laccels->config.key[i][0],
+                laccels->config.key[i][1]);
     }
     laccels->config.ldb.close(&laccels->config.ldb);
     return LCRTE_OK;

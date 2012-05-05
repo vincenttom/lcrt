@@ -20,7 +20,8 @@
 typedef enum {
     LCRT_NB_COPY,
     LCRT_NB_PASTE,
-    LCRT_NB_NONE, /*useless*/
+    LCRT_NB_NONES, /*useless*/
+    LCRT_NB_NONEE, /*useless*/
     LCRT_NB_CLONE,
     LCRT_NB_CLOSE,
     LCRT_NB_MOVE_NEXT,
