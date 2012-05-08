@@ -1,3 +1,9 @@
+1.1.2
+=====
+ * support to create a folder to management sessions in connect dialog.
+ * support to find key words in terminal.
+ * Can modify the port of telnet protocol.
+
 1.0.1
 =====
  * Thanks for Manfred Müller<manfred.mueller@lin2go.com> to add language support of German.

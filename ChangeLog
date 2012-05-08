@@ -1,3 +1,149 @@
+commit d39daf67fbd827461bf70e2506f7dd4534019c28
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Sat May 5 23:50:45 2012 +0800
+
+    bugfix: can not save shortcut
+
+ src/cfind.c     |    2 ++
+ src/cnotebook.c |    3 +--
+ src/iaccels.c   |   33 ++++++++++++++++++++++++++++-----
+ src/inotebook.c |    2 +-
+ src/inotebook.h |    3 ++-
+ src/mkconfig.c  |   12 ++++++++++++
+ src/mkconfig.h  |    1 +
+ src/user.c      |    2 +-
+ 8 files changed, 48 insertions(+), 10 deletions(-)
+
+commit d129f2046327b0d29d2a4442a9162bab1b3fdb46
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Fri May 4 21:59:07 2012 +0800
+
+    test: add shortcut for find
+
+ language/de_DE.c |    1 +
+ language/en_US.c |    1 +
+ language/zh_CN.c |    1 +
+ src/cfind.c      |   12 +++++++++---
+ src/iaccels.c    |    9 +++++++--
+ src/iaccels.h    |    4 ++++
+ src/iedit.c      |    7 +++++++
+ 7 files changed, 30 insertions(+), 5 deletions(-)
+
+commit 2ec452f8ff25fbf180c6b69dad6ccadd13877217
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Fri May 4 00:31:38 2012 +0800
+
+    resize the dialog quick connect
+
+ src/iconnect.c  |    1 +
+ src/iqconnect.c |    4 ++--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 868764cc5440c6b82edd177a9eebdc569d4a9e47
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Thu May 3 20:54:19 2012 +0800
+
+    bugfix:when a session in top directory, you can not modify it's options
+
+ src/cconnect.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 16e2381c0adb6f321b03d08bad3d87ddbe928678
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Thu May 3 14:11:22 2012 +0800
+
+    we can find string in terminal
+
+ src/cfind.c      |   33 +++++++++++++++++++++++++++++----
+ src/clock.c      |    2 +-
+ src/crename.c    |    2 +-
+ src/cstatusbar.c |    5 +++--
+ src/foperate.c   |    4 +++-
+ src/foperate.h   |    3 ++-
+ src/ifind.h      |    2 ++
+ src/shell.c      |   15 ++++++++++++++-
+ src/ssh.c        |   20 +++++++++++++++++++-
+ src/telnet.c     |   22 ++++++++++++++++++++--
+ src/user.c       |    4 +++-
+ 11 files changed, 97 insertions(+), 15 deletions(-)
+
+commit 8531fa0fd4467ecc8e3ec5abaf07531012de0152
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Thu May 3 00:27:54 2012 +0800
+
+    add the missing database table ifind
+
+ language/de_DE.c    |   16 ++++++++++
+ language/en_US.c    |   16 ++++++++++
+ language/language.c |    1 +
+ language/language.h |    2 +-
+ language/zh_CN.c    |   18 ++++++++++-
+ src/cconnect.c      |   21 +++++++++++--
+ src/cedit.c         |    6 ++-
+ src/cfind.c         |   61 ++++++++++++++++++++++++++++++++-----
+ src/cfind.h         |    3 +-
+ src/ifind.c         |   83 ++++++++++++++++++++++++++++++++++++---------------
+ src/ifind.h         |   28 ++++++++++-------
+ 11 files changed, 203 insertions(+), 52 deletions(-)
+
+commit 1f5ebf47549a86e0e29324e7facc66d524a6aa8e
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Wed May 2 21:03:26 2012 +0800
+
+    tmp
+
+ src/cconnect.c |   23 +++++++++++++++--------
+ src/cconnect.h |    3 +++
+ src/iconnect.c |    3 ++-
+ src/iconnect.h |    2 ++
+ src/ifind.c    |   26 +++++++++++++++++++++++---
+ src/ifind.h    |    9 +++++++--
+ 6 files changed, 52 insertions(+), 14 deletions(-)
+
+commit 1225d89e58a04e93ca908618d8d545d9a3f759ee
+Author: NiuTao <niutao0602@gmail.com>
+Date:   Wed May 2 10:04:45 2012 +0800
+
+    install lcrt-mkdir.png
+
+ Makefile.in          |    2 +
+ aclocal.m4           |   62 +++---
+ configure            |  597 +++++++++++++++++++++++++++-----------------------
+ gnome/Makefile.in    |    2 +
+ help/Makefile.in     |    2 +
+ help/man/Makefile.in |    2 +
+ language/Makefile.in |    2 +
+ pixmaps/Makefile.am  |   29 ++--
+ pixmaps/Makefile.in  |   31 ++--
+ src/Makefile.in      |    2 +
+ 10 files changed, 396 insertions(+), 335 deletions(-)
+
+commit c6cf29aa4bc9f8738f271b269f9995dcad5e6acc
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Tue May 1 16:42:10 2012 +0800
+
+    1.double click a folder in connect dialog will be expand or collapse
+    this folder.
+    2.implement to change the value of scrollline.
+
+ README          |    3 +-
+ src/cconnect.c  |   37 ++++++++++++++++++--------
+ src/csettings.c |   14 ++++++++--
+ src/foperate.c  |   41 ++++++++++++++++++++++++++--
+ src/foperate.h  |   78 ++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ src/serial.c    |   54 +++++++++++++++++++-------------------
+ 6 files changed, 181 insertions(+), 46 deletions(-)
+
+commit b07702f42c0177aaca353654b35b8bc951ed8171
+Author: Niu Tao <niutao0602@gmail.com>
+Date:   Tue May 1 00:54:03 2012 +0800
+
+    modify README
+
+ ChangeLog |   89 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ README    |   28 +++++++++++++++----
+ 2 files changed, 111 insertions(+), 6 deletions(-)
+
 commit fd4e2441e78bde8a51e15526f5e905c9a641b527
 Author: Niu Tao <niutao0602@gmail.com>
 Date:   Tue May 1 00:34:05 2012 +0800
