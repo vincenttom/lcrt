@@ -300,7 +300,7 @@ int lcrt_user_create_config(struct lcrt_user *luser)
 
     luser->db.exec(&luser->db, 
                          "CREATE TABLE %s( \
-                          name V    ARCHAR(128) PRIMARY KEY, \
+                          name      VARCHAR(128) PRIMARY KEY, \
                           hostname  VARCHAR(128) NOT NULL, \
                           protocol  INTEGER DEFAULT 0, \
                           username  VARCHAR(64) DEFAULT NULL, \

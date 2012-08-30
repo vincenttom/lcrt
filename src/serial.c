@@ -47,11 +47,6 @@
 #endif
 #endif
 
-struct lcrt_serial_map {
-    int index;
-    char *name;
-    int data;
-};
 struct lcrt_serial_if {
     GtkWidget *port;
     GtkWidget *baud_rate;

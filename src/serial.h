@@ -15,6 +15,12 @@
     "/dev/ttyUSB1", \
     "/dev/ttyUSB2",
 
+struct lcrt_serial_map {
+    int index;
+    char *name;
+    int data;
+};
+
 #define LCRT_SERIAL_BAUD_RATE_NUMBER 14
 #define LCRT_SERIAL_BAUD_RATE_TABLE \
     {0, "110", B110}, \
