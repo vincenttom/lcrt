@@ -205,10 +205,22 @@ int lcrt_config_save_language(char *language_name)
 int lcrt_config_load()
 {
     char *home;
+    char redir_content[256];
+
     if ((home = getenv("HOME")) == NULL) {
-        home = ".";
+      home = ".";
     }
-    snprintf(local_config_dir, sizeof(local_config_dir), "%s/.lcrt", home);
+    
+    /* If there's a .lcrt_redirect file, we use its content as home path to find the lcrt config folder */
+    snprintf(local_config_dir, sizeof(local_config_dir), "%s/.lcrt_redirect", home);
+
+    if (lcrt_floadline(local_config_dir, redir_content, sizeof(redir_content)) == 0) {
+      strncpy(local_config_dir, redir_content, sizeof(redir_content)<sizeof(local_config_dir)?sizeof(redir_content):sizeof(local_config_dir));
+    } else {
+      /* If there's no $HOME/.lcrt_redirect, the default is $HOME/.lcrt/ */
+      snprintf(local_config_dir, sizeof(local_config_dir), "%s/.lcrt", home);
+    }
+
     lcrt_fmkdir(local_config_dir);
     lcrt_config_load_language();
     return 0;

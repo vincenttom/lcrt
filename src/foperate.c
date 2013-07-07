@@ -290,3 +290,33 @@ int lcrt_echeck(const char *prog, char *p_path)
     return rv;
 }
 
+/**
+ * @brief loads the first non-empty  line from a file, trimmed from its terminating linefeed character
+ * @param filepath the path for the file to load and read
+ * @param buffer the char buffer where to store the content, untouched if the file does not exist
+ * @param buflen the buffer size, if the line found is bigger than this, it ends up truncated
+ * @return = 0, if a non-empty line was found and stored in the buffer
+ *         < 0, error code, -2 if the file was not found, -1 if no non-empty line was found in the file
+ */
+int lcrt_floadline(char *filepath, char *buffer, int buflen) {
+  FILE *fp;
+  char tmpbuf[256];
+  int len;
+  int rv = -2;
+  if ((fp = fopen(filepath, "r")) != NULL) {
+    rv = -1;
+    while (fgets(tmpbuf, sizeof(tmpbuf), fp)) {
+      len = strlen(tmpbuf);
+      if (len>0 && tmpbuf[len-1] == '\n') {
+	tmpbuf[len-1]=0;
+      }
+      if (strlen(tmpbuf)>0) {
+	strncpy(buffer, tmpbuf, buflen);
+	rv = 0;
+	break;
+      }
+    }
+    fclose(fp);
+  }
+  return rv;
+}
