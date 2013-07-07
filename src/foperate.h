@@ -86,4 +86,13 @@ int lcrt_fcreate(const char *fname);
  */
 int lcrt_echeck(const char *prog, char *p_path);
 
+/**
+ * @brief loads the first non-empty  line from a file, trimmed from its terminating linefeed character
+ * @param filepath the path for the file to load and read
+ * @param buffer the char buffer where to store the content, untouched if the file does not exist
+ * @param buflen the buffer size, if the line found is bigger than this, it ends up truncated
+ * @return = 0, if a non-empty line was found and stored in the buffer
+ *         < 0, error code, -2 if the file was not found, -1 if no non-empty line was found in the file
+ */
+int lcrt_floadline(char *filepath, char *buffer, int buflen);
 #endif
